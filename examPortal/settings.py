@@ -32,13 +32,13 @@ ALLOWED_HOSTS = ['mimamsa-exam-portal.herokuapp.com']
 # Application definition
 
 INSTALLED_APPS = [
+    'examPortalApp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'examPortalApp'
 ]
 
 MIDDLEWARE = [
@@ -82,6 +82,7 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = "examPortalApp.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

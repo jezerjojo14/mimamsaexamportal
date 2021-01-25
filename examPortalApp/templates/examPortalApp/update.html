@@ -1,0 +1,33 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Mimamsa Exam Portal | Update Accounts</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="{% static 'examPortalApp/js/main.js' %}">
+    </script>
+  </head>
+  <body>
+    <div>
+      <form action="{% url 'update' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="fieldWrapper">
+            {{ form.passcode.errors }}
+            <label for="{{ form.subject.id_for_label }}">Passcode:</label>
+            {{ form.passcode }}
+        </div>
+        <div class="fieldWrapper" id="fileFieldWrapper">
+            {{ form.file.errors }}
+            <label for="{{ form.file.id_for_label }}">CSV of registration sheet (Optional):</label>
+            {{ form.file }}
+        </div>
+        <button type="button" name="button" onclick="clearUpload()">Clear upload</button>
+        <input type="submit" name="" value="Submit">
+      </form>
+    </div>
+  </body>
+</html>
