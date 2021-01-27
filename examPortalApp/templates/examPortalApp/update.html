@@ -12,7 +12,7 @@
   </head>
   <body>
     <div>
-      <form action="{% url 'update' %}" method="post" enctype="multipart/form-data">
+      <form action="{% url 'update_accounts' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.non_field_errors }}
         <div class="fieldWrapper">
@@ -22,7 +22,7 @@
         </div>
         <div class="fieldWrapper" id="fileFieldWrapper">
             {{ form.file.errors }}
-            <label for="{{ form.file.id_for_label }}">CSV of registration sheet (Optional):</label>
+            <label for="{{ form.file.id_for_label }}">CSV of registration sheet:</label>
             {{ form.file }}
         </div>
         <button type="button" name="button" onclick="clearUpload()">Clear upload</button>

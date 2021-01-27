@@ -25,3 +25,13 @@ class Ordering(models.Model):
     team_instance = models.ForeignKey(Team, on_delete=models.CASCADE)
     #Order index gives the users' order in the team and takes a value between 1 and 4
     order_index = models.IntegerField()
+
+#Database containing one instance containing all global variables
+#Basically just using this as a global variable that's accessible to the admin
+class GlobalVariables(models.Model):
+    test_start = models.DateTimeField()
+    test_end = models.DateTimeField()
+
+class Question(models.Model):
+    question_number = models.IntegerField()
+    question_html = models.CharField(max_length=1000)
