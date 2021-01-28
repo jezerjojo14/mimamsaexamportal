@@ -1,0 +1,69 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Mimamsa Quiz Portal</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
+  </head>
+  <body>
+    <div id="new-post">
+      <h3>New Question: </h3>
+      <form action="{%url 'post_question'%}" method="post" autocomplete="off">
+        {% csrf_token %}
+        <textarea style="resize: both" name="content" rows="15" cols="80"></textarea>
+        <input class="btn btn-primary" type="submit" value="Submit">
+      </form>
+    </div>
+
+    <!-- QUESTIONS -->
+
+    <div id="questions">
+      {% for question in questions%}
+        <div class="question" id="question{{question.pk}}">
+          <h2>Question {{question.question_number}}</h2>
+          <br>
+          {{question.question_html|safe|linebreaksbr}}
+          <br>
+        </div>
+      {% empty %}
+        <i>Looks like there aren't any questions here yet</i>
+      {% endfor %}
+    </div>
+
+
+    <!-- PAGINATION -->
+
+
+    {% if pagecount > 1 %}
+    <nav>
+      <ul class="pagination justify-content-center">
+        {% if page == 1 %}
+        <li class="page-item disabled">
+        {% else %}
+        <li class="page-item">
+        {% endif %}
+          <a class="page-link" href="{% url 'questionportal' page=page|add:"-1" %}" tabindex="-1" aria-disabled="true">Previous</a>
+        </li>
+
+        {% with ''|center:pagecount as range %}
+        {% for _ in range %}
+        <li class="page-item{% if forloop.counter == page %} active{% endif %}"><a class="page-link" href="{% url 'questionportal' page=forloop.counter %}">{{ forloop.counter }}</a></li>
+        {% endfor %}
+        {% endwith %}
+
+        {% if page == pagecount %}
+        <li class="page-item disabled">
+        {% else %}
+        <li class="page-item">
+        {% endif %}
+          <a class="page-link" href="{% url 'questionportal' page=page|add:"1" %}">Next</a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
+
+  </body>
+</html>

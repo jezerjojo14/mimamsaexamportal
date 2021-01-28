@@ -33,5 +33,5 @@ class GlobalVariables(models.Model):
     test_end = models.DateTimeField()
 
 class Question(models.Model):
-    question_number = models.IntegerField()
+    question_number = models.IntegerField(unique=True, null=False)
     question_html = models.CharField(max_length=1000)

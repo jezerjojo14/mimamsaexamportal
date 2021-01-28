@@ -7,7 +7,22 @@
     <title>Mimamsa Exam Portal | Update Accounts</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
-    <script type="text/javascript" src="{% static 'examPortalApp/js/main.js' %}">
+    <script type="text/javascript">
+      function clearUpload() {
+        f=document.querySelector("#fileFieldWrapper input")
+        if(f.value){
+              try{
+                  f.value = ''; //for IE11, latest Chrome/Firefox/Opera...
+              }catch(err){ }
+              if(f.value){ //for IE5 ~ IE10
+                  var form = document.createElement('form'),
+                      parentNode = f.parentNode, ref = f.nextSibling;
+                  form.appendChild(f);
+                  form.reset();
+                  parentNode.insertBefore(f,ref);
+              }
+          }
+      }
     </script>
   </head>
   <body>

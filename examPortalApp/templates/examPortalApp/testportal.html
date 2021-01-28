@@ -60,6 +60,54 @@
       var display = document.querySelector('#time');
       startTimer(d.getTime(), display);
     };
+
+    var currentQNo;
+
+    function getQuestion(questionNumber) {
+      console.log(questionNumber);
+      fetch(("{% url 'get_question' qnumber=1 %}").substring(0, ("{% url 'get_question' qnumber=1 %}").length - 1) + questionNumber)
+        .then(response=>response.json())
+        .then((data) => {
+          document.getElementById('content').innerHTML=data["content"];
+        })
+    }
+
+    function nextQuestion() {
+      if (currentQNo < {{QCount}})
+      {
+        getQuestion(currentQNo+1);
+        currentQNo+=1;
+        if (currentQNo == {{QCount}})
+        {
+          document.getElementById('next').setAttribute("disabled", "disabled")
+        }
+        if (currentQNo == 2)
+        {
+          document.getElementById('prev').removeAttribute("disabled")
+        }
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQNo != 1)
+      {
+        getQuestion(currentQNo-1);
+        currentQNo-=1;
+        if (currentQNo == 1)
+        {
+          document.getElementById('prev').setAttribute("disabled", "disabled")
+        }
+        if (currentQNo == ({{QCount}} - 1))
+        {
+          document.getElementById('next').removeAttribute("disabled")
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", ()=>{
+      currentQNo = 1;
+      getQuestion(currentQNo);
+    });
     </script>
   </head>
   <body>
@@ -68,5 +116,9 @@
       <div id="time">
       </div>
     </div>
+    <div id="content">
+    </div>
+    <button onclick="prevQuestion()" id="prev" type="button" class="btn btn-secondary btn-lg" disabled>Previous</button>
+    <button onclick="nextQuestion()" id="next" type="button" class="btn btn-secondary btn-lg">Next</button>
   </body>
 </html>
