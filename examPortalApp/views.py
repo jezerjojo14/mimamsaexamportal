@@ -467,7 +467,7 @@ def upload_answer(request):
                                         fields='id').execute()
 
     #Reloads the page. Hopefully can be avoided using JS fetch API
-    return HttpResponseRedirect(reverse("test/"+str(qnumber)))
+    return HttpResponseRedirect("test/"+str(qnumber))
 
 
 # TODO:
