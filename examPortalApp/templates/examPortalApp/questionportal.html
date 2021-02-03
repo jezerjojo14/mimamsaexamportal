@@ -14,6 +14,12 @@
       <form action="{%url 'post_question'%}" method="post" autocomplete="off">
         {% csrf_token %}
         <textarea style="resize: both" name="content" rows="15" cols="80"></textarea>
+        <select name="subject">
+          <option value="Physics">Physics</option>
+          <option value="Math">Math</option>
+          <option value="Biology">Biology</option>
+          <option value="Chemistry">Chemistry</option>
+        </select>
         <input class="btn btn-primary" type="submit" value="Submit">
       </form>
     </div>
@@ -24,6 +30,7 @@
       {% for question in questions%}
         <div class="question" id="question{{question.pk}}">
           <h2>Question {{question.question_number}}</h2>
+          <small>{{question.question_subject}}</small>
           <br>
           {{question.question_html|safe|linebreaksbr}}
           <br>

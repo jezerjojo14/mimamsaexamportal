@@ -9,3 +9,8 @@ psycopg2==2.8.6
 pytz==2020.5
 sqlparse==0.4.1
 static3==0.7.0
+google-api-python-client==1.12.8
+google-auth-httplib2==0.0.4
+google-auth-oauthlib==0.4.2
+google_cloud_storage==1.35.0
+oauth2client==4.1.3

@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "uploaded-answers-1611847129837",
+  "private_key_id": "14e35a500de255e2ffe1550e2b84018b969d07e9",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDijumVc2tJsz3w\nBS+4hYBRuDjTwHeAfcmeXZ/9oQpQgLIzhAc1jzKOviN+2TyGzX272Xos0kXsSq/1\n55LlAq4P3wx11swHwGwEmPQ1fj6n1JoxrWrA3dXCazSni/mchHuHpsg37ZNU+bNO\nEwyQGxLv7PvWUO0Z2LXs+cekzTCLAUEOhz4RaCgsePeGULEYkwtY2+HySl68yEmp\nMjnJq68MNpmuzNql3nUqQ9MWyPL7nNiTNNp1+Hh0MbYvEtUf8c0v/a6tvjera1aV\noAKWyyHi2EbAh6GEgxWNwLv5b3tQNGLOAjF2XQ/jdd2pCXz8oEga3DtDzhlPmyaS\njXPRoTCJAgMBAAECggEADwRaB0X3PpNa76XoW9q9fq0vVxnS0fmEe7LJAA7EmEFv\njmqZ77rmJwADak0L7gOA6gqoRoBJkjgBIdOPsQ5Ua0jlkooCTCE9B7D7vu/3RziY\nX+KWyOHrYU+p1dE5Yl6FsaAkdVCSC3fhorMwifzBbJXQu4vxq1zp8iM8UHgpV41F\nzMRHkMeDNClQExrk8YxYZTrYfNGH5uf8xfZQMm9LTsTmxqSSF3hm5d9Oz4sorMHg\ntEduChJ92QhbcrVgdlj4646ll1Xd/PINgEHAaPHNMzn14iVyIsSP0h03yVVdBB6E\nbKJCSxIdeEMFkCtjzvmR+GdAhoCi1NFVtSOGgTLHgQKBgQD0Fbt4RrwzoOSNPgCC\nELACYma5bqV7eyB1yuasqznqHPo/1rrkxo4KTx5Wu8pBBMOUnGgyxyH5mVWpvgjT\n+mSChxtYrUgngKEoIBgfCmqIRF52O9qmFZmgSjCEWp/eD/6HRfsenaMIM2F0BTdY\nL9wAR1VAdzdw526auSOXMT7a7QKBgQDtnidzdd05KUA/HqZ1BAoNHO0K1RY669t4\nhuTh78zkotkExfUojSJPnQUmnkwAOw8pMyNEHhHnT2op9mmF4KKM3i8di87auhwS\nCSPmsIyOAgCV0NrusP4MrdCx0AKg72Ika9FkGB0A8oaiBsUuFvCKqBTVNxGhA4Iz\nxvRBPU2MjQKBgAxJZ8V3MhQbPkYJ3/asJmAIWgltk3Dy0sB7NT9t4x1w1fwOsBvC\nDvZf4zQUgerh9YJumSQtN/2bhV9lDIa3LQYRDQRavK4YYIRnkS9G0/QGFQc4nhoM\nLk6OTYDsGu4Pug1PLYPuBX3tMDOp645J4nY1IQp8tdK+I6gwN6Vtui9FAoGBAJPd\n+nDoZN1gZUGiQjXJaLPWT1CRX/8UrQPo9d//yUJycJh+09wDT9m5Pe5VTbhLCFk8\nIHMQP1XxXoB0fiA4tQ7yaOF7EiOc80Dp/TReo2jvqAuS59rnu4CKXbd5WVlq/mjp\ny2j9dHcVdWC409WlotS2WhiA53CKbWjpIzDCBFM1AoGALJRfS4n4KeJzj7kQ/zLx\n0/xH5YGTptKTJjbedQ0/Nvnn3CnN4LQKMT60AS1baurGbqbl6rsxtwKmWk4piAjY\nszDrIOFbFgcGc1sSi0xal4EV9RprvZr6niGmh4mduw3Zx95Xfj5f2aaMe+iNznAK\nv1xN0tOd2ifCas9f8Ap6lYc=\n-----END PRIVATE KEY-----\n",
+  "client_email": "bob-uploader-of-mimamsa-answer@uploaded-answers-1611847129837.iam.gserviceaccount.com",
+  "client_id": "104660993354098207349",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/bob-uploader-of-mimamsa-answer%40uploaded-answers-1611847129837.iam.gserviceaccount.com"
+}

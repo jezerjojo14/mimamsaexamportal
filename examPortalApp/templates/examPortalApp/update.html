@@ -29,16 +29,9 @@
     <div>
       <form action="{% url 'update_accounts' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.non_field_errors }}
-        <div class="fieldWrapper">
-            {{ form.passcode.errors }}
-            <label for="{{ form.subject.id_for_label }}">Passcode:</label>
-            {{ form.passcode }}
-        </div>
         <div class="fieldWrapper" id="fileFieldWrapper">
-            {{ form.file.errors }}
-            <label for="{{ form.file.id_for_label }}">CSV of registration sheet:</label>
-            {{ form.file }}
+            <label for="id_file">CSV of registration sheet:</label>
+            <input type="file" name="file" required="" id="id_file">
         </div>
         <button type="button" name="button" onclick="clearUpload()">Clear upload</button>
         <input type="submit" name="" value="Submit">

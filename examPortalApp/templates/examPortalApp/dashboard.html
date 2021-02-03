@@ -12,8 +12,16 @@
     <div class="login">
       <h2>Dashboard</h2>
 
-      <a href="#">Open Test</a>
+      <a href="{% url 'test' %}">Open Test</a>
+      <br>
       <a href="{% url 'change_password' %}">Change Password</a>
+      <br>
+      {% if user.username == 'admin' %}
+      <a href="{% url 'update_accounts' %}">Update registrations</a>
+      <br>
+      <a href="{% url 'questionportal' page=1 %}">Question Portal</a>
+      <br>
+      {% endif %}
       <a href="{% url 'logout' %}">Log Out</a>
 
     </div>
