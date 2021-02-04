@@ -7,9 +7,104 @@
     <title>Mimamsa Quiz Portal</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
+    <script type="text/javascript">
+    function toggleEditBox(ele) {
+      if(ele.classList.contains("edit-link"))
+      {
+        var question = ele.parentElement.parentElement;
+        var id = (question.id).substring(8);
+        var contentEle = document.getElementById(("question-content-").concat(id));
+        var date = document.getElementById(("date-").concat(id));
+        var oldContent = contentEle.innerHTML;
+        if(document.getElementById(("editForm").concat(id)) == null)
+        {
+          //Create Form
+
+            //Init form
+          var f = document.createElement("form");
+          f.setAttribute('method', "post");
+          f.setAttribute('onsubmit', "edit(this); return false;");
+          f.innerHTML='{% csrf_token %}';
+          f.id=("editForm").concat(id);
+          f.classList.add('editForm');
+            //Init form elements
+          var newContent = document.createElement("textarea");
+          newContent.innerHTML=oldContent;
+          newContent.name="content";
+          newContent.classList.add('editFormText');
+          newContent.style.marginTop="10px";
+          var br = document.createElement("br");
+          var submit = document.createElement("input");
+          submit.type="submit";
+          submit.name="submit";
+          submit.value="Post Changes";
+          submit.classList.add('editFormSubmit');
+          submit.classList.add('btn');
+          submit.classList.add('btn-outline-dark');
+          submit.style.margin="10px";
+          submit.style.marginLeft="0";
+          var cancel = document.createElement("button");
+          cancel.innerHTML="Cancel";
+          cancel.setAttribute('onclick', "toggleEditBox(this)");
+          cancel.id=("cancel").concat(id);
+          cancel.classList.add('editFormCancel');
+          cancel.classList.add('btn');
+          cancel.classList.add('btn-outline-dark');
+          cancel.style.margin="10px";
+          cancel.style.marginLeft="0";
+            //Add form elements to form
+          f.appendChild(newContent);
+          f.appendChild(br);
+          f.appendChild(submit);
+          f.appendChild(cancel);
+
+
+          question.insertBefore(f, ele.parentElement.nextElementSibling);
+          contentEle.style.display="none";
+        }
+        else {
+          document.getElementById(("cancel").concat(id)).click();
+        }
+      }
+      else {
+        var question=ele.parentElement.parentElement;
+        var id = (question.id).substring(8);
+        var contentEle = document.getElementById(("question-content-").concat(id));
+        var form = document.getElementById(("editForm").concat(id))
+        contentEle.style.display="block";
+        question.removeChild(form);
+      }
+    }
+
+    async function edit(form) {
+      var formdata = new FormData(form);
+      var id=form.id.substring(8);
+      formdata.append("id", id);
+      toggleEditBox(document.getElementById(("cancel").concat(id)));
+      var contentEle = document.getElementById(("question-content-").concat(id));
+      const result=await fetch('{% url 'edit_question' %}', {
+        method: 'POST',
+        body: formdata,
+        credentials: 'same-origin',
+      })
+      const response=await result;
+      if (response.status==200)
+      {
+        console.log("All good");
+        const data=await response.json();
+        contentEle.innerHTML = data.content;
+      }
+      else if (response.status==403) {
+        console.log("Woop doop");
+        var small = document.createElement("small");
+        small.innerHTML="<i>Forbidden </i>";
+        contentEle.parentElement.insertBefore(small, contentEle.nextElementSibling);
+      }
+    }
+    </script>
   </head>
   <body>
-    <div id="new-post">
+    <div id="new-question">
       <h3>New Question: </h3>
       <form action="{%url 'post_question'%}" method="post" autocomplete="off">
         {% csrf_token %}
@@ -32,7 +127,13 @@
           <h2>Question {{question.question_number}}</h2>
           <small>{{question.question_subject}}</small>
           <br>
-          {{question.question_html|safe|linebreaksbr}}
+          <div class="question-content" id="question-content-{{question.pk}}">
+            {{question.question_html|safe|linebreaksbr}}
+          </div>
+          {% if user.username == "admin" %}
+          <span data-active="0" class="edit"><a href="#" class="edit-link" onclick="toggleEditBox(this); return false;">Edit</a></span>
+          {% endif %}
+
           <br>
         </div>
       {% empty %}

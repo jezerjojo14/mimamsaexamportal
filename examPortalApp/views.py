@@ -494,7 +494,7 @@ def question_making_page(request, page=1):
 @login_required
 def post_question(request):
     if request.user.username=="admin":
-        q=Question(question_html=(request.POST["content"]).replace("\n", "<br>"), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"])
+        q=Question(question_html=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>"), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"])
         q.save()
         #Redirect to page 1 of the question making portal
         return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
@@ -511,7 +511,16 @@ def delete_question(request):
 # TODO:
 @login_required
 def edit_question(request):
-    pass
+    if request.user.username=="admin":
+        print(request.POST)
+        q=Question.objects.get(id=request.POST["id"])
+        q.content=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")
+        q.save()
+        print("--------------")
+        print(('{"content":"')+str(q.content)+('"}'))
+        return HttpResponse('{"content":"'+q.content+'"}', status=200)
+    # else:
+    #     return HttpResponse(status=403)
 
 # TODO:
 @login_required
@@ -536,28 +545,28 @@ def delete_media(request):
 
 
 
-def drive_clear(request):
-
-    scope = ['https://www.googleapis.com/auth/drive']
-
-    creds = ServiceAccountCredentials.from_json_keyfile_name('Uploaded Answers-14e35a500de2.json', scope)
-
-    service = build('drive', 'v3', credentials=creds)
-
-    # Call the Drive v3 API
-    results = service.files().list(
-        pageSize=60, fields="nextPageToken, files(id, name)").execute()
-    items = results.get('files', [])
-
-    if not items:
-        print('No files found.')
-    else:
-        print('Files:')
-        for item in items:
-            print(u'{0} ({1})'.format(item['name'], item['id']))
-            service.files().delete(fileId=item['id']).execute()
-
-    return HttpResponse("Drive cleared")
+# def drive_clear(request):
+#
+#     scope = ['https://www.googleapis.com/auth/drive']
+#
+#     creds = ServiceAccountCredentials.from_json_keyfile_name('Uploaded Answers-14e35a500de2.json', scope)
+#
+#     service = build('drive', 'v3', credentials=creds)
+#
+#     # Call the Drive v3 API
+#     results = service.files().list(
+#         pageSize=60, fields="nextPageToken, files(id, name)").execute()
+#     items = results.get('files', [])
+#
+#     if not items:
+#         print('No files found.')
+#     else:
+#         print('Files:')
+#         for item in items:
+#             print(u'{0} ({1})'.format(item['name'], item['id']))
+#             service.files().delete(fileId=item['id']).execute()
+#
+#     return HttpResponse("Drive cleared")
 
 # def drive_list(request):
 #
