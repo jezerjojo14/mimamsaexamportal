@@ -19,6 +19,6 @@ urlpatterns = [
     path('question-portal/<int:page>', views.question_making_page, name="questionportal"),
     path('post-question', views.post_question, name="post_question"),
 
-    # path('drive-clear', views.drive_clear, name="drive_clear"),
+    path('drive-clear', views.drive_clear, name="drive_clear"),
     # path('drive-list', views.drive_list, name="drive_list"),
 ]

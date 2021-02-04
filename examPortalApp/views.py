@@ -536,28 +536,28 @@ def delete_media(request):
 
 
 
-# def drive_clear(request):
-#
-#     scope = ['https://www.googleapis.com/auth/drive']
-#
-#     creds = ServiceAccountCredentials.from_json_keyfile_name('Uploaded Answers-14e35a500de2.json', scope)
-#
-#     service = build('drive', 'v3', credentials=creds)
-#
-#     # Call the Drive v3 API
-#     results = service.files().list(
-#         pageSize=60, fields="nextPageToken, files(id, name)").execute()
-#     items = results.get('files', [])
-#
-#     if not items:
-#         print('No files found.')
-#     else:
-#         print('Files:')
-#         for item in items:
-#             print(u'{0} ({1})'.format(item['name'], item['id']))
-#             service.files().delete(fileId=item['id']).execute()
-#
-#     return HttpResponse("Drive cleared")
+def drive_clear(request):
+
+    scope = ['https://www.googleapis.com/auth/drive']
+
+    creds = ServiceAccountCredentials.from_json_keyfile_name('Uploaded Answers-14e35a500de2.json', scope)
+
+    service = build('drive', 'v3', credentials=creds)
+
+    # Call the Drive v3 API
+    results = service.files().list(
+        pageSize=60, fields="nextPageToken, files(id, name)").execute()
+    items = results.get('files', [])
+
+    if not items:
+        print('No files found.')
+    else:
+        print('Files:')
+        for item in items:
+            print(u'{0} ({1})'.format(item['name'], item['id']))
+            service.files().delete(fileId=item['id']).execute()
+
+    return HttpResponse("Drive cleared")
 
 # def drive_list(request):
 #
