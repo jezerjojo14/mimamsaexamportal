@@ -482,7 +482,6 @@ def end_test(request):
 def question_making_page(request, page=1):
     if request.user.username=="admin":
         q=Paginator(Question.objects.all().order_by("question_number"), 10)
-        print(q.page_range)
         if page not in q.page_range:
             raise Http404
         return render(request, "examPortalApp/questionportal.html", {"questions": q.page(page), "page": page, "pagecount": q.num_pages})
@@ -511,14 +510,18 @@ def delete_question(request):
 # TODO:
 @login_required
 def edit_question(request):
+    subjects=["Physics", "Biology", "Math", "Chemistry"]
     if request.user.username=="admin":
         print(request.POST)
-        q=Question.objects.get(id=request.POST["id"])
-        q.content=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")
+        q=Question.objects.get(id=int(request.POST["id"]))
+        print(q.question_html)
+        q.question_html=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")
+        if request.POST["subject"] in subjects:
+            q.question_subject=request.POST["subject"]
         q.save()
         print("--------------")
-        print(('{"content":"')+str(q.content)+('"}'))
-        return HttpResponse('{"content":"'+q.content+'"}', status=200)
+        print(('{"content":"')+(q.question_html)+('", "subject":"'+q.question_subject+'"}'))
+        return HttpResponse(('{"content":"')+(q.question_html)+('", "subject":"'+q.question_subject+'"}'), status=201)
     # else:
     #     return HttpResponse(status=403)
 

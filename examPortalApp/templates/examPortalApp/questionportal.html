@@ -16,6 +16,7 @@
         var contentEle = document.getElementById(("question-content-").concat(id));
         var date = document.getElementById(("date-").concat(id));
         var oldContent = contentEle.innerHTML;
+        var subjectEle = document.getElementById(("question-subject-").concat(id));
         if(document.getElementById(("editForm").concat(id)) == null)
         {
           //Create Form
@@ -28,6 +29,9 @@
           f.id=("editForm").concat(id);
           f.classList.add('editForm');
             //Init form elements
+          var newSubject = document.createElement("select");
+          newSubject.innerHTML = '<option value="Physics">Physics</option><option value="Math">Math</option><option value="Biology">Biology</option><option value="Chemistry">Chemistry</option>';
+          newSubject.name = "subject";
           var newContent = document.createElement("textarea");
           newContent.innerHTML=oldContent;
           newContent.name="content";
@@ -53,14 +57,17 @@
           cancel.style.margin="10px";
           cancel.style.marginLeft="0";
             //Add form elements to form
+          f.appendChild(newSubject);
+          f.innerHTML+="<br>";
           f.appendChild(newContent);
           f.appendChild(br);
           f.appendChild(submit);
           f.appendChild(cancel);
 
 
-          question.insertBefore(f, ele.parentElement.nextElementSibling);
+          question.insertBefore(f, ele.parentElement);
           contentEle.style.display="none";
+          subjectEle.style.display="none";
         }
         else {
           document.getElementById(("cancel").concat(id)).click();
@@ -70,8 +77,10 @@
         var question=ele.parentElement.parentElement;
         var id = (question.id).substring(8);
         var contentEle = document.getElementById(("question-content-").concat(id));
+        var subjectEle = document.getElementById(("question-subject-").concat(id));
         var form = document.getElementById(("editForm").concat(id))
         contentEle.style.display="block";
+        subjectEle.style.display="block";
         question.removeChild(form);
       }
     }
@@ -82,17 +91,19 @@
       formdata.append("id", id);
       toggleEditBox(document.getElementById(("cancel").concat(id)));
       var contentEle = document.getElementById(("question-content-").concat(id));
+      var subjectEle = document.getElementById(("question-subject-").concat(id));
       const result=await fetch('{% url 'edit_question' %}', {
         method: 'POST',
         body: formdata,
         credentials: 'same-origin',
-      })
+      });
       const response=await result;
-      if (response.status==200)
+      if (response.status==201)
       {
         console.log("All good");
         const data=await response.json();
         contentEle.innerHTML = data.content;
+        subjectEle.innerHTML = data.subject;
       }
       else if (response.status==403) {
         console.log("Woop doop");
@@ -125,10 +136,10 @@
       {% for question in questions%}
         <div class="question" id="question{{question.pk}}">
           <h2>Question {{question.question_number}}</h2>
-          <small>{{question.question_subject}}</small>
+          <small class="question-subject" id="question-subject-{{question.pk}}">{{question.question_subject}}</small>
           <br>
           <div class="question-content" id="question-content-{{question.pk}}">
-            {{question.question_html|safe|linebreaksbr}}
+            {{question.question_html|safe}}
           </div>
           {% if user.username == "admin" %}
           <span data-active="0" class="edit"><a href="#" class="edit-link" onclick="toggleEditBox(this); return false;">Edit</a></span>
