@@ -233,7 +233,7 @@ def change_password(request):
         old_password = request.POST["old_password"]
         new_password = request.POST["new_password"]
         confirm_password = request.POST["confirm_password"]
-        if new_password==confirm_password:
+        if new_password==confirm_password and new_password!="":
             if user.username==email and user.check_password(old_password):
                 user.set_password(new_password)
                 user.passwordSet=True
@@ -253,9 +253,14 @@ def change_password(request):
                     "message": "Your credentials don't match."
                 })
         else:
-            return render(request, "examPortalApp/change_password.html", {
+            if new_password!=confirm_password:
+                return render(request, "examPortalApp/change_password.html", {
                 "message": "Passwords don't match."
-            })
+                })
+            else:
+                return render(request,"examPortalApp/change_password.html", {
+                "message": "Password cannot be blank."
+                })
         logout(request)
         return render(request, "examPortalApp/index.html", {
             "message": "Password successfully updated."
