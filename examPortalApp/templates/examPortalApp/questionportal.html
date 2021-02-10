@@ -135,7 +135,7 @@
     <div id="questions">
       {% for question in questions%}
         <div class="question" id="question{{question.pk}}">
-          <h2>Question {{question.question_number}}</h2>
+          <h2 class="question-heading" id="question-heading-{{question.pk}}">Question {{question.question_number}}</h2>
           <small class="question-subject" id="question-subject-{{question.pk}}">{{question.question_subject}}</small>
           <br>
           <div class="question-content" id="question-content-{{question.pk}}">
