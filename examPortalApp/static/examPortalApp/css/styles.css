@@ -5,4 +5,37 @@ body {
 
 h2 {
   color: #39b54a;
+  margin: 10px;
+  font-size: 28px;
+}
+
+hr {
+  border-top: 1px solid #eee;
+}
+
+#time {
+display:inline-block
+}
+
+#questions button{
+  margin:5px;
+  border:none;
+}
+
+#questions .active{
+  border:4px solid #007bff;
+}
+
+#questions .visited{
+  background-color: #ff661a;
+}
+
+#content {
+  padding:10px;
+  font-size: 38px;
+  margin: 10px auto 50px auto;
+}
+
+#nav_buttons{
+  margin: 50px auto 20px auto;
 }

@@ -41,16 +41,16 @@
           seconds = (diff % 60) | 0;
           if (days>0)
           {
-            display.textContent = days + " days " + hours + " hours " + minutes + " minutes and " + seconds + "seconds";
+            display.textContent = days + " days " + hours + " hours " + minutes + " minutes and " + seconds + " seconds";
           }
           else if (hours>0) {
-            display.textContent = hours + " hours " + minutes + " minutes and " + seconds + "seconds";
+            display.textContent = hours + " hours " + minutes + " minutes and " + seconds + " seconds";
           }
           else if (minutes>0) {
-            display.textContent = minutes + " minutes and " + seconds + "seconds";
+            display.textContent = minutes + " minutes and " + seconds + " seconds";
           }
           else {
-            display.textContent = seconds + "seconds";
+            display.textContent = seconds + " seconds";
           }
           if (diff <= 0) {
               // add one second so that the count down starts at the full duration
@@ -61,7 +61,16 @@
       // we don't want to wait a full second before the timer starts
       timer();
       setInterval(timer, 1000);
-    }
+    };
+    
+
+    function display_question_numbers (que_display) {
+      var content="<button onclick='getQuestion(1);Qactive(1);' class='btn visited active btn-primary btn-md'> 1 </button>" ;
+      for (i=1; i< {{QCount}} ; i++){
+        content+="<button onclick='getQuestion("+(i+1)+");Qactive("+(i+1)+");'class='btn btn-primary btn-md'> "+ (i+1) +" </button>" ;
+      };
+      que_display.innerHTML=content;
+    };
 
     window.onload = function () {
       var d = new Date();
@@ -74,9 +83,47 @@
       console.log(d);
       var display = document.querySelector('#time');
       startTimer(d.getTime(), display);
+      var que_display=document.querySelector('#questions')
+      display_question_numbers(que_display);
     };
 
     var currentQNo;
+    
+
+
+    function Qactive(newQNo){
+      if (currentQNo!=newQNo) {
+        if (currentQNo==1){
+          document.getElementById('prev').removeAttribute("disabled");
+          if (newQNo=={{QCount}}){
+            document.getElementById('next').setAttribute("disabled","disabled");
+          };
+        };
+        if (currentQNo=={{QCount}}){
+          document.getElementById('next').removeAttribute("disabled");
+          if (newQNo==1){
+            document.getElementById('prev').setAttribute("disabled","disabled");
+          };
+        };
+        if (currentQNo>1 && currentQNo<{{QCount}}){
+          if (newQNo==1){
+            document.getElementById('prev').setAttribute("disabled","disabled");
+          };
+          if (newQNo=={{QCount}}){
+            document.getElementById('next').setAttribute("disabled","disabled");
+          };
+        };
+      };
+      var header = document.getElementById("questions");
+      var btns = header.getElementsByClassName("btn");
+      var current = document.getElementsByClassName("active");
+      current[0].className = current[0].className.replace(" active", "");
+      btns[newQNo-1].className += " active visited";
+      currentQNo=newQNo;
+      console.log("currentQNo: "+currentQNo);
+      document.getElementById('qnumber').value=currentQNo;
+    };
+
 
     function getQuestion(questionNumber) {
       console.log(questionNumber);
@@ -93,6 +140,7 @@
       {
         currentQNo+=1;
         getQuestion(currentQNo);
+        Qactive(currentQNo);
         if (currentQNo == {{QCount}})
         {
           document.getElementById('next').setAttribute("disabled", "disabled");
@@ -110,6 +158,7 @@
       {
         currentQNo-=1;
         getQuestion(currentQNo);
+        Qactive(currentQNo);
         if (currentQNo == 1)
         {
           document.getElementById('prev').setAttribute("disabled", "disabled")
@@ -159,14 +208,15 @@
 
     </script>
   </head>
+
   <body>
-    <div>
-      <h2>The quiz will end in</h2>
-      <div id="time">
-      </div>
-    </div>
-    <div id="content">
-    </div>
+    <div class="fluid-container">
+    <div class="col-lg-10">
+      <h2>The quiz will end in: <div id="time"></div></h2>
+      <hr>
+
+    <div id="questions"></div>  
+    <div id="content"></div>
     <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="fieldWrapper" id="fileFieldWrapper">
@@ -179,7 +229,12 @@
     <div id="uploadedAnswers">
 
     </div>
-    <button onclick="prevQuestion()" id="prev" type="button" class="btn btn-secondary btn-lg" disabled>Previous</button>
-    <button onclick="nextQuestion()" id="next" type="button" class="btn btn-secondary btn-lg">Next</button>
+    <div id="nav_buttons">
+    <button onclick="prevQuestion();" id="prev" type="button" class="btn btn-secondary btn-lg" disabled>Previous</button>
+    <button onclick="nextQuestion();" id="next" type="button" class="btn btn-secondary btn-lg" style="float: right;">Next</button>
+    </div>
+  </div>
+    </div>
   </body>
+
 </html>
