@@ -487,7 +487,6 @@ def end_test(request):
 def question_making_page(request, page=1):
     if request.user.username=="admin":
         q=Paginator(Question.objects.all().order_by("question_number"), 10)
-        print(q.page_range)
         if page not in q.page_range:
             raise Http404
         return render(request, "examPortalApp/questionportal.html", {"questions": q.page(page), "page": page, "pagecount": q.num_pages})
@@ -499,7 +498,7 @@ def question_making_page(request, page=1):
 @login_required
 def post_question(request):
     if request.user.username=="admin":
-        q=Question(question_html=(request.POST["content"]).replace("\n", "<br>"), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"])
+        q=Question(question_html=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>"), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"])
         q.save()
         #Redirect to page 1 of the question making portal
         return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
@@ -511,12 +510,62 @@ def post_question(request):
 # TODO:
 @login_required
 def delete_question(request):
-    pass
+    if request.user.username=="admin":
+        print(request.body)
+        post_data = json.loads(request.body.decode("utf-8"))
+        q=Question.objects.get(id=post_data["id"])
+        print(q.question_html)
+        total=Question.objects.all().count()
+        qnum=q.question_number
+        q.delete()
+        for i in range(total-qnum):
+            m=Question.objects.get(question_number=qnum+(i+1))
+            m.question_number-=1
+            m.save()
+        print("--------------")
+        print(('{"content":"')+(q.question_html)+('", "subject":"'+q.question_subject+'"}'))
+        return HttpResponse(status=201)
 
-# TODO:
 @login_required
 def edit_question(request):
-    pass
+    subjects=["Physics", "Biology", "Math", "Chemistry"]
+    if request.user.username=="admin":
+        print(request.POST)
+        q=Question.objects.get(id=int(request.POST["id"]))
+        print(q.question_html)
+        q.question_html=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")
+        if request.POST["subject"] in subjects:
+            q.question_subject=request.POST["subject"]
+        qnumber=int(request.POST["qnumber"])
+        total=Question.objects.all().count()
+        if qnumber<1:
+            qnumber=1
+        elif qnumber>total:
+            qnumber=total
+        old_qnum=q.question_number
+        if qnumber>old_qnum:
+            q.question_number=total+1
+            q.save()
+            for i in range(qnumber-old_qnum):
+                m=Question.objects.get(question_number=old_qnum+(i+1))
+                m.question_number-=1
+                m.save()
+            q.question_number=qnumber
+        elif qnumber<old_qnum:
+            q.question_number=total+1
+            q.save()
+            for i in range(old_qnum-qnumber):
+                m=Question.objects.get(question_number=old_qnum-(i+1))
+                m.question_number+=1
+                m.save()
+            q.question_number=qnumber
+        q.save()
+        print("--------------")
+        print(('{"content":"')+(q.question_html)+('", "subject":"'+q.question_subject+'"}'))
+        return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
+        # return HttpResponse(('{"content":"')+(q.question_html)+('", "subject":"'+q.question_subject+'"}'), status=201)
+    # else:
+    #     return HttpResponse(status=403)
 
 # TODO:
 @login_required

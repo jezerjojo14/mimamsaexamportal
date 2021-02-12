@@ -175,7 +175,7 @@
       currentQNo = 1;
       getQuestion(currentQNo);
     });
-
+    
     function fetchAnswers() {
       document.getElementById('uploadedAnswers').innerHTML="Loading";
       fetch(("{% url 'get_answers' qnumber=1 %}").substring(0, ("{% url 'get_answers' qnumber=1 %}").length - 1) + currentQNo)
