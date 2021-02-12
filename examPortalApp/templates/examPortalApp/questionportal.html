@@ -17,6 +17,7 @@
         var date = document.getElementById(("date-").concat(id));
         var oldContent = contentEle.innerHTML;
         var subjectEle = document.getElementById(("question-subject-").concat(id));
+        var qnumber = parseInt(document.getElementById(("qnumber-").concat(id)).innerHTML);
         if(document.getElementById(("editForm").concat(id)) == null)
         {
           //Create Form
@@ -24,8 +25,10 @@
             //Init form
           var f = document.createElement("form");
           f.setAttribute('method', "post");
-          f.setAttribute('onsubmit', "edit(this); return false;");
+          f.setAttribute('action', '{% url 'edit_question' %}');
           f.innerHTML='{% csrf_token %}';
+          f.innerHTML+="<label for='qnumber'>Question nummber: </label>\n<input type='number' id='qnumber' name='qnumber' min='1' max='{{questions|length}}' value='"+qnumber.toString()+"'>";
+          f.innerHTML+="<input type='hidden' name='id' value='"+id+"'>";
           f.id=("editForm").concat(id);
           f.classList.add('editForm');
             //Init form elements
@@ -64,8 +67,8 @@
           f.appendChild(submit);
           f.appendChild(cancel);
 
-
           question.insertBefore(f, ele.parentElement);
+          f.parentElement.innerHTML+='<button id="del'+id+'" onclick="delQ(this)">Delete</button>';
           contentEle.style.display="none";
           subjectEle.style.display="none";
         }
@@ -85,33 +88,73 @@
       }
     }
 
-    async function edit(form) {
-      var formdata = new FormData(form);
-      var id=form.id.substring(8);
-      formdata.append("id", id);
-      toggleEditBox(document.getElementById(("cancel").concat(id)));
-      var contentEle = document.getElementById(("question-content-").concat(id));
-      var subjectEle = document.getElementById(("question-subject-").concat(id));
-      const result=await fetch('{% url 'edit_question' %}', {
-        method: 'POST',
-        body: formdata,
-        credentials: 'same-origin',
-      });
-      const response=await result;
+    // The following function are copying from
+    // https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function delQ(btn) {
+      let csrftoken = getCookie('csrftoken');
+      let response = await fetch("{% url 'del_question' %}", {
+          method: 'POST',
+          body: JSON.stringify({"id" : btn.id.substring(3)}),
+          headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": csrftoken },
+      })
       if (response.status==201)
       {
-        console.log("All good");
-        const data=await response.json();
-        contentEle.innerHTML = data.content;
-        subjectEle.innerHTML = data.subject;
+        location.reload();
       }
-      else if (response.status==403) {
+      else {
         console.log("Woop doop");
         var small = document.createElement("small");
-        small.innerHTML="<i>Forbidden </i>";
+        small.innerHTML="<i>Something went wrong </i>";
         contentEle.parentElement.insertBefore(small, contentEle.nextElementSibling);
       }
     }
+
+
+    // async function edit(form) {
+    //   var formdata = new FormData(form);
+    //   var id=form.id.substring(8);
+    //   formdata.append("id", id);
+    //   toggleEditBox(document.getElementById(("cancel").concat(id)));
+    //   var contentEle = document.getElementById(("question-content-").concat(id));
+    //   var subjectEle = document.getElementById(("question-subject-").concat(id));
+    //   const result=await fetch('{% url 'edit_question' %}', {
+    //     method: 'POST',
+    //     body: formdata,
+    //     credentials: 'same-origin',
+    //   });
+    //   const response=await result;
+    //   if (response.status==201)
+    //   {
+    //     console.log("All good");
+    //     const data=await response.json();
+    //     contentEle.innerHTML = data.content;
+    //     subjectEle.innerHTML = data.subject;
+    //   }
+    //   else if (response.status==403) {
+    //     console.log("Woop doop");
+    //     var small = document.createElement("small");
+    //     small.innerHTML="<i>Forbidden </i>";
+    //     contentEle.parentElement.insertBefore(small, contentEle.nextElementSibling);
+    //   }
+    // }
     </script>
   </head>
   <body>
@@ -135,7 +178,7 @@
     <div id="questions">
       {% for question in questions%}
         <div class="question" id="question{{question.pk}}">
-          <h2 class="question-heading" id="question-heading-{{question.pk}}">Question {{question.question_number}}</h2>
+          <h2 class="question-heading" id="question-heading-{{question.pk}}">Question <span id="qnumber-{{question.pk}}">{{question.question_number}}</span></h2>
           <small class="question-subject" id="question-subject-{{question.pk}}">{{question.question_subject}}</small>
           <br>
           <div class="question-content" id="question-content-{{question.pk}}">
