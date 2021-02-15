@@ -298,11 +298,13 @@ def dashboard(request):
 
 
 @login_required
-def open_test(request):
+def open_test(request,qnumber=None):
     now = timezone.now()
     test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 0, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 30, 0))})[0]).test_start
     test_end=GlobalVariables.objects.get(pk=1).test_end
     q_count= Question.objects.all().count();
+    q_current = 1 if (qnumber is None) else int(qnumber);
+    q=Question.objects.get(question_number=qnumber)
 
     #If test hasn't started yet, show the waiting page,
     #If it has started but hasn't ended, show the testportal
@@ -311,18 +313,20 @@ def open_test(request):
     if now<test_start:
         return render(request, "examPortalApp/waitingroom.html", {"UTCDate": test_start.day, "UTCMonth": test_start.month, "UTCYear": test_start.year, "UTCHours": test_start.hour, "UTCMinutes": test_start.minute, "UTCSeconds": test_start.second})
     if now<test_end:
-        return render(request, "examPortalApp/testportal.html", {"QCount": q_count, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+        print("Qnumber: ",qnumber)
+        print("Value: ",q_current)
+        return render(request, "examPortalApp/testportal.html", {"QNum": q_current, "QCount": q_count, "content": q.question_html, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
     return render(request, "examPortalApp/testended.html")
 
-@login_required
-def get_question(request, qnumber=1):
-    now = timezone.now()
-    test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 0, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 30, 0))})[0]).test_start
-    if now>test_start:
-        q=Question.objects.get(question_number=qnumber)
-        return JsonResponse({"content": q.question_html})
-    else:
-        return HttpResponse(status=403)
+# @login_required
+# def get_question(request, qnumber=1):
+#     now = timezone.now()
+#     test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 0, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 30, 0))})[0]).test_start
+#     if now>test_start:
+#         q=Question.objects.get(question_number=qnumber)
+#         return JsonResponse({"content": q.question_html})
+#     else:
+#         return HttpResponse(status=403)
 
 @login_required
 def get_answers(request, qnumber):
@@ -406,7 +410,7 @@ def upload_answer(request):
         print(qnumber)
         raise Http404;
     subject=q.question_subject
-
+    if team is None: return HttpResponseRedirect("test/"+str(qnumber))
     #Resize and compress uploaded image
 
     im = Image.open(answerfile)
@@ -469,7 +473,7 @@ def upload_answer(request):
                                         fields='id').execute()
 
     #Reloads the page. Hopefully can be avoided using JS fetch API
-    return HttpResponseRedirect(reverse("test"))
+    return HttpResponseRedirect("test/"+str(qnumber))
 
 
 # TODO:

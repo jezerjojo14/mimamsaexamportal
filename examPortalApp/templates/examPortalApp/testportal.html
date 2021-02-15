@@ -62,7 +62,7 @@
       timer();
       setInterval(timer, 1000);
     };
-    
+
 
     function display_question_numbers (que_display) {
       var content="<button onclick='getQuestion(1);Qactive(1);' class='btn visited active btn-primary btn-md'> 1 </button>" ;
@@ -88,7 +88,7 @@
     };
 
     var currentQNo;
-    
+
 
 
     function Qactive(newQNo){
@@ -127,12 +127,13 @@
 
     function getQuestion(questionNumber) {
       console.log(questionNumber);
-      fetch(("{% url 'get_question' qnumber=1 %}").substring(0, ("{% url 'get_question' qnumber=1 %}").length - 1) + questionNumber)
-        .then(response=>response.json())
-        .then((data) => {
-          document.getElementById('content').innerHTML=data["content"];
-        })
-      fetchAnswers();
+      // fetch(("{% url 'get_question' qnumber=1 %}").substring(0, ("{% url 'get_question' qnumber=1 %}").length - 1) + questionNumber)
+      //   .then(response=>response.json())
+      //   .then((data) => {
+      //     document.getElementById('content').innerHTML=data["content"];
+      //   })
+      // fetchAnswers();
+      window.location.href = ("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'get_question' qnumber=1 %}").length - 1) + questionNumber;
     }
 
     function nextQuestion() {
@@ -175,7 +176,7 @@
       currentQNo = 1;
       getQuestion(currentQNo);
     });
-    
+
     function fetchAnswers() {
       document.getElementById('uploadedAnswers').innerHTML="Loading";
       fetch(("{% url 'get_answers' qnumber=1 %}").substring(0, ("{% url 'get_answers' qnumber=1 %}").length - 1) + currentQNo)
@@ -215,8 +216,8 @@
       <h2>The quiz will end in: <div id="time"></div></h2>
       <hr>
 
-    <div id="questions"></div>  
-    <div id="content"></div>
+    <div id="questions"></div>
+    <div id="content">{{content}}</div>
     <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="fieldWrapper" id="fileFieldWrapper">
