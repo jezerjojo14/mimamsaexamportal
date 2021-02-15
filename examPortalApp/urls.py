@@ -13,7 +13,7 @@ urlpatterns = [
 
     # path('test', views.open_test, name="test"),
     path('test/<int:qnumber>', views.open_test, name="test_no"),
-    path('question/<int:qnumber>', views.get_question, name="get_question"),
+    # path('question/<int:qnumber>', views.get_question, name="get_question"),
     path('upload-answer', views.upload_answer, name="upload_answer"),
     path('answers/<int:qnumber>', views.get_answers, name="get_answers"),
 

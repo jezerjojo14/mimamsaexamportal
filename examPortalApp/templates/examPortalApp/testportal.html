@@ -65,9 +65,14 @@
 
 
     function display_question_numbers (que_display) {
-      var content="<button onclick='getQuestion(1);Qactive(1);' class='btn visited active btn-primary btn-md'> 1 </button>" ;
-      for (i=1; i< {{QCount}} ; i++){
-        content+="<button onclick='getQuestion("+(i+1)+");Qactive("+(i+1)+");'class='btn btn-primary btn-md'> "+ (i+1) +" </button>" ;
+      var content="";
+      for (i=0; i< {{QCount}} ; i++){
+        if (i+1=={{QNum}}) {
+          content+="<button onclick='getQuestion("+(i+1)+");Qactive("+(i+1)+");'class='btn visited active btn-primary btn-md'> "+ (i+1) +" </button>" ;
+        }
+        else {
+          content+="<button onclick='getQuestion("+(i+1)+");Qactive("+(i+1)+");'class='btn btn-primary btn-md'> "+ (i+1) +" </button>" ;
+        }
       };
       que_display.innerHTML=content;
     };
@@ -91,49 +96,43 @@
 
 
 
-    function Qactive(newQNo){
-      if (currentQNo!=newQNo) {
-        if (currentQNo==1){
-          document.getElementById('prev').removeAttribute("disabled");
-          if (newQNo=={{QCount}}){
-            document.getElementById('next').setAttribute("disabled","disabled");
-          };
-        };
-        if (currentQNo=={{QCount}}){
-          document.getElementById('next').removeAttribute("disabled");
-          if (newQNo==1){
-            document.getElementById('prev').setAttribute("disabled","disabled");
-          };
-        };
-        if (currentQNo>1 && currentQNo<{{QCount}}){
-          if (newQNo==1){
-            document.getElementById('prev').setAttribute("disabled","disabled");
-          };
-          if (newQNo=={{QCount}}){
-            document.getElementById('next').setAttribute("disabled","disabled");
-          };
-        };
-      };
-      var header = document.getElementById("questions");
-      var btns = header.getElementsByClassName("btn");
-      var current = document.getElementsByClassName("active");
-      current[0].className = current[0].className.replace(" active", "");
-      btns[newQNo-1].className += " active visited";
-      currentQNo=newQNo;
-      console.log("currentQNo: "+currentQNo);
-      document.getElementById('qnumber').value=currentQNo;
-    };
+    // function Qactive(newQNo){
+    //   if (currentQNo!=newQNo) {
+    //     if (currentQNo==1){
+    //       document.getElementById('prev').removeAttribute("disabled");
+    //       if (newQNo=={{QCount}}){
+    //         document.getElementById('next').setAttribute("disabled","disabled");
+    //       };
+    //     };
+    //     if (currentQNo=={{QCount}}){
+    //       document.getElementById('next').removeAttribute("disabled");
+    //       if (newQNo==1){
+    //         document.getElementById('prev').setAttribute("disabled","disabled");
+    //       };
+    //     };
+    //     if (currentQNo>1 && currentQNo<{{QCount}}){
+    //       if (newQNo==1){
+    //         document.getElementById('prev').setAttribute("disabled","disabled");
+    //       };
+    //       if (newQNo=={{QCount}}){
+    //         document.getElementById('next').setAttribute("disabled","disabled");
+    //       };
+    //     };
+    //   };
+    //   var header = document.getElementById("questions");
+    //   var btns = header.getElementsByClassName("btn");
+    //   var current = document.getElementsByClassName("active");
+    //   current[0].className = current[0].className.replace(" active", "");
+    //   btns[newQNo-1].className += " active visited";
+    //   currentQNo=newQNo;
+    //   console.log("currentQNo: "+currentQNo);
+    //   document.getElementById('qnumber').value=currentQNo;
+    // };
 
 
     function getQuestion(questionNumber) {
       console.log(questionNumber);
-      // fetch(("{% url 'get_question' qnumber=1 %}").substring(0, ("{% url 'get_question' qnumber=1 %}").length - 1) + questionNumber)
-      //   .then(response=>response.json())
-      //   .then((data) => {
-      //     document.getElementById('content').innerHTML=data["content"];
-      //   })
-      // fetchAnswers();
-      window.location.href = ("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'get_question' qnumber=1 %}").length - 1) + questionNumber;
+      window.location.href = ("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'test_no' qnumber=1 %}").length - 1) + questionNumber;
     }
 
     function nextQuestion() {
@@ -142,15 +141,6 @@
         currentQNo+=1;
         getQuestion(currentQNo);
         Qactive(currentQNo);
-        if (currentQNo == {{QCount}})
-        {
-          document.getElementById('next').setAttribute("disabled", "disabled");
-        }
-        if (currentQNo == 2)
-        {
-          document.getElementById('prev').removeAttribute("disabled");
-        }
-        document.getElementById('qnumber').value=currentQNo;
       }
     }
 
@@ -160,21 +150,21 @@
         currentQNo-=1;
         getQuestion(currentQNo);
         Qactive(currentQNo);
-        if (currentQNo == 1)
-        {
-          document.getElementById('prev').setAttribute("disabled", "disabled")
-        }
-        if (currentQNo == ({{QCount}} - 1))
-        {
-          document.getElementById('next').removeAttribute("disabled")
-        }
-        document.getElementById('qnumber').value=currentQNo;
       }
     }
 
     document.addEventListener("DOMContentLoaded", ()=>{
-      currentQNo = 1;
-      getQuestion(currentQNo);
+      currentQNo = {{QNum}};
+      if (currentQNo == 1)
+      {
+        document.getElementById('prev').setAttribute("disabled", "disabled")
+      }
+      if (currentQNo == {{QCount}})
+      {
+        document.getElementById('next').setAttribute("disabled", "disabled");
+      }
+      fetchAnswers();
+      // getQuestion(currentQNo);
     });
 
     function fetchAnswers() {
@@ -217,21 +207,21 @@
       <hr>
 
     <div id="questions"></div>
-    <div id="content">{{content}}</div>
+    <div id="content">{{content|safe}}</div>
     <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="fieldWrapper" id="fileFieldWrapper">
           <label for="id_file">Upload answers:</label>
           <input type="file" name="file" required id="id_file">
       </div>
-      <input id="qnumber" type="hidden" name="qnumber" value="1">
+      <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
       <input type="submit" name="" value="Submit">
     </form>
     <div id="uploadedAnswers">
 
     </div>
     <div id="nav_buttons">
-    <button onclick="prevQuestion();" id="prev" type="button" class="btn btn-secondary btn-lg" disabled>Previous</button>
+    <button onclick="prevQuestion();" id="prev" type="button" class="btn btn-secondary btn-lg">Previous</button>
     <button onclick="nextQuestion();" id="next" type="button" class="btn btn-secondary btn-lg" style="float: right;">Next</button>
     </div>
   </div>
