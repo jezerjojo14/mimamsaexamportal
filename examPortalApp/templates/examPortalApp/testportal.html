@@ -80,12 +80,13 @@
 
     function getQuestion(questionNumber) {
       console.log(questionNumber);
-      fetch(("{% url 'get_question' qnumber=1 %}").substring(0, ("{% url 'get_question' qnumber=1 %}").length - 1) + questionNumber)
-        .then(response=>response.json())
-        .then((data) => {
-          document.getElementById('content').innerHTML=data["content"];
-        })
-      fetchAnswers();
+      // fetch(("{% url 'get_question' qnumber=1 %}").substring(0, ("{% url 'get_question' qnumber=1 %}").length - 1) + questionNumber)
+      //   .then(response=>response.json())
+      //   .then((data) => {
+      //     document.getElementById('content').innerHTML=data["content"];
+      //   })
+      // fetchAnswers();
+      window.location.href = ("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'get_question' qnumber=1 %}").length - 1) + questionNumber;
     }
 
     function nextQuestion() {
@@ -166,6 +167,7 @@
       </div>
     </div>
     <div id="content">
+      {{content}}
     </div>
     <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
