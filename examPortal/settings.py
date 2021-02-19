@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'examPortal.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mimamsaexamportaldb',
+        'NAME': 'mimamsaExamPortalDB',
         'USER': 'root',
         'PASSWORD': 'monkey1432001',
         'HOST': '127.0.0.1',
