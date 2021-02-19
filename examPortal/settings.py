@@ -75,16 +75,6 @@ WSGI_APPLICATION = 'examPortal.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mimamsaExamPortalDB',
-        'USER': 'root',
-        'PASSWORD': 'monkey1432001',
-        'HOST': '127.0.0.1',
-        'PORT': '3306'
-    }
-}
 
 if 'RDS_HOSTNAME' in os.environ:
     DATABASES = {
@@ -97,6 +87,18 @@ if 'RDS_HOSTNAME' in os.environ:
             'PORT': os.environ['RDS_PORT'],
         }
     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'mimamsaExamPortalDB',
+            'USER': 'root',
+            'PASSWORD': 'monkey1432001',
+            'HOST': '127.0.0.1',
+            'PORT': '3306'
+        }
+    }
+
 
 AUTH_USER_MODEL = "examPortalApp.User"
 
