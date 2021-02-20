@@ -25,7 +25,7 @@ SECRET_KEY = 'r0yc*776ty^e9*02oos(f44rccz%+3@zx5fv-s6uw%b05tn5wo'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', "localhost", 'examportal-dev2.ap-south-1.elasticbeanstalk.com', 'examportal.eba-ngubpvi9.ap-south-1.elasticbeanstalk.com', 'examportal-dev.ap-south-1.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['127.0.0.1', "localhost", 'examportal-dev2.ap-south-1.elasticbeanstalk.com', '172.31.12.13', 'examportal.eba-ngubpvi9.ap-south-1.elasticbeanstalk.com', 'examportal-dev.ap-south-1.elasticbeanstalk.com']
 
 
 # Application definition
