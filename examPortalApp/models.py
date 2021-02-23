@@ -16,13 +16,11 @@ class User(AbstractUser):
 class Team(models.Model):
     team_id = models.CharField(max_length=15, primary_key=True)
     sequence = models.CharField(max_length=10)
-    users = models.ManyToManyField(User, through="Ordering")
+    # users = models.ManyToManyField(User, through="Ordering")
+    users = models.ManyToManyField(User)
     college = models.CharField(max_length=200)
     zone = models.CharField(max_length=5)
-    p_folder_id = models.CharField(max_length=100)
-    m_folder_id = models.CharField(max_length=100)
-    b_folder_id = models.CharField(max_length=100)
-    c_folder_id = models.CharField(max_length=100)
+
 #This database adds an extra datum to each connection between a group and its members expressing the ordering of the users in their teams
 class Ordering(models.Model):
     user_instance = models.ForeignKey(User, on_delete=models.CASCADE)

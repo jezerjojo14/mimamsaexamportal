@@ -1,18 +1,13 @@
 
 
-# Google Drive API
+# S3 API
 
-# from __future__ import print_function
-# import pickle
+import boto3
+from botocore.exceptions import ClientError
+
+
+
 import os.path
-# from googleapiclient.discovery import build
-# from google_auth_oauthlib.flow import InstalledAppFlow
-# from google.auth.transport.requests import Request
-# from google.cloud import storage
-# from oauth2client.service_account import ServiceAccountCredentials
-# from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
-
-
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -39,6 +34,32 @@ from PIL import Image
 import io
 
 import base64
+
+
+
+#Function for uploading file onto S3
+
+def upload_file(file_name, object_name=None):
+    """Upload a file to an S3 bucket
+
+    :param file_name: File to upload
+    :param bucket: Bucket to upload to
+    :param object_name: S3 object name. If not specified then file_name is used
+    :return: True if file was uploaded, else False
+    """
+
+    # If S3 object_name was not specified, use file_name
+    if object_name is None:
+        object_name = file_name
+
+        # Upload the file
+        s3_client = boto3.client('s3')
+        try:
+            response = s3_client.upload_file(file_name, "mimamsauploadedanswers", object_name)
+        except ClientError as e:
+            print("oh no")
+            return False
+        return True
 
 
 
@@ -81,143 +102,49 @@ def login_view(request):
 # TODO: Make this view a background task
 
 def update_accounts(request):
-    pass
-#     if request.user.username=="admin":
-#         if request.method == 'POST':
-#             scope = ['https://www.googleapis.com/auth/drive']
-#
-#             creds = ServiceAccountCredentials.from_json_keyfile_name('Uploaded Answers-14e35a500de2.json', scope)
-#
-#             service = build('drive', 'v3', credentials=creds)
-#
-#             results = service.files().list(q="name='Mimamsa Uploaded Answers 21'", pageSize=10, fields="nextPageToken, files(id, name)").execute()
-#             items = results.get('files', [])
-#
-#             if not items:
-#                 file_metadata = {
-#                 'name': 'Mimamsa Uploaded Answers 21',
-#                 'mimeType': 'application/vnd.google-apps.folder'
-#                 }
-#                 master_folder = service.files().create(body=file_metadata, fields='id').execute()
-#                 master_folder_id=master_folder.get('id')
-#
-#                 permission = {
-#                 'type': 'user',
-#                 'role': 'writer',
-#                 'emailAddress': 'mimamsaportal@gmail.com',
-#                 'sendNotificationEmails': False,
-#                 }
-#                 service.permissions().create(fileId=master_folder_id, body=permission).execute()
-#
-#                 file_metadata = {
-#                 'name': 'Physics',
-#                 'mimeType': 'application/vnd.google-apps.folder',
-#                 'parents' : [master_folder_id],
-#                 }
-#                 p_folder = service.files().create(body=file_metadata, fields='id').execute()
-#                 p_folder_id=p_folder.get('id')
-#
-#                 file_metadata = {
-#                 'name': 'Chemistry',
-#                 'mimeType': 'application/vnd.google-apps.folder',
-#                 'parents' : [master_folder_id],
-#                 }
-#                 c_folder = service.files().create(body=file_metadata, fields='id').execute()
-#                 c_folder_id=c_folder.get('id')
-#
-#                 file_metadata = {
-#                 'name': 'Math',
-#                 'mimeType': 'application/vnd.google-apps.folder',
-#                 'parents' : [master_folder_id],
-#                 }
-#                 m_folder = service.files().create(body=file_metadata, fields='id').execute()
-#                 m_folder_id=m_folder.get('id')
-#
-#                 file_metadata = {
-#                 'name': 'Biology',
-#                 'mimeType': 'application/vnd.google-apps.folder',
-#                 'parents' : [master_folder_id],
-#                 }
-#                 b_folder = service.files().create(body=file_metadata, fields='id').execute()
-#                 b_folder_id=b_folder.get('id')
-#
-#
-#             else:
-#                 print(items)
-#                 master_folder_id=items[0]['id']
-#             #Authenticate user trying to update the accounts and generate passwords
-#             file=request.FILES['file']
-#             if file:
-#                 reader = csv.DictReader(codecs.iterdecode(file, 'utf-8'))
-#                 generated_passwords={}
-#                 print("It begins")
-#                 for row in reader:
-#                     team_id = row["TEAM ID"]
-#                     print(row["SEQUENCE"])
-#                     try:
-#                         team=Team.objects.create(team_id=team_id, sequence=row["SEQUENCE"], college=row["COLLEGE"], zone=row["ZONE CODE"])
-#                         file_metadata = {
-#                             'name': team_id,
-#                             'parents' : [p_folder_id],
-#                             'mimeType': 'application/vnd.google-apps.folder'
-#                         }
-#                         p_team_folder = service.files().create(body=file_metadata, fields='id').execute()
-#                         folder_id=p_team_folder.get('id')
-#                         team.p_folder_id=folder_id
-#
-#                         file_metadata = {
-#                             'name': team_id,
-#                             'parents' : [m_folder_id],
-#                             'mimeType': 'application/vnd.google-apps.folder'
-#                         }
-#                         m_team_folder = service.files().create(body=file_metadata, fields='id').execute()
-#                         folder_id=m_team_folder.get('id')
-#                         team.m_folder_id=folder_id
-#                         file_metadata = {
-#                             'name': team_id,
-#                             'parents' : [c_folder_id],
-#                             'mimeType': 'application/vnd.google-apps.folder'
-#                         }
-#                         c_team_folder = service.files().create(body=file_metadata, fields='id').execute()
-#                         folder_id=c_team_folder.get('id')
-#                         team.c_folder_id=folder_id
-#                         file_metadata = {
-#                             'name': team_id,
-#                             'parents' : [b_folder_id],
-#                             'mimeType': 'application/vnd.google-apps.folder'
-#                         }
-#                         b_team_folder = service.files().create(body=file_metadata, fields='id').execute()
-#                         folder_id=b_team_folder.get('id')
-#                         team.b_folder_id=folder_id
-#
-#                         team.save()
-#                         print(team_id+" saved")
-#                     except IntegrityError:
-#                         team=Team.objects.get(team_id=team_id)
-#                         print(team_id)
-#                     for i in range(4):
-#                         if row["EMAIL ID "+str(i+1)]=="":
-#                             continue
-#                         try:
-#                             password=''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-#                             user=User.objects.create_user(username=(row["EMAIL ID "+str(i+1)]).lower(), email=(row["EMAIL ID "+str(i+1)]).lower(), password=password, generated_pass=password)
-#                             if i==0:
-#                                 user.phone_number=row["PHONE 1"]
-#                                 user.save()
-#                         except IntegrityError:
-#                             print(row["EMAIL ID "+str(i+1)])
-#                             user=User.objects.get(email=(row["EMAIL ID "+str(i+1)]).lower())
-#                         if user.passwordSet==False:
-#                             generated_passwords[(row["EMAIL ID "+str(i+1)]).lower()]=user.generated_pass
-#                         if team.users.all().filter(email=user.email).count()==0:
-#                             team.users.add(user, through_defaults={"order_index": i+1})
-#                             team.save()
-#                 return JsonResponse(generated_passwords)
-#             return render(request, 'examPortalApp/update.html')
-#         else:
-#             return render(request, 'examPortalApp/update.html')
-#     else:
-#         return HttpResponseRedirect(reverse("dashboard"))
+    if request.user.username=="admin":
+        if request.method=="POST":
+            #Authenticate user trying to update the accounts and generate passwords
+            file=request.FILES['file']
+            if file:
+                reader = csv.DictReader(codecs.iterdecode(file, 'utf-8'))
+                generated_passwords={}
+                print("It begins")
+                for row in reader:
+                    team_id = row["TEAM ID"]
+                    print(row["SEQUENCE"])
+                    try:
+                        team=Team.objects.create(team_id=team_id, sequence=row["SEQUENCE"], college=row["COLLEGE"], zone=row["ZONE CODE"])
+                        team.save()
+                        print(team_id+" saved")
+                    except IntegrityError:
+                        team=Team.objects.get(team_id=team_id)
+                        print(team_id)
+                    for i in range(4):
+                        if row["EMAIL ID "+str(i+1)]=="":
+                            continue
+                        try:
+                            password=''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+                            user=User.objects.create_user(username=(row["EMAIL ID "+str(i+1)]).lower(), email=(row["EMAIL ID "+str(i+1)]).lower(), password=password, generated_pass=password)
+                            if i==0:
+                                user.phone_number=row["PHONE 1"]
+                                user.save()
+                        except IntegrityError:
+                            print(row["EMAIL ID "+str(i+1)])
+                            user=User.objects.get(email=(row["EMAIL ID "+str(i+1)]).lower())
+                        if user.passwordSet==False:
+                            generated_passwords[(row["EMAIL ID "+str(i+1)]).lower()]=user.generated_pass
+                        if team.users.all().filter(email=user.email).count()==0:
+                            team.users.add(user)
+                            ordering=Ordering.objects.create(team_instance=team, user_instance=user, order_index=i+1)
+                            ordering.save()
+                            team.save()
+                return JsonResponse(generated_passwords)
+            return render(request, 'examPortalApp/update.html')
+        else:
+            return render(request, 'examPortalApp/update.html')
+    else:
+        return HttpResponseRedirect(reverse("dashboard"))
 
 def unset_passwords(request):
     password_list={}
@@ -322,152 +249,76 @@ def open_test(request,qnumber=None):
 
 @login_required
 def get_answers(request, qnumber):
-    pass
-#     scope = ['https://www.googleapis.com/auth/drive']
-#     creds = ServiceAccountCredentials.from_json_keyfile_name('Uploaded Answers-14e35a500de2.json', scope)
-#     service = build('drive', 'v3', credentials=creds)
-#
-#     team=request.user.team_set.first()
-#
-#     q=Question.objects.get(question_number=int(qnumber))
-#     subject=q.question_subject
-#
-#     #Get the team folder corresponding to the subject
-#
-#     if subject=="Physics":
-#         folder_id = team.p_folder_id
-#     if subject=="Math":
-#         folder_id = team.m_folder_id
-#     if subject=="Biology":
-#         folder_id = team.b_folder_id
-#     if subject=="Chemistry":
-#         folder_id = team.c_folder_id
-#
-#     #Get a folder for the question
-#
-#     results = service.files().list(q="name='Question "+str(qnumber)+"' and '"+folder_id+"' in parents", pageSize=10, fields="nextPageToken, files(id, name)").execute()
-#     items = results.get('files', [])
-#
-#     #If it doesn't exist, return an empty list to show that there aren't any uploaded answers yet
-#
-#     if not items:
-#         return JsonResponse({"images":[]})
-#
-#     #This is the folder named "Question N" in the folder named after the team id, which in turn is in the folder named after the subject
-#     subfolder_id=items[0]['id']
-#
-#     results = service.files().list(q="'"+subfolder_id+"' in parents", pageSize=30, fields="nextPageToken, files(id, name)").execute()
-#     items = results.get('files', [])
-#
-#     images=[]
-#
-#     #Get all the images and generate a data blob URI for each of them
-#
-#     for item in items:
-#         file_id=item['id']
-#         request = service.files().get_media(fileId=file_id)
-#         fh = io.BytesIO()
-#
-#         # Initialise a downloader object to download the file
-#         downloader = MediaIoBaseDownload(fh, request, chunksize=204800)
-#         done = False
-#
-#         # Download the data in chunks
-#         while not done:
-#             status, done = downloader.next_chunk()
-#
-#         fh.seek(0)
-#
-#         prefix = 'data:image/jpeg;base64,'
-#         contents=fh.read()
-#         data_url = prefix + str((base64.b64encode(contents)).decode('ascii'))
-#         images+=[data_url]
-#
-#     #Pass the list of data blob text in a JSON response
-#     return JsonResponse({"images":images})
+
+    team=request.user.team_set.first()
+
+    q=Question.objects.get(question_number=int(qnumber))
+    subject=q.question_subject
+
+    s3 = boto3.client("s3")
+    response = s3.list_objects_v2(
+            Bucket='mimamsauploadedanswers',
+            Prefix =subject+'/Q'+str(q.question_number)+'/'+team.team_id,
+            MaxKeys=100 )
+    print(response)
+    images=[]
+    if "Contents" in response:
+        for i in range(len(response["Contents"])):
+            fh = io.BytesIO()
+
+            # Initialise a downloader object to download the file
+            s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.question_number)+'/'+team.team_id+'/'+str(i)+'.jpeg', fh)
+
+            fh.seek(0)
+
+            prefix = 'data:image/jpeg;base64,'
+            contents=fh.read()
+            data_url = prefix + str((base64.b64encode(contents)).decode('ascii'))
+            images+=[data_url]
+
+    #Pass the list of data blob text in a JSON response
+    return JsonResponse({"images":images})
 
 @login_required
 def upload_answer(request):
-    pass
-#     scope = ['https://www.googleapis.com/auth/drive']
-#     creds = ServiceAccountCredentials.from_json_keyfile_name('Uploaded Answers-14e35a500de2.json', scope)
-#     service = build('drive', 'v3', credentials=creds)
-#
-#     user=request.user
-#     team=user.team_set.first()
-#     print(request.POST)
-#     answerfile=request.FILES["file"]
-#     qnumber=request.POST["qnumber"]
-#     try:
-#         q=Question.objects.get(question_number=int(qnumber))
-#     except:
-#         print(qnumber)
-#         raise Http404;
-#     subject=q.question_subject
-#     if team is None: return HttpResponseRedirect("test/"+str(qnumber))
-#     #Resize and compress uploaded image
-#
-#     im = Image.open(answerfile)
-#     w, h = im.size
-#     f=(250000/(w*h))**(0.5)
-#
-#     im=im.resize((int(w*f), int(h*f)))
-#     rgb_im = im.convert("RGB")
-#
-#     b = io.BytesIO()
-#     rgb_im.save(b, "JPEG", optimize=True, quality=70)
-#     b.seek(0)
-#
-#     #Find the team folder under the respective subject folder
-#
-#     if subject=="Physics":
-#         folder_id = team.p_folder_id
-#     if subject=="Math":
-#         folder_id = team.m_folder_id
-#     if subject=="Biology":
-#         folder_id = team.b_folder_id
-#     if subject=="Chemistry":
-#         folder_id = team.c_folder_id
-#
-#     #Get or create a folder for the question
-#
-#     results = service.files().list(q="name='Question "+str(qnumber)+"' and '"+folder_id+"' in parents", pageSize=10, fields="nextPageToken, files(id, name)").execute()
-#     items = results.get('files', [])
-#
-#     if not items:
-#         subfolder_metadata = {
-#             'name': 'Question '+str(qnumber),
-#             'mimeType': 'application/vnd.google-apps.folder',
-#             'parents': [folder_id]
-#         }
-#         subfolder = service.files().create(body=subfolder_metadata, fields='id').execute()
-#         subfolder_id=subfolder.get('id')
-#
-#     else:
-#         print(items)
-#         subfolder_id=items[0]['id']
-#
-#     #Count the number of files in this folder
-#
-#     results = service.files().list(q="'"+subfolder_id+"' in parents", pageSize=30, fields="nextPageToken, files(id, name)").execute()
-#     items = results.get('files', [])
-#     count=len(items)
-#
-#     #The image file to be uploaded would be named the number 0 if it's the first upload, 1 if it's the second, and so on
-#
-#     file_metadata = {
-#         'name': str(count),
-#         'parents': [subfolder_id]
-#     }
-#     media = MediaIoBaseUpload(b,
-#                             mimetype='image/jpeg',
-#                             resumable=True)
-#     file = service.files().create(body=file_metadata,
-#                                         media_body=media,
-#                                         fields='id').execute()
-#
-#     #Reloads the page. Hopefully can be avoided using JS fetch API
-#     return HttpResponseRedirect("test/"+str(qnumber))
+    user=request.user
+    team=user.team_set.first()
+    print(request.POST)
+    answerfile=request.FILES["file"]
+    qnumber=request.POST["qnumber"]
+    try:
+        q=Question.objects.get(question_number=int(qnumber))
+    except:
+        print(qnumber)
+        raise Http404;
+    subject=q.question_subject
+    if team is None: return HttpResponseRedirect("test/"+str(qnumber))
+    #Resize and compress uploaded image
+
+    im = Image.open(answerfile)
+    w, h = im.size
+    f=(250000/(w*h))**(0.5)
+
+    im=im.resize((int(w*f), int(h*f)))
+    rgb_im = im.convert("RGB")
+
+    b = io.BytesIO()
+    rgb_im.save(b, "JPEG", optimize=True, quality=70)
+    b.seek(0)
+
+    s3 = boto3.client('s3')
+
+    response = s3.list_objects_v2(
+        Bucket='mimamsauploadedanswers',
+        Prefix =subject+'/Q'+str(qnumber)+'/'+team.team_id,
+        MaxKeys=100)
+
+    if "Contents" in response:
+        s3.upload_fileobj(b, "mimamsauploadedanswers", subject+'/Q'+qnumber+'/'+team.team_id+'/'+str(len(response['Contents']))+'.jpeg')
+    else:
+        s3.upload_fileobj(b, "mimamsauploadedanswers", subject+'/Q'+qnumber+'/'+team.team_id+'/0.jpeg')
+
+    return HttpResponseRedirect("test/"+str(qnumber))
 
 
 # TODO:
