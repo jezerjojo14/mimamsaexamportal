@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'examPortal.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': '-',
+        'NAME': '',
         'USER': 'postgres',
         'PASSWORD': 'mimamsaAWS14',
         'HOST': 'database-1.cxa9mi9i4k9z.ap-south-1.rds.amazonaws.com',
