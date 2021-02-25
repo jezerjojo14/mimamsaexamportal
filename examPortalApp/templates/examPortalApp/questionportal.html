@@ -2,15 +2,17 @@
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>Mimamsa Quiz Portal</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
-    <script type="text/javascript">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Mimamsa Quiz Portal</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
+  <script type="text/javascript">
     function toggleEditBox(ele) {
-      if(ele.classList.contains("edit-link"))
-      {
+      if (ele.classList.contains("edit-link")) {
         var question = ele.parentElement.parentElement;
         var id = (question.id).substring(8);
         var contentEle = document.getElementById(("question-content-").concat(id));
@@ -18,72 +20,71 @@
         var oldContent = contentEle.innerHTML;
         var subjectEle = document.getElementById(("question-subject-").concat(id));
         var qnumber = parseInt(document.getElementById(("qnumber-").concat(id)).innerHTML);
-        if(document.getElementById(("editForm").concat(id)) == null)
-        {
+        if (document.getElementById(("editForm").concat(id)) == null) {
           //Create Form
 
-            //Init form
+          //Init form
           var f = document.createElement("form");
           f.setAttribute('method', "post");
           f.setAttribute('action', '{% url 'edit_question' %}');
-          f.innerHTML='{% csrf_token %}';
-          f.innerHTML+="<label for='qnumber'>Question nummber: </label>\n<input type='number' id='qnumber' name='qnumber' min='1' max='{{questions|length}}' value='"+qnumber.toString()+"'>";
-          f.innerHTML+="<input type='hidden' name='id' value='"+id+"'>";
-          f.id=("editForm").concat(id);
+          f.innerHTML = '{% csrf_token %}';
+          f.innerHTML += "<label for='qnumber'>Question nummber: </label>\n<input type='number' id='qnumber' name='qnumber' min='1' max='{{questions|length}}' value='" + qnumber.toString() + "'>";
+          f.innerHTML += "<input type='hidden' name='id' value='" + id + "'>";
+          f.id = ("editForm").concat(id);
           f.classList.add('editForm');
-            //Init form elements
+          //Init form elements
           var newSubject = document.createElement("select");
           newSubject.innerHTML = '<option value="Physics">Physics</option><option value="Math">Math</option><option value="Biology">Biology</option><option value="Chemistry">Chemistry</option>';
           newSubject.name = "subject";
           var newContent = document.createElement("textarea");
-          newContent.innerHTML=oldContent;
-          newContent.name="content";
+          newContent.innerHTML = oldContent;
+          newContent.name = "content";
           newContent.classList.add('editFormText');
-          newContent.style.marginTop="10px";
+          newContent.style.marginTop = "10px";
           var br = document.createElement("br");
           var submit = document.createElement("input");
-          submit.type="submit";
-          submit.name="submit";
-          submit.value="Post Changes";
+          submit.type = "submit";
+          submit.name = "submit";
+          submit.value = "Post Changes";
           submit.classList.add('editFormSubmit');
           submit.classList.add('btn');
           submit.classList.add('btn-outline-dark');
-          submit.style.margin="10px";
-          submit.style.marginLeft="0";
+          submit.style.margin = "10px";
+          submit.style.marginLeft = "0";
           var cancel = document.createElement("button");
-          cancel.innerHTML="Cancel";
+          cancel.innerHTML = "Cancel";
           cancel.setAttribute('onclick', "toggleEditBox(this)");
-          cancel.id=("cancel").concat(id);
+          cancel.id = ("cancel").concat(id);
           cancel.classList.add('editFormCancel');
           cancel.classList.add('btn');
           cancel.classList.add('btn-outline-dark');
-          cancel.style.margin="10px";
-          cancel.style.marginLeft="0";
-            //Add form elements to form
+          cancel.style.margin = "10px";
+          cancel.style.marginLeft = "0";
+          //Add form elements to form
           f.appendChild(newSubject);
-          f.innerHTML+="<br>";
+          f.innerHTML += "<br>";
           f.appendChild(newContent);
           f.appendChild(br);
           f.appendChild(submit);
           f.appendChild(cancel);
 
           question.insertBefore(f, ele.parentElement);
-          f.parentElement.innerHTML+='<button id="del'+id+'" onclick="delQ(this)">Delete</button>';
-          contentEle.style.display="none";
-          subjectEle.style.display="none";
+          f.parentElement.innerHTML += '<button id="del' + id + '" onclick="delQ(this)">Delete</button>';
+          contentEle.style.display = "none";
+          subjectEle.style.display = "none";
         }
         else {
           document.getElementById(("cancel").concat(id)).click();
         }
       }
       else {
-        var question=ele.parentElement.parentElement;
+        var question = ele.parentElement.parentElement;
         var id = (question.id).substring(8);
         var contentEle = document.getElementById(("question-content-").concat(id));
         var subjectEle = document.getElementById(("question-subject-").concat(id));
         var form = document.getElementById(("editForm").concat(id))
-        contentEle.style.display="block";
-        subjectEle.style.display="block";
+        contentEle.style.display = "block";
+        subjectEle.style.display = "block";
         question.removeChild(form);
       }
     }
@@ -91,38 +92,38 @@
     // The following function are copying from
     // https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
     function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
         }
-        return cookieValue;
+      }
+      return cookieValue;
     }
 
     async function delQ(btn) {
       let csrftoken = getCookie('csrftoken');
       let response = await fetch("{% url 'del_question' %}", {
-          method: 'POST',
-          body: JSON.stringify({"id" : btn.id.substring(3)}),
-          headers: {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": csrftoken },
+        method: 'POST',
+        body: JSON.stringify({ "id": btn.id.substring(3) }),
+        headers: {
+          'Content-Type': 'application/json',
+          "X-CSRFToken": csrftoken
+        },
       })
-      if (response.status==201)
-      {
+      if (response.status == 201) {
         location.reload();
       }
       else {
         console.log("Woop doop");
         var small = document.createElement("small");
-        small.innerHTML="<i>Something went wrong </i>";
+        small.innerHTML = "<i>Something went wrong </i>";
         contentEle.parentElement.insertBefore(small, contentEle.nextElementSibling);
       }
     }
@@ -155,9 +156,11 @@
     //     contentEle.parentElement.insertBefore(small, contentEle.nextElementSibling);
     //   }
     // }
-    </script>
-  </head>
-  <body>
+  </script>
+</head>
+
+<body>
+  <div class="container">
     <div id="new-question">
       <h3>New Question: </h3>
       <form action="{%url 'post_question'%}" method="post" autocomplete="off">
@@ -177,21 +180,23 @@
 
     <div id="questions">
       {% for question in questions%}
-        <div class="question" id="question{{question.pk}}">
-          <h2 class="question-heading" id="question-heading-{{question.pk}}">Question <span id="qnumber-{{question.pk}}">{{question.question_number}}</span></h2>
-          <small class="question-subject" id="question-subject-{{question.pk}}">{{question.question_subject}}</small>
-          <br>
-          <div class="question-content" id="question-content-{{question.pk}}">
-            {{question.question_html|safe}}
-          </div>
-          {% if user.username == "admin" %}
-          <span data-active="0" class="edit"><a href="#" class="edit-link" onclick="toggleEditBox(this); return false;">Edit</a></span>
-          {% endif %}
-
-          <br>
+      <div class="question" id="question{{question.pk}}">
+        <h2 class="question-heading" id="question-heading-{{question.pk}}">Question <span
+            id="qnumber-{{question.pk}}">{{question.question_number}}</span></h2>
+        <small class="question-subject" id="question-subject-{{question.pk}}">{{question.question_subject}}</small>
+        <br>
+        <div class="question-content" id="question-content-{{question.pk}}">
+          {{question.question_html|safe}}
         </div>
+        {% if user.username == "admin" %}
+        <span data-active="0" class="edit"><a href="#" class="edit-link"
+            onclick="toggleEditBox(this); return false;">Edit</a></span>
+        {% endif %}
+
+        <br>
+      </div>
       {% empty %}
-        <i>Looks like there aren't any questions here yet</i>
+      <i>Looks like there aren't any questions here yet</i>
       {% endfor %}
     </div>
 
@@ -204,28 +209,31 @@
       <ul class="pagination justify-content-center">
         {% if page == 1 %}
         <li class="page-item disabled">
-        {% else %}
+          {% else %}
         <li class="page-item">
-        {% endif %}
-          <a class="page-link" href="{% url 'questionportal' page=page|add:"-1" %}" tabindex="-1" aria-disabled="true">Previous</a>
+          {% endif %}
+          <a class="page-link" href="{% url 'questionportal' page=page|add:" -1" %}" tabindex="-1"
+            aria-disabled="true">Previous</a>
         </li>
 
         {% with ''|center:pagecount as range %}
         {% for _ in range %}
-        <li class="page-item{% if forloop.counter == page %} active{% endif %}"><a class="page-link" href="{% url 'questionportal' page=forloop.counter %}">{{ forloop.counter }}</a></li>
+        <li class="page-item{% if forloop.counter == page %} active{% endif %}"><a class="page-link"
+            href="{% url 'questionportal' page=forloop.counter %}">{{ forloop.counter }}</a></li>
         {% endfor %}
         {% endwith %}
 
         {% if page == pagecount %}
         <li class="page-item disabled">
-        {% else %}
+          {% else %}
         <li class="page-item">
-        {% endif %}
-          <a class="page-link" href="{% url 'questionportal' page=page|add:"1" %}">Next</a>
+          {% endif %}
+          <a class="page-link" href="{% url 'questionportal' page=page|add:" 1" %}">Next</a>
         </li>
       </ul>
     </nav>
     {% endif %}
+  </div>
+</body>
 
-  </body>
 </html>
