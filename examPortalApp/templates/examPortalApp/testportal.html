@@ -69,8 +69,7 @@
     function display_question_numbers(que_display) {
       var content = "";
       for (i = 0; i < {{ QCount }}; i++) {
-      if (i + 1 == {{ QNum }
-    }) {
+      if (i + 1 == {{ QNum }}) {
       content += "<button onclick='getQuestion(" + (i + 1) + ");Qactive(" + (i + 1) + ");'class='btn visited active btn-primary btn-md'> " + (i + 1) + " </button>";
     }
         else {
@@ -139,13 +138,12 @@
     }
 
     function nextQuestion() {
-      if (currentQNo < {{ QCount }
-    })
-    {
-      currentQNo += 1;
-      getQuestion(currentQNo);
-      Qactive(currentQNo);
-    }
+      if (currentQNo < {{ QCount }})
+      {
+        currentQNo += 1;
+        getQuestion(currentQNo);
+        Qactive(currentQNo);
+      }
     }
 
     function prevQuestion() {
@@ -157,8 +155,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      currentQNo = {{ QNum }
-    };
+      currentQNo = {{ QNum }};
     if (currentQNo == 1) {
       document.getElementById('prev').setAttribute("disabled", "disabled")
     }
