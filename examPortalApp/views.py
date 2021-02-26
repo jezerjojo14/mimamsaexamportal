@@ -34,6 +34,7 @@ from PIL import Image
 import io
 
 import base64
+from threading import *
 
 
 
@@ -102,9 +103,8 @@ def login_view(request):
 # TODO: Make this view a background task
 
 def update_accounts(request):
-    if request.user.username=="admin":
-        if request.method=="POST":
-            #Authenticate user trying to update the accounts and generate passwords
+    class GeneratePass(Thread):
+        def run(self):
             file=request.FILES['file']
             if file:
                 reader = csv.DictReader(codecs.iterdecode(file, 'utf-8'))
@@ -140,9 +140,15 @@ def update_accounts(request):
                             ordering.save()
                             team.save()
                 return JsonResponse(generated_passwords)
-            return render(request, 'examPortalApp/update.html')
+            print("Accounts updated")
+    if request.user.username=="admin":
+        if request.method=="POST":
+            #Authenticate user trying to update the accounts and generate passwords
+            thread1 = GeneratePass()
+            thread1.start()
+            return render(request,"examPortalApp/updateconfirmation.html",{'confirmvar':'Updates initiated'})
         else:
-            return render(request, 'examPortalApp/update.html')
+            return render(request,"examPortalApp/update.html")
     else:
         return HttpResponseRedirect(reverse("dashboard"))
 
