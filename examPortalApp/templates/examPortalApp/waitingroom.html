@@ -2,46 +2,48 @@
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>Mimamsa Quiz Portal</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
-    <script type="text/javascript">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Mimamsa Quiz Portal</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
+  <script type="text/javascript">
     function startTimer(datetime, display) {
       var start = Date.now(),
-          diff,
-          minutes,
-          seconds;
+        diff,
+        minutes,
+        seconds;
       function timer() {
 
-          diff = ((datetime - Date.now()) / 1000);
+        diff = ((datetime - Date.now()) / 1000);
 
-          // does the same job as parseInt truncates the float
-          days = (diff / (60*60*24)) | 0;
-          diff = (diff % (60*60*24)) | 0;
-          hours = (diff / (60*60)) | 0;
-          diff = (diff % (60*60)) | 0;
-          minutes = (diff / 60) | 0;
-          seconds = (diff % 60) | 0;
-          if (days>0)
-          {
-            display.textContent = days + " days " + hours + " hours " + minutes + " minutes and " + seconds + "seconds";
-          }
-          else if (hours>0) {
-            display.textContent = hours + " hours " + minutes + " minutes and " + seconds + "seconds";
-          }
-          else if (minutes>0) {
-            display.textContent = minutes + " minutes and " + seconds + "seconds";
-          }
-          else {
-            display.textContent = seconds + "seconds";
-          }
-          if ((datetime-Date.now()) <= 0) {
-              // add one second so that the count down starts at the full duration
-              // example 05:00 not 04:59
-              location.reload();
-          }
+        // does the same job as parseInt truncates the float
+        days = (diff / (60 * 60 * 24)) | 0;
+        diff = (diff % (60 * 60 * 24)) | 0;
+        hours = (diff / (60 * 60)) | 0;
+        diff = (diff % (60 * 60)) | 0;
+        minutes = (diff / 60) | 0;
+        seconds = (diff % 60) | 0;
+        if (days > 0) {
+          display.textContent = days + " days " + hours + " hours " + minutes + " minutes and " + seconds + "seconds";
+        }
+        else if (hours > 0) {
+          display.textContent = hours + " hours " + minutes + " minutes and " + seconds + "seconds";
+        }
+        else if (minutes > 0) {
+          display.textContent = minutes + " minutes and " + seconds + "seconds";
+        }
+        else {
+          display.textContent = seconds + "seconds";
+        }
+        if ((datetime - Date.now()) <= 0) {
+          // add one second so that the count down starts at the full duration
+          // example 05:00 not 04:59
+          location.reload();
+        }
       };
       // we don't want to wait a full second before the timer starts
       timer();
@@ -50,23 +52,25 @@
 
     window.onload = function () {
       var d = new Date();
-      d.setUTCDate({{UTCDate}});
-      d.setUTCMonth({{UTCMonth}}-1);
-      d.setUTCFullYear({{UTCYear}});
-      d.setUTCHours({{UTCHours}});
-      d.setUTCMinutes({{UTCMinutes}});
-      d.setUTCSeconds({{UTCSeconds}});
-      console.log(d);
-      var display = document.querySelector('#time');
-      startTimer(d.getTime(), display);
+      d.setUTCDate({{ UTCDate }});
+    d.setUTCMonth({{ UTCMonth }}-1);
+    d.setUTCFullYear({{ UTCYear }});
+    d.setUTCHours({{ UTCHours }});
+    d.setUTCMinutes({{ UTCMinutes }});
+    d.setUTCSeconds({{ UTCSeconds }});
+    console.log(d);
+    var display = document.querySelector('#time');
+    startTimer(d.getTime(), display);
     };
-    </script>
-  </head>
-  <body>
-    <div>
-      <h2>The quiz will begin in</h2>
-      <div id="time">
-      </div>
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <h2>The quiz will begin in</h2>
+    <div id="time">
     </div>
-  </body>
+  </div>
+</body>
+
 </html>

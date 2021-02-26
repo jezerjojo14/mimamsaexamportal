@@ -2,12 +2,15 @@
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>Mimamsa Quiz Portal</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
-    <script type="text/javascript">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Mimamsa Quiz Portal</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
+  <script type="text/javascript">
     function getCookie(name) {
       var cookieValue = null;
       if (document.cookie && document.cookie !== '') {
@@ -25,38 +28,37 @@
     }
     function startTimer(datetime, display) {
       var start = Date.now(),
-          diff,
-          minutes,
-          seconds;
+        diff,
+        minutes,
+        seconds;
       function timer() {
 
-          diff = ((datetime - Date.now()) / 1000);
+        diff = ((datetime - Date.now()) / 1000);
 
-          // does the same job as parseInt truncates the float
-          days = (diff / (60*60*24)) | 0;
-          diff = (diff % (60*60*24)) | 0;
-          hours = (diff / (60*60)) | 0;
-          diff = (diff % (60*60)) | 0;
-          minutes = (diff / 60) | 0;
-          seconds = (diff % 60) | 0;
-          if (days>0)
-          {
-            display.textContent = days + " days " + hours + " hours " + minutes + " minutes and " + seconds + " seconds";
-          }
-          else if (hours>0) {
-            display.textContent = hours + " hours " + minutes + " minutes and " + seconds + " seconds";
-          }
-          else if (minutes>0) {
-            display.textContent = minutes + " minutes and " + seconds + " seconds";
-          }
-          else {
-            display.textContent = seconds + " seconds";
-          }
-          if (diff <= 0) {
-              // add one second so that the count down starts at the full duration
-              // example 05:00 not 04:59
-              start = Date.now() + 1000;
-          }
+        // does the same job as parseInt truncates the float
+        days = (diff / (60 * 60 * 24)) | 0;
+        diff = (diff % (60 * 60 * 24)) | 0;
+        hours = (diff / (60 * 60)) | 0;
+        diff = (diff % (60 * 60)) | 0;
+        minutes = (diff / 60) | 0;
+        seconds = (diff % 60) | 0;
+        if (days > 0) {
+          display.textContent = days + " days " + hours + " hours " + minutes + " minutes and " + seconds + " seconds";
+        }
+        else if (hours > 0) {
+          display.textContent = hours + " hours " + minutes + " minutes and " + seconds + " seconds";
+        }
+        else if (minutes > 0) {
+          display.textContent = minutes + " minutes and " + seconds + " seconds";
+        }
+        else {
+          display.textContent = seconds + " seconds";
+        }
+        if (diff <= 0) {
+          // add one second so that the count down starts at the full duration
+          // example 05:00 not 04:59
+          start = Date.now() + 1000;
+        }
       };
       // we don't want to wait a full second before the timer starts
       timer();
@@ -64,32 +66,33 @@
     };
 
 
-    function display_question_numbers (que_display) {
-      var content="";
-      for (i=0; i< {{QCount}} ; i++){
-        if (i+1=={{QNum}}) {
-          content+="<button onclick='getQuestion("+(i+1)+");Qactive("+(i+1)+");'class='btn visited active btn-primary btn-md'> "+ (i+1) +" </button>" ;
-        }
+    function display_question_numbers(que_display) {
+      var content = "";
+      for (i = 0; i < {{ QCount }}; i++) {
+      if (i + 1 == {{ QNum }
+    }) {
+      content += "<button onclick='getQuestion(" + (i + 1) + ");Qactive(" + (i + 1) + ");'class='btn visited active btn-primary btn-md'> " + (i + 1) + " </button>";
+    }
         else {
-          content+="<button onclick='getQuestion("+(i+1)+");Qactive("+(i+1)+");'class='btn btn-primary btn-md'> "+ (i+1) +" </button>" ;
-        }
+      content += "<button onclick='getQuestion(" + (i + 1) + ");Qactive(" + (i + 1) + ");'class='btn btn-primary btn-md'> " + (i + 1) + " </button>";
+    }
       };
-      que_display.innerHTML=content;
+    que_display.innerHTML = content;
     };
 
     window.onload = function () {
       var d = new Date();
-      d.setUTCDate({{UTCDate}});
-      d.setUTCMonth({{UTCMonth}}-1);
-      d.setUTCFullYear({{UTCYear}});
-      d.setUTCHours({{UTCHours}});
-      d.setUTCMinutes({{UTCMinutes}});
-      d.setUTCSeconds({{UTCSeconds}});
-      console.log(d);
-      var display = document.querySelector('#time');
-      startTimer(d.getTime(), display);
-      var que_display=document.querySelector('#questions')
-      display_question_numbers(que_display);
+      d.setUTCDate({{ UTCDate }});
+    d.setUTCMonth({{ UTCMonth }}-1);
+    d.setUTCFullYear({{ UTCYear }});
+    d.setUTCHours({{ UTCHours }});
+    d.setUTCMinutes({{ UTCMinutes }});
+    d.setUTCSeconds({{ UTCSeconds }});
+    console.log(d);
+    var display = document.querySelector('#time');
+    startTimer(d.getTime(), display);
+    var que_display = document.querySelector('#questions')
+    display_question_numbers(que_display);
     };
 
     var currentQNo;
@@ -136,47 +139,47 @@
     }
 
     function nextQuestion() {
-      if (currentQNo < {{QCount}})
-      {
-        currentQNo+=1;
-        getQuestion(currentQNo);
-        Qactive(currentQNo);
-      }
+      if (currentQNo < {{ QCount }
+    })
+    {
+      currentQNo += 1;
+      getQuestion(currentQNo);
+      Qactive(currentQNo);
+    }
     }
 
     function prevQuestion() {
-      if (currentQNo > 1)
-      {
-        currentQNo-=1;
+      if (currentQNo > 1) {
+        currentQNo -= 1;
         getQuestion(currentQNo);
         Qactive(currentQNo);
       }
     }
 
-    document.addEventListener("DOMContentLoaded", ()=>{
-      currentQNo = {{QNum}};
-      if (currentQNo == 1)
-      {
-        document.getElementById('prev').setAttribute("disabled", "disabled")
-      }
-      if (currentQNo == {{QCount}})
-      {
-        document.getElementById('next').setAttribute("disabled", "disabled");
-      }
-      fetchAnswers();
+    document.addEventListener("DOMContentLoaded", () => {
+      currentQNo = {{ QNum }
+    };
+    if (currentQNo == 1) {
+      document.getElementById('prev').setAttribute("disabled", "disabled")
+    }
+    if (currentQNo == {{ QCount }})
+    {
+      document.getElementById('next').setAttribute("disabled", "disabled");
+    }
+    fetchAnswers();
       // getQuestion(currentQNo);
     });
 
     function fetchAnswers() {
-      document.getElementById('uploadedAnswers').innerHTML="Loading";
+      document.getElementById('uploadedAnswers').innerHTML = "Loading";
       fetch(("{% url 'get_answers' qnumber=1 %}").substring(0, ("{% url 'get_answers' qnumber=1 %}").length - 1) + currentQNo)
-        .then(response=>response.json())
-        .then((data)=>{
-          document.getElementById('uploadedAnswers').innerHTML="";
-          var URIList=data["images"];
+        .then(response => response.json())
+        .then((data) => {
+          document.getElementById('uploadedAnswers').innerHTML = "";
+          var URIList = data["images"];
           for (var i = 0; i < URIList.length; i++) {
-            var URI=URIList[i];
-            document.getElementById('uploadedAnswers').innerHTML+="<img width='200' src='"+URI+"'>";
+            var URI = URIList[i];
+            document.getElementById('uploadedAnswers').innerHTML += "<img width='200' src='" + URI + "'>";
           }
         })
     }
@@ -197,35 +200,43 @@
     //     })
     // }
 
-    </script>
-  </head>
+  </script>
+</head>
 
-  <body>
-    <div class="fluid-container">
-    <div class="col-lg-10">
-      <h2>The quiz will end in: <div id="time"></div></h2>
-      <hr>
+<body>
+  <div class="container">
+    <h2>The quiz will end in: <div id="time"></div>
+    </h2>
+    <hr>
+    <div class="row">
+      <div class="col-lg-9 ">
 
-    <div id="questions"></div>
-    <div id="content">{{content|safe}}</div>
-    <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="fieldWrapper" id="fileFieldWrapper">
-          <label for="id_file">Upload answers:</label>
-          <input type="file" name="file" required id="id_file">
+
+        <div id="questions"></div>
+        <div id="content">{{content|safe}}</div>
+        <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="fieldWrapper" id="fileFieldWrapper">
+            <label for="id_file">Upload answers:</label>
+            <input type="file" name="file" required id="id_file">
+          </div>
+          <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
+          <input type="submit" name="" value="Submit">
+        </form>
+        <div id="uploadedAnswers">
+
+        </div>
+        <div id="nav_buttons">
+          <button onclick="prevQuestion();" id="prev" type="button" class="btn btn-secondary btn-lg">Previous</button>
+          <button onclick="nextQuestion();" id="next" type="button" class="btn btn-secondary btn-lg"
+            style="float: right;">Next</button>
+        </div>
       </div>
-      <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-      <input type="submit" name="" value="Submit">
-    </form>
-    <div id="uploadedAnswers">
-
-    </div>
-    <div id="nav_buttons">
-    <button onclick="prevQuestion();" id="prev" type="button" class="btn btn-secondary btn-lg">Previous</button>
-    <button onclick="nextQuestion();" id="next" type="button" class="btn btn-secondary btn-lg" style="float: right;">Next</button>
+      <div id="members" class="col-lg-3">
+        <h3>Team members<h3>
+      </div>
     </div>
   </div>
-    </div>
-  </body>
+</body>
 
 </html>
