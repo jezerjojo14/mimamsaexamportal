@@ -1,15 +1,7 @@
-{% load static %}
+{% extends 'examPortalApp/body.html' %}
 
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+{% block script %}
 
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Mimamsa Exam Portal | Update Accounts</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-  <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
   <script type="text/javascript">
     function clearUpload() {
       f = document.querySelector("#fileFieldWrapper input")
@@ -27,9 +19,11 @@
       }
     }
   </script>
-</head>
 
-<body>
+{% endblock %}
+
+{% block content %}
+
   <div class="container">
     <form action="{% url 'update_accounts' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
@@ -41,6 +35,5 @@
       <input type="submit" name="" value="Submit">
     </form>
   </div>
-</body>
 
-</html>
+{% endblock %}

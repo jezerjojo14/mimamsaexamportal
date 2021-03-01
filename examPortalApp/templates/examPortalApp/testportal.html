@@ -1,15 +1,6 @@
-{% load static %}
+{% extends 'examPortalApp/body.html' %}
 
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Mimamsa Quiz Portal</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-  <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
+{% block script %}
   <script type="text/javascript">
     function getCookie(name) {
       var cookieValue = null;
@@ -198,9 +189,11 @@
     // }
 
   </script>
-</head>
+{% endblock %}
 
-<body>
+
+{% block content %}
+
   <div class="container">
     <h2>The quiz will end in: <div id="time"></div>
     </h2>
@@ -234,6 +227,5 @@
       </div>
     </div>
   </div>
-</body>
 
-</html>
+{% endblock %}

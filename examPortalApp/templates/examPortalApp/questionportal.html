@@ -1,15 +1,7 @@
-{% load static %}
+{% extends 'examPortalApp/body.html' %}
 
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
 
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Mimamsa Quiz Portal</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-  <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
+{% block script %}
   <script type="text/javascript">
     function toggleEditBox(ele) {
       if (ele.classList.contains("edit-link")) {
@@ -127,39 +119,11 @@
         contentEle.parentElement.insertBefore(small, contentEle.nextElementSibling);
       }
     }
-
-
-    // async function edit(form) {
-    //   var formdata = new FormData(form);
-    //   var id=form.id.substring(8);
-    //   formdata.append("id", id);
-    //   toggleEditBox(document.getElementById(("cancel").concat(id)));
-    //   var contentEle = document.getElementById(("question-content-").concat(id));
-    //   var subjectEle = document.getElementById(("question-subject-").concat(id));
-    //   const result=await fetch('{% url 'edit_question' %}', {
-    //     method: 'POST',
-    //     body: formdata,
-    //     credentials: 'same-origin',
-    //   });
-    //   const response=await result;
-    //   if (response.status==201)
-    //   {
-    //     console.log("All good");
-    //     const data=await response.json();
-    //     contentEle.innerHTML = data.content;
-    //     subjectEle.innerHTML = data.subject;
-    //   }
-    //   else if (response.status==403) {
-    //     console.log("Woop doop");
-    //     var small = document.createElement("small");
-    //     small.innerHTML="<i>Forbidden </i>";
-    //     contentEle.parentElement.insertBefore(small, contentEle.nextElementSibling);
-    //   }
-    // }
   </script>
-</head>
+{% endblock %}
 
-<body>
+{% block content %}
+
   <div class="container">
     <div id="new-question">
       <h3>New Question: </h3>
@@ -234,6 +198,5 @@
     </nav>
     {% endif %}
   </div>
-</body>
 
-</html>
+{% endblock %}
