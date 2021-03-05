@@ -1,4 +1,5 @@
 {% extends 'examPortalApp/body.html' %}
+{% load mathfilters %}
 
 {% block script %}
   <script type="text/javascript">
@@ -61,10 +62,10 @@
       var content = "";
       for (i = 0; i < {{ QCount }}; i++) {
       if (i + 1 == {{ QNum }}) {
-      content += "<button onclick='getQuestion(" + (i + 1) + ");Qactive(" + (i + 1) + ");'class='btn visited active btn-primary btn-md'> " + (i + 1) + " </button>";
+      content += "<button onclick='getQuestion(" + (i + 1) + ")' class='btn visited active btn-primary btn-md'> " + (i + 1) + " </button>";
     }
         else {
-      content += "<button onclick='getQuestion(" + (i + 1) + ");Qactive(" + (i + 1) + ");'class='btn btn-primary btn-md'> " + (i + 1) + " </button>";
+      content += "<button onclick='getQuestion(" + (i + 1) + ")'class='btn btn-primary btn-md'> " + (i + 1) + " </button>";
     }
       };
     que_display.innerHTML = content;
@@ -73,54 +74,19 @@
     window.onload = function () {
       var d = new Date();
       d.setUTCDate({{ UTCDate }});
-    d.setUTCMonth({{ UTCMonth }}-1);
-    d.setUTCFullYear({{ UTCYear }});
-    d.setUTCHours({{ UTCHours }});
-    d.setUTCMinutes({{ UTCMinutes }});
-    d.setUTCSeconds({{ UTCSeconds }});
-    console.log(d);
-    var display = document.querySelector('#time');
-    startTimer(d.getTime(), display);
-    var que_display = document.querySelector('#questions')
-    display_question_numbers(que_display);
+      d.setUTCMonth({{ UTCMonth }}-1);
+      d.setUTCFullYear({{ UTCYear }});
+      d.setUTCHours({{ UTCHours }});
+      d.setUTCMinutes({{ UTCMinutes }});
+      d.setUTCSeconds({{ UTCSeconds }});
+      console.log(d);
+      var display = document.querySelector('#time');
+      startTimer(d.getTime(), display);
+      var que_display = document.querySelector('#questions')
+      display_question_numbers(que_display);
     };
 
     var currentQNo;
-
-
-
-    // function Qactive(newQNo){
-    //   if (currentQNo!=newQNo) {
-    //     if (currentQNo==1){
-    //       document.getElementById('prev').removeAttribute("disabled");
-    //       if (newQNo=={{QCount}}){
-    //         document.getElementById('next').setAttribute("disabled","disabled");
-    //       };
-    //     };
-    //     if (currentQNo=={{QCount}}){
-    //       document.getElementById('next').removeAttribute("disabled");
-    //       if (newQNo==1){
-    //         document.getElementById('prev').setAttribute("disabled","disabled");
-    //       };
-    //     };
-    //     if (currentQNo>1 && currentQNo<{{QCount}}){
-    //       if (newQNo==1){
-    //         document.getElementById('prev').setAttribute("disabled","disabled");
-    //       };
-    //       if (newQNo=={{QCount}}){
-    //         document.getElementById('next').setAttribute("disabled","disabled");
-    //       };
-    //     };
-    //   };
-    //   var header = document.getElementById("questions");
-    //   var btns = header.getElementsByClassName("btn");
-    //   var current = document.getElementsByClassName("active");
-    //   current[0].className = current[0].className.replace(" active", "");
-    //   btns[newQNo-1].className += " active visited";
-    //   currentQNo=newQNo;
-    //   console.log("currentQNo: "+currentQNo);
-    //   document.getElementById('qnumber').value=currentQNo;
-    // };
 
 
     function getQuestion(questionNumber) {
@@ -133,7 +99,7 @@
       {
         currentQNo += 1;
         getQuestion(currentQNo);
-        Qactive(currentQNo);
+        // Qactive(currentQNo);
       }
     }
 
@@ -141,23 +107,24 @@
       if (currentQNo > 1) {
         currentQNo -= 1;
         getQuestion(currentQNo);
-        Qactive(currentQNo);
+        // Qactive(currentQNo);
       }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       currentQNo = {{ QNum }};
-    if (currentQNo == 1) {
-      document.getElementById('prev').setAttribute("disabled", "disabled")
-    }
-    if (currentQNo == {{ QCount }})
-    {
-      document.getElementById('next').setAttribute("disabled", "disabled");
-    }
-    fetchAnswers();
+      if (currentQNo == 1) {
+        document.getElementById('prev').setAttribute("disabled", "disabled")
+      }
+      if (currentQNo == {{ QCount }})
+      {
+        document.getElementById('next').setAttribute("disabled", "disabled");
+      }
+      fetchAnswers();
       // getQuestion(currentQNo);
     });
 
+    {% if QType == 's' %}
     function fetchAnswers() {
       document.getElementById('uploadedAnswers').innerHTML = "Loading";
       fetch(("{% url 'get_answers' qnumber=1 %}").substring(0, ("{% url 'get_answers' qnumber=1 %}").length - 1) + currentQNo)
@@ -171,22 +138,40 @@
           }
         })
     }
-
-    // function submitAnswer() {
-    //   var input = document.querySelector('input[type="file"]');
-    //   var file=input.files[0];
-    //   fetch("{% url 'upload_answer' %}", {
-    //     method: 'POST',
-    //     credentials: 'same-origin',
-    //     headers: {
-    //       "X-CSRFToken": getCookie("csrftoken")
-    //     },
-    //     body: file,
-    //   })
-    //     .then(()=>{
-    //       fetchAnswers()
-    //     })
-    // }
+    {% elif QType == 'm' %}
+    function fetchAnswers() {
+      fetch(("{% url 'get_m_answers' qnumber=1 %}").substring(0, ("{% url 'get_m_answers' qnumber=1 %}").length - 1) + currentQNo)
+        .then(response => response.json())
+        .then((data) => {
+          var marked_answers = data["answers"];
+          for (var i = 0; i < marked_answers.length; i++) {
+            document.getElementById('mcq-btn-'+marked_answers[i].toString()).checked=true;
+          }
+        })
+    }
+    {% elif QType == 't' %}
+    function fetchAnswers() {
+      fetch(("{% url 'get_t_answers' qnumber=1 %}").substring(0, ("{% url 'get_t_answers' qnumber=1 %}").length - 1) + currentQNo)
+        .then(response => response.json())
+        .then((data) => {
+          var choice = data["choice"];
+          if (choice>0) {
+            document.getElementById('tt-btn-'+choice.toString()).checked=true;
+          }
+        })
+      document.getElementById('uploadedAnswers').innerHTML = "Loading";
+      fetch(("{% url 'get_answers' qnumber=1 %}").substring(0, ("{% url 'get_answers' qnumber=1 %}").length - 1) + currentQNo)
+        .then(response => response.json())
+        .then((data) => {
+          document.getElementById('uploadedAnswers').innerHTML = "";
+          var URIList = data["images"];
+          for (var i = 0; i < URIList.length; i++) {
+            var URI = URIList[i];
+            document.getElementById('uploadedAnswers').innerHTML += "<img width='200' src='" + URI + "'>";
+          }
+        })
+    }
+    {% endif %}
 
   </script>
 {% endblock %}
@@ -204,6 +189,35 @@
 
         <div id="questions"></div>
         <div id="content">{{content|safe}}</div>
+        {% if QType == 'm' %}
+        <form action="{% url 'save_m_answer' %}" method="post">
+          {% csrf_token %}
+          {% for option_set in options %}
+          {% for option in option_set %}
+          {% if forloop.counter0 == 0 %}
+          <h5>{{option}}</h5>
+          {% else %}
+          <label for="opt-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">{{option}}</label>
+          <input id="mcq-btn-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}" type="radio" name="choice-{{forloop.parentloop.counter}}" value="{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">
+          {% endif %}
+          {% endfor %}
+          {% endfor %}
+          <br>
+          <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
+          <input type="submit" name="" value="Save Answer">
+        </form>
+        {% elif QType == 't' %}
+        <form action="{% url 'save_t_answer' %}" method="post">
+          {% csrf_token %}
+          <h5>Options</h5>
+          {% for option in options %}
+          <label for="opt-{{forloop.counter}}">{{option}}</label>
+          <input id="tt-btn-{{forloop.counter}}" type="radio" name="choice" value="{{forloop.counter}}">
+          {% endfor %}
+          <br>
+          <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
+          <input type="submit" name="" value="Save Choice">
+        </form>
         <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
           {% csrf_token %}
           <div class="fieldWrapper" id="fileFieldWrapper">
@@ -216,6 +230,20 @@
         <div id="uploadedAnswers">
 
         </div>
+        {% elif QType == 's' %}
+        <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="fieldWrapper" id="fileFieldWrapper">
+            <label for="id_file">Upload answers:</label>
+            <input type="file" name="file" required id="id_file">
+          </div>
+          <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
+          <input type="submit" name="" value="Submit">
+        </form>
+        <div id="uploadedAnswers">
+
+        </div>
+        {% endif %}
         <div id="nav_buttons">
           <button onclick="prevQuestion();" id="prev" type="button" class="btn btn-secondary btn-lg">Previous</button>
           <button onclick="nextQuestion();" id="next" type="button" class="btn btn-secondary btn-lg"

@@ -18,6 +18,7 @@ from django.urls import reverse
 from django import forms
 from django.views.decorators.csrf import csrf_exempt
 import json
+import ast
 import csv
 import codecs
 import random
@@ -28,7 +29,8 @@ from django.contrib.sessions.models import Session
 from django.utils import timezone
 import datetime
 import pytz
-from .models import User, Team, Ordering, GlobalVariables, Question
+
+from .models import User, Team, Ordering, GlobalVariables, Question, Answer
 
 from PIL import Image
 import io
@@ -249,7 +251,27 @@ def open_test(request,qnumber=None):
     if now<test_end:
         print("Qnumber: ",qnumber)
         print("Value: ",q_current)
-        return render(request, "examPortalApp/testportal.html", {"QNum": q_current, "QCount": q_count, "content": q.question_html, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+        if q.question_type=='s':
+            return render(request, "examPortalApp/testportal.html", {"labels": [], "options": [], "QNum": q_current, "QCount": q_count, "QType": 's', "content": q.question_content, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+        if q.question_type=='m':
+            print(q.question_content)
+            content=ast.literal_eval(q.question_content)
+            print(content)
+            setup=content[0]
+            print(setup)
+            option_sets=[]
+            labels=[]
+            i=1
+            while i<len(content):
+                option_sets+=[[content[i][0]]+content[i][1]]
+                i+=1
+            return render(request, "examPortalApp/testportal.html", {"labels": labels, "options": option_sets, "QNum": q_current, "QCount": q_count, "QType": 'm', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+        if q.question_type=='t':
+            content=ast.literal_eval(q.question_content)
+            setup=content[0]
+            options=content[1]
+            return render(request, "examPortalApp/testportal.html", {"labels": [], "options": options, "QNum": q_current, "QCount": q_count, "QType": 't', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+
     return render(request, "examPortalApp/testended.html")
 
 
@@ -284,6 +306,57 @@ def get_answers(request, qnumber):
 
     #Pass the list of data blob text in a JSON response
     return JsonResponse({"images":images})
+
+@login_required
+def get_m_answers(request, qnumber):
+    team=request.user.team_set.first()
+    q=Question.objects.get(question_number=int(qnumber))
+    try:
+        a=Answer.objects.get(team_instance=team, question_instance=q)
+        return JsonResponse({"answers":ast.literal_eval(a.answer_content)})
+    except:
+        return JsonResponse({"answers": []})
+
+
+@login_required
+def get_t_answers(request, qnumber):
+    team=request.user.team_set.first()
+    q=Question.objects.get(question_number=int(qnumber))
+    # try:
+    a=Answer.objects.get(team_instance=team, question_instance=q)
+    l=ast.literal_eval(a.answer_content)
+    if len(l)==1:
+        return JsonResponse({"choice":l[0], "text": ""})
+    else:
+        return JsonResponse({"choice":l[0], "text": l[1]})
+    # except:
+    #     return JsonResponse({"choice":-1, "images": [], "text": ""})
+
+
+@login_required
+def submit_MCQ(request):
+    i=1
+    answer=[]
+    while "choice-"+str(i) in request.POST:
+        answer+=[int(request.POST["choice-"+str(i)])]
+        i+=1
+    q=Question.objects.get(question_number=request.POST["qnumber"])
+
+    a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first(), answer_type='m'))[0]
+    a.answer_content=str(answer)
+    a.save()
+    return HttpResponseRedirect("test/"+str(request.POST["qnumber"]))
+
+@login_required
+def submit_TT(request):
+    i=1
+    answer=[int(request.POST["choice"])]
+    q=Question.objects.get(question_number=request.POST["qnumber"])
+
+    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first(), answer_type='t')[0]
+    a.answer_content=str(answer)
+    a.save()
+    return HttpResponseRedirect("test/"+str(request.POST["qnumber"]))
 
 @login_required
 def upload_answer(request):
@@ -353,10 +426,38 @@ def question_making_page(request, page=1):
 @login_required
 def post_question(request):
     if request.user.username=="admin":
-        q=Question(question_html=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>"), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"])
-        q.save()
-        #Redirect to page 1 of the question making portal
-        return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
+        if request.POST["qtype"]=='s':
+            q=Question(question_content=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>"), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"], question_type='s', question_answers='')
+            q.save()
+            #Redirect to page 1 of the question making portal
+            return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
+        if request.POST["qtype"]=='m':
+            answers=[]
+            content=[(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")]
+            i=1
+            while "opt-"+str(i) in request.POST:
+                if (i-1)%4==0:
+                    content+=[[request.POST["mcq-set-"+str(int((i-1)/4))+"-label"], []]]
+                content[1+int((i-1)/4)][1]+=[request.POST["opt-"+str(i)]]
+                if "correct_"+str(i) in request.POST:
+                    answers+=[i]
+                i+=1
+            q=Question(question_content=str(content), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"], question_type='m', question_answers=str(answers))
+            q.save()
+            return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
+        if request.POST["qtype"]=='t':
+            answers=[]
+            content=[(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>"), []]
+            i=1
+            while "opt-"+str(i) in request.POST:
+                content[1]+=[request.POST["opt-"+str(i)]]
+                if "correct_"+str(i) in request.POST:
+                    answers+=[i]
+                i+=1
+            q=Question(question_content=str(content), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"], question_type='t', question_answers=str(answers))
+            q.save()
+            return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
+
     else:
         return HttpResponseRedirect(reverse("dashboard"))
 
@@ -369,7 +470,7 @@ def delete_question(request):
         print(request.body)
         post_data = json.loads(request.body.decode("utf-8"))
         q=Question.objects.get(id=post_data["id"])
-        print(q.question_html)
+        print(q.question_content)
         total=Question.objects.all().count()
         qnum=q.question_number
         q.delete()
@@ -378,7 +479,7 @@ def delete_question(request):
             m.question_number-=1
             m.save()
         print("--------------")
-        print(('{"content":"')+(q.question_html)+('", "subject":"'+q.question_subject+'"}'))
+        print(('{"content":"')+(q.question_content)+('", "subject":"'+q.question_subject+'"}'))
         return HttpResponse(status=201)
 
 @login_required
@@ -387,8 +488,8 @@ def edit_question(request):
     if request.user.username=="admin":
         print(request.POST)
         q=Question.objects.get(id=int(request.POST["id"]))
-        print(q.question_html)
-        q.question_html=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")
+        print(q.question_content)
+        q.question_content=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")
         if request.POST["subject"] in subjects:
             q.question_subject=request.POST["subject"]
         qnumber=int(request.POST["qnumber"])
@@ -416,11 +517,8 @@ def edit_question(request):
             q.question_number=qnumber
         q.save()
         print("--------------")
-        print(('{"content":"')+(q.question_html)+('", "subject":"'+q.question_subject+'"}'))
+        print(('{"content":"')+(q.question_content)+('", "subject":"'+q.question_subject+'"}'))
         return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
-        # return HttpResponse(('{"content":"')+(q.question_html)+('", "subject":"'+q.question_subject+'"}'), status=201)
-    # else:
-    #     return HttpResponse(status=403)
 
 # TODO:
 @login_required
@@ -441,51 +539,3 @@ def upload_media(request):
 @login_required
 def delete_media(request):
     pass
-
-
-
-
-# def drive_clear(request):
-#
-#     scope = ['https://www.googleapis.com/auth/drive']
-#
-#     creds = ServiceAccountCredentials.from_json_keyfile_name('Uploaded Answers-14e35a500de2.json', scope)
-#
-#     service = build('drive', 'v3', credentials=creds)
-#
-#     # Call the Drive v3 API
-#     results = service.files().list(
-#         pageSize=60, fields="nextPageToken, files(id, name)").execute()
-#     items = results.get('files', [])
-#
-#     if not items:
-#         print('No files found.')
-#     else:
-#         print('Files:')
-#         for item in items:
-#             print(u'{0} ({1})'.format(item['name'], item['id']))
-#             service.files().delete(fileId=item['id']).execute()
-#
-#     return HttpResponse("Drive cleared")
-
-# def drive_list(request):
-#
-#     scope = ['https://www.googleapis.com/auth/drive']
-#
-#     creds = ServiceAccountCredentials.from_json_keyfile_name('Uploaded Answers-14e35a500de2.json', scope)
-#
-#     service = build('drive', 'v3', credentials=creds)
-#
-#     # Call the Drive v3 API
-#     results = service.files().list(
-#         pageSize=60, fields="nextPageToken, files(id, name)").execute()
-#     items = results.get('files', [])
-#
-#     if not items:
-#         print('No files found.')
-#     else:
-#         print('Files:')
-#         for item in items:
-#             print(u'{0} ({1})'.format(item['name'], item['id']))
-#
-#     return HttpResponse("Woohoo!")

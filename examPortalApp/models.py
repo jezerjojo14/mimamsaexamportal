@@ -37,5 +37,16 @@ class GlobalVariables(models.Model):
 
 class Question(models.Model):
     question_number = models.IntegerField(unique=True, null=False)
-    question_html = models.CharField(max_length=1000)
+    #For MCQ, question_content takes the form '["Main question here", ["Subquestion here", ["Option A","Option B"]], ["Next subquestion", ["Option 1", "Option 2", "Option 3"]]]'
+    question_content = models.TextField()
     question_subject = models.CharField(max_length=15)
+    #s=subjective, m=mcq, t=train of thought
+    question_type = models.CharField(max_length=2, default='s')
+    question_answers = models.CharField(max_length=100)
+
+class Answer(models.Model):
+    team_instance = models.ForeignKey(Team, on_delete=models.CASCADE)
+    question_instance = models.ForeignKey(Question, on_delete=models.CASCADE)
+    #s=subjective typed, m=mcq, t=train of thought
+    answer_type = models.CharField(max_length=2, default='s')
+    answer_content = models.TextField()

@@ -11,17 +11,16 @@ urlpatterns = [
 
     path('dashboard', views.dashboard, name="dashboard"),
 
-    # path('test', views.open_test, name="test"),
     path('test/<int:qnumber>', views.open_test, name="test_no"),
-    # path('question/<int:qnumber>', views.get_question, name="get_question"),
     path('upload-answer', views.upload_answer, name="upload_answer"),
+    path('save-mcq', views.submit_MCQ, name="save_m_answer"),
+    path('save-tt', views.submit_TT, name="save_t_answer"),
     path('answers/<int:qnumber>', views.get_answers, name="get_answers"),
+    path('m-answers/<int:qnumber>', views.get_m_answers, name="get_m_answers"),
+    path('t-answers/<int:qnumber>', views.get_t_answers, name="get_t_answers"),
 
     path('question-portal/<int:page>', views.question_making_page, name="questionportal"),
     path('post-question', views.post_question, name="post_question"),
     path('edit-question', views.edit_question, name="edit_question"),
     path('del-question', views.delete_question, name="del_question"),
-
-    # path('drive-clear', views.drive_clear, name="drive_clear"),
-    # path('drive-list', views.drive_list, name="drive_list"),
 ]

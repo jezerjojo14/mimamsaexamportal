@@ -119,6 +119,79 @@
         contentEle.parentElement.insertBefore(small, contentEle.nextElementSibling);
       }
     }
+
+    function addMCQSet(btn) {
+      var set_count=parseInt(btn.previousElementSibling.id.substr(8))+1;
+      var new_set=document.createElement('DIV');
+      new_set.id="mcq-set-"+(set_count).toString();
+      new_set.innerHTML=
+      '<div id="mcq-set-'+(set_count).toString()+'">'+
+        '<div class="mcq-options">'+
+          '<input type="text" name="mcq-set-'+(set_count).toString()+'-label" value="" placeholder="Label for the following set of choices (Optional)">'+
+          '<br><input id="mcq-'+(set_count).toString()+'-1" type="text" name="opt-'+((set_count)*4+1)+'" value="" placeholder="Option A"> <input type="checkbox" name="correct_'+((set_count)*4+1)+'" value="1">'+
+          '<br><input id="mcq-'+(set_count).toString()+'-2" type="text" name="opt-'+((set_count)*4+2)+'" value="" placeholder="Option B"> <input type="checkbox" name="correct_'+((set_count)*4+2)+'" value="2">'+
+          '<br><input id="mcq-'+(set_count).toString()+'-3" type="text" name="opt-'+((set_count)*4+3)+'" value="" placeholder="Option C"> <input type="checkbox" name="correct_'+((set_count)*4+3)+'" value="3">'+
+          '<br><input id="mcq-'+(set_count).toString()+'-4" type="text" name="opt-'+((set_count)*4+4)+'" value="" placeholder="Option D"> <input type="checkbox" name="correct_'+((set_count)*4+4)+'" value="4">'+
+        '</div><br>'+
+      '</div>';
+      btn.parentElement.insertBefore(new_set, btn);
+      btn.nextElementSibling.nextElementSibling.disabled=false;
+    }
+
+    function removeMCQSet(btn) {
+      btn.previousElementSibling.previousElementSibling.previousElementSibling.remove();
+      if (btn.previousElementSibling.previousElementSibling.previousElementSibling.id.substr(8)==0)
+      {
+        btn.disabled=true;
+      }
+    }
+
+    function removeTTOption(btn) {
+      btn.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.remove();
+      btn.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.remove();
+      btn.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.remove();
+      if (parseInt(btn.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.value)<=2)
+      {
+        btn.disabled=true;
+      }
+    }
+
+    function addTTOption(btn) {
+      var opt_count=parseInt(btn.previousElementSibling.previousElementSibling.previousElementSibling.id.substr(7));
+      btn.insertAdjacentHTML('beforebegin', '<input id="tt-opt-'+(opt_count+1).toString()+'" type="text" name="opt-'+(opt_count+1).toString()+'" value="" placeholder="Option '+(opt_count+1).toString()+'"> <input type="checkbox" name="correct_'+(opt_count+1).toString()+'" value="'+(opt_count+1).toString()+'"> <br>'); //Holy shit this makes things easier
+      btn.nextElementSibling.nextElementSibling.disabled=false;
+    }
+
+    function activateSub() {
+      document.getElementById('subjectiveQ-form').style.display="block";
+      document.getElementById('MCQ-form').style.display="none";
+      document.getElementById('TT-form').style.display="none";
+      document.getElementById('s-tab').classList.add('active');
+      document.getElementById('m-tab').classList.remove('active');
+      document.getElementById('t-tab').classList.remove('active');
+      return false;
+    }
+
+    function activateMCQ() {
+      document.getElementById('subjectiveQ-form').style.display="none";
+      document.getElementById('MCQ-form').style.display="block";
+      document.getElementById('TT-form').style.display="none";
+      document.getElementById('s-tab').classList.remove('active');
+      document.getElementById('m-tab').classList.add('active');
+      document.getElementById('t-tab').classList.remove('active');
+      return false;
+    }
+
+    function activateTT() {
+      document.getElementById('subjectiveQ-form').style.display="none";
+      document.getElementById('MCQ-form').style.display="none";
+      document.getElementById('TT-form').style.display="block";
+      document.getElementById('s-tab').classList.remove('active');
+      document.getElementById('m-tab').classList.remove('active');
+      document.getElementById('t-tab').classList.add('active');
+      return false;
+    }
+
   </script>
 {% endblock %}
 
@@ -127,30 +200,114 @@
   <div class="container">
     <div id="new-question">
       <h3>New Question: </h3>
-      <form action="{%url 'post_question'%}" method="post" autocomplete="off">
-        {% csrf_token %}
-        <textarea style="resize: both" name="content" rows="15" cols="80"></textarea>
-        <select name="subject">
-          <option value="Physics">Physics</option>
-          <option value="Math">Math</option>
-          <option value="Biology">Biology</option>
-          <option value="Chemistry">Chemistry</option>
-        </select>
-        <input class="btn btn-primary" type="submit" value="Submit">
-      </form>
-    </div>
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+              <a id="s-tab" class="nav-link active" aria-current="true" onclick="activateSub()" href="#">Subjective</a>
+            </li>
+            <li class="nav-item">
+              <a id="m-tab" class="nav-link" aria-current="true" onclick="activateMCQ()" href="#">MCQ</a>
+            </li>
+            <li class="nav-item">
+              <a id="t-tab" class="nav-link" aria-current="true" onclick="activateTT()" href="#">Train of Thought</a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div id="subjectiveQ-form">
+            <h5 class="card-title">Subjective Question</h5>
+            <form action="{%url 'post_question'%}" method="post" autocomplete="off">
+              {% csrf_token %}
+              <input type="hidden" name="qtype" value="s">
+              <select name="subject">
+                <option value="Physics">Physics</option>
+                <option value="Math">Math</option>
+                <option value="Biology">Biology</option>
+                <option value="Chemistry">Chemistry</option>
+              </select>
+              <br>
+              <textarea style="resize: both" name="content" rows="8" cols="50"></textarea>
+              <br>
+              <input class="btn btn-primary" type="submit" value="Submit">
+            </form>
+          </div>
+          <div id="MCQ-form" style="display: none">
+            <h5 class="card-title">MCQ</h5>
+            <form action="{%url 'post_question'%}" method="post" autocomplete="off">
+              {% csrf_token %}
+              <input type="hidden" name="qtype" value="m">
+              <select name="subject">
+                <option value="Physics">Physics</option>
+                <option value="Math">Math</option>
+                <option value="Biology">Biology</option>
+                <option value="Chemistry">Chemistry</option>
+              </select>
+              <br>
+              <textarea style="resize: both" name="content" rows="8" cols="50"></textarea>
+              <div id="mcq-set-0">
+                <input type="text" name="mcq-set-0-label" value="" placeholder="Label for the following set of choices (Optional)">
+                <div class="mcq-options">
+                  <input id="mcq-0-1" type="text" name="opt-1" value="" placeholder="Option A"> <input type="checkbox" name="correct_1" value="1">
+                  <br>
+                  <input id="mcq-0-2" type="text" name="opt-2" value="" placeholder="Option B"> <input type="checkbox" name="correct_2" value="2">
+                  <br>
+                  <input id="mcq-0-3" type="text" name="opt-3" value="" placeholder="Option C"> <input type="checkbox" name="correct_3" value="3">
+                  <br>
+                  <input id="mcq-0-4" type="text" name="opt-4" value="" placeholder="Option D"> <input type="checkbox" name="correct_4" value="4">
+                </div><br>
+              </div>
+              <button type="button" name="button" onclick="addMCQSet(this)">Add a set</button>
+              <br>
+              <button disabled type="button" name="button" onclick="removeMCQSet(this)">Remove a set</button>
+              <br>
+              <input class="btn btn-primary" type="submit" value="Submit">
+            </form>
+          </div>
+          <div id="TT-form" style="display: none">
+            <h5 class="card-title">Train of Thought</h5>
+            <form action="{%url 'post_question'%}" method="post" autocomplete="off">
+              {% csrf_token %}
+              <input type="hidden" name="qtype" value="t">
+              <select name="subject">
+                <option value="Physics">Physics</option>
+                <option value="Math">Math</option>
+                <option value="Biology">Biology</option>
+                <option value="Chemistry">Chemistry</option>
+              </select>
+              <br>
+              <textarea style="resize: both" name="content" rows="8" cols="50"></textarea>
+              <div class="tt-options">
+                <input id="tt-opt-1" type="text" name="opt-1" value="" placeholder="Option 1"> <input type="checkbox" name="correct_1" value="1">
+                <br>
+                <input id="tt-opt-2" type="text" name="opt-2" value="" placeholder="Option 2"> <input type="checkbox" name="correct_2" value="2">
+                <br>
+                <input id="tt-opt-3" type="text" name="opt-3" value="" placeholder="Option 3"> <input type="checkbox" name="correct_3" value="3">
+                <br>
+                <input id="tt-opt-4" type="text" name="opt-4" value="" placeholder="Option 4"> <input type="checkbox" name="correct_4" value="4">
+                <br>
+                <button type="button" name="button" onclick="addTTOption(this)">Add option</button>
+                <br>
+                <button type="button" name="button" onclick="removeTTOption(this)">Delete option</button>
+              </div>
+              <input class="btn btn-primary" type="submit" value="Submit">
+            </form>
+          </div>
+        </div>
+        </div>
+      </div>
+
 
     <!-- QUESTIONS -->
 
     <div id="questions">
       {% for question in questions%}
       <div class="question" id="question{{question.pk}}">
-        <h2 class="question-heading" id="question-heading-{{question.pk}}">Question <span
-            id="qnumber-{{question.pk}}">{{question.question_number}}</span></h2>
+        <h2 class="question-heading" id="question-heading-{{question.pk}}">Question <span id="qnumber-{{question.pk}}">{{question.question_number}}</span></h2>
         <small class="question-subject" id="question-subject-{{question.pk}}">{{question.question_subject}}</small>
         <br>
         <div class="question-content" id="question-content-{{question.pk}}">
-          {{question.question_html|safe}}
+          {{question.question_content|safe}}
         </div>
         {% if user.username == "admin" %}
         <span data-active="0" class="edit"><a href="#" class="edit-link"
