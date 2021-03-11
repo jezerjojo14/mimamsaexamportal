@@ -257,6 +257,9 @@ def open_test(request,qnumber=None):
             return render(request, "examPortalApp/testportal.html", {"answer_text": a.answer_content, "selected_options": [], "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": [], "options": [], "QNum": q_current, "QCount": q_count, "QType": 's', "content": q.question_content, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
         if q.question_type=='m':
             a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
+            if a.answer_content=="":
+                a.answer_content=str([])
+                a.save()
             selected_options=ast.literal_eval(a.answer_content)
             content=ast.literal_eval(q.question_content)
             setup=content[0]
