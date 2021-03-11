@@ -241,6 +241,7 @@ def open_test(request,qnumber=None):
     q_count= Question.objects.all().count();
     q_current = 1 if (qnumber is None) else int(qnumber);
     q=Question.objects.get(question_number=qnumber)
+    team=request.user.team_set.first()
 
     #If test hasn't started yet, show the waiting page,
     #If it has started but hasn't ended, show the testportal
@@ -249,28 +250,33 @@ def open_test(request,qnumber=None):
     if now<test_start:
         return render(request, "examPortalApp/waitingroom.html", {"UTCDate": test_start.day, "UTCMonth": test_start.month, "UTCYear": test_start.year, "UTCHours": test_start.hour, "UTCMinutes": test_start.minute, "UTCSeconds": test_start.second})
     if now<test_end:
-        print("Qnumber: ",qnumber)
-        print("Value: ",q_current)
+        review_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='r').values_list('question_number', flat=True))
+        answered_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='a').values_list('question_number', flat=True))
         if q.question_type=='s':
-            return render(request, "examPortalApp/testportal.html", {"labels": [], "options": [], "QNum": q_current, "QCount": q_count, "QType": 's', "content": q.question_content, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+            a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
+            return render(request, "examPortalApp/testportal.html", {"answer_text": a.answer_content, "selected_options": [], "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": [], "options": [], "QNum": q_current, "QCount": q_count, "QType": 's', "content": q.question_content, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
         if q.question_type=='m':
-            print(q.question_content)
+            a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
+            selected_options=ast.literal_eval(a.answer_content)
             content=ast.literal_eval(q.question_content)
-            print(content)
             setup=content[0]
-            print(setup)
             option_sets=[]
             labels=[]
             i=1
             while i<len(content):
                 option_sets+=[[content[i][0]]+content[i][1]]
                 i+=1
-            return render(request, "examPortalApp/testportal.html", {"labels": labels, "options": option_sets, "QNum": q_current, "QCount": q_count, "QType": 'm', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+            return render(request, "examPortalApp/testportal.html", {"answer_text": "", "selected_options": selected_options, "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": labels, "options": option_sets, "QNum": q_current, "QCount": q_count, "QType": 'm', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
         if q.question_type=='t':
+            a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
+            if a.answer_content=="":
+                a.answer_content=str([[], ""])
+                a.save()
+            selected_option=(ast.literal_eval(a.answer_content))[0]
             content=ast.literal_eval(q.question_content)
             setup=content[0]
             options=content[1]
-            return render(request, "examPortalApp/testportal.html", {"labels": [], "options": options, "QNum": q_current, "QCount": q_count, "QType": 't', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+            return render(request, "examPortalApp/testportal.html", {"answer_text": (ast.literal_eval(a.answer_content))[1], "selected_options": selected_option, "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": [], "options": options, "QNum": q_current, "QCount": q_count, "QType": 't', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
 
     return render(request, "examPortalApp/testended.html")
 
@@ -322,41 +328,65 @@ def get_m_answers(request, qnumber):
 def get_t_answers(request, qnumber):
     team=request.user.team_set.first()
     q=Question.objects.get(question_number=int(qnumber))
-    # try:
-    a=Answer.objects.get(team_instance=team, question_instance=q)
-    l=ast.literal_eval(a.answer_content)
-    if len(l)==1:
-        return JsonResponse({"choice":l[0], "text": ""})
-    else:
-        return JsonResponse({"choice":l[0], "text": l[1]})
-    # except:
-    #     return JsonResponse({"choice":-1, "images": [], "text": ""})
+    try:
+        a=Answer.objects.get(team_instance=team, question_instance=q)
+        l=ast.literal_eval(a.answer_content)
+        if len(l)==1:
+            return JsonResponse({"choice":l[0][0], "text": ""})
+        else:
+            return JsonResponse({"choice":l[0][0], "text": l[1]})
+    except:
+        return JsonResponse({"choice":-1, "images": [], "text": ""})
 
 
 @login_required
 def submit_MCQ(request):
+    qnumber=request.POST["qnumber"]
     i=1
     answer=[]
     while "choice-"+str(i) in request.POST:
         answer+=[int(request.POST["choice-"+str(i)])]
         i+=1
+
     q=Question.objects.get(question_number=request.POST["qnumber"])
-
-    a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first(), answer_type='m'))[0]
+    a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
     a.answer_content=str(answer)
+    if len(answer)!=0:
+        a.status='a'
+    elif a.status=='a':
+        a.status='u'
     a.save()
-    return HttpResponseRedirect("test/"+str(request.POST["qnumber"]))
+    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
+#This function is for saving the choice, not the explanation. The latter is handled by upload_answer/upload_text_answer
 @login_required
 def submit_TT(request):
     i=1
-    answer=[int(request.POST["choice"])]
+    answer=[[], ""]
+    if "choice" in request.POST:
+        answer[0]=[int(request.POST["choice"])]
     q=Question.objects.get(question_number=request.POST["qnumber"])
+    qnumber=request.POST["qnumber"]
 
-    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first(), answer_type='t')[0]
+    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+    if a.answer_content!="":
+        answer[1]=(ast.literal_eval(a.answer_content))[1]
     a.answer_content=str(answer)
     a.save()
-    return HttpResponseRedirect("test/"+str(request.POST["qnumber"]))
+    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+
+@login_required
+def upload_text_answer(request):
+    q=Question.objects.get(question_number=request.POST["qnumber"])
+    qnumber=request.POST["qnumber"]
+    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+    if q.question_type=='s':
+        a.answer_content=request.POST["answer_text"]
+    elif q.question_type=='t':
+        a.answer_content=[(ast.literal_eval(a.answer_content))[0], request.POST["answer_text"]]
+    a.save()
+    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+
 
 @login_required
 def upload_answer(request):
@@ -367,11 +397,13 @@ def upload_answer(request):
     qnumber=request.POST["qnumber"]
     try:
         q=Question.objects.get(question_number=int(qnumber))
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
     except:
         print(qnumber)
         raise Http404;
     subject=q.question_subject
-    if team is None: return HttpResponseRedirect("test/"+str(qnumber))
+    if team is None:
+        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
     #Resize and compress uploaded image
 
     im = Image.open(answerfile)
@@ -397,7 +429,7 @@ def upload_answer(request):
     else:
         s3.upload_fileobj(b, "mimamsauploadedanswers", subject+'/Q'+qnumber+'/'+team.team_id+'/0.jpeg')
 
-    return HttpResponseRedirect("test/"+str(qnumber))
+    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 
 # TODO:
@@ -406,8 +438,60 @@ def end_test(request):
     pass
 
 
+@login_required
+def mark_for_review(request, qnumber):
+    user=request.user
+    team=user.team_set.first()
+    q=Question.objects.get(question_number=int(qnumber))
+    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+    a.status='r'
+    a.save()
+    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+
+@login_required
+def mark_as_answered(request, qnumber):
+    user=request.user
+    team=user.team_set.first()
+    q=Question.objects.get(question_number=int(qnumber))
+    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+    a.status='a'
+    a.save()
+    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+
+@login_required
+def mark_as_unanswered(request, qnumber):
+    user=request.user
+    team=user.team_set.first()
+    q=Question.objects.get(question_number=int(qnumber))
+    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+    if a.question_instance.question_type=='m':
+        if a.answer_content=="[]":
+            a.status='u'
+        else:
+            a.status='a'
+    else:
+        a.status='u'
+    a.save()
+    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+
+
+@login_required
+def clear_t_options(request, qnumber):
+    user=request.user
+    team=user.team_set.first()
+    q=Question.objects.get(question_number=int(qnumber))
+    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+    a.answer_content=str([[], (ast.literal_eval(a.answer_content))[1]])
+    if a.status=='a':
+        a.status='u';
+    a.save()
+    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+
+
+
 
 # Question making portal
+
 
 
 
