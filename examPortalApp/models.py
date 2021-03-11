@@ -47,7 +47,6 @@ class Question(models.Model):
 class Answer(models.Model):
     team_instance = models.ForeignKey(Team, on_delete=models.CASCADE)
     question_instance = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer_typed = models.BooleanField(default=False)
     answer_content = models.TextField(default="")
     #u=unanswered, a=answered, r=marked for review
     status = models.CharField(max_length=2, default='u')
