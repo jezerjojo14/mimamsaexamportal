@@ -69,7 +69,7 @@ display:inline-block
   border-color: #aaa;
 }
 
-#save-changes-popup {
+.popup {
   top: 0;
   left: 0;
   display: none;
@@ -80,7 +80,7 @@ display:inline-block
   height: 100vh;
 }
 
-#popup-message {
+.popup-message {
   background-color: white;
 }
 

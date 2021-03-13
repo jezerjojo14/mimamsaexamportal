@@ -127,7 +127,7 @@
       };
     }
 
-    function closeWarningPopup() {
+    function closeSaveWarningPopup() {
       document.getElementById('save-changes-popup').style.display="none";
     }
 
@@ -240,13 +240,13 @@
           {% endfor %}
         </div>
         <div id="q-content">{{content|safe}}</div>
-        <div id="save-changes-popup">
-          <div id="popup-message">
+        <div id="save-changes-popup" class="popup">
+          <div class="popup-message">
             <p>
               You've made unsaved changes to your answer. Discard changes and continue?
             </p>
             <button id="save-changes-popup-continue">Continue</button>
-            <button onclick="closeWarningPopup()">Go back</button>
+            <button onclick="closeSaveWarningPopup()">Go back</button>
           </div>
         </div>
         <div class="answer-section">
