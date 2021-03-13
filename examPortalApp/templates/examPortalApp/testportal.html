@@ -127,8 +127,8 @@
       };
     }
 
-    function closeSaveWarningPopup() {
-      document.getElementById('save-changes-popup').style.display="none";
+    function closePopup(ele) {
+      ele.closest('.popup').style.display="none";
     }
 
     function markAnswered() {
@@ -246,7 +246,7 @@
               You've made unsaved changes to your answer. Discard changes and continue?
             </p>
             <button id="save-changes-popup-continue">Continue</button>
-            <button onclick="closeSaveWarningPopup()">Go back</button>
+            <button onclick="closePopup(this)">Go back</button>
           </div>
         </div>
         <div class="answer-section">
