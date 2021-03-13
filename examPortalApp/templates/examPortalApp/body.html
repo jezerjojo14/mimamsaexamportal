@@ -11,9 +11,18 @@
     <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
     {% block script %}
     {% endblock %}
+    
+    <!-- common script for collapsible menu -->
+    <script type="text/javascript" src="{% static 'examPortalApp/js/menu.js' %}"></script>
+
   </head>
     <body>
-        {% block content %}
-        {% endblock %}
+
+      {% if user.is_authenticated %}
+      <!-- Add header and menu elements here -->
+      {% endif %}
+
+      {% block content %}
+      {% endblock %}
     </body>
 </html>
