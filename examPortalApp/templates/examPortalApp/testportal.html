@@ -1,5 +1,6 @@
 {% extends 'examPortalApp/body.html' %}
 {% load mathfilters %}
+{% load staticfiles%}
 
 {% block script %}
   <script type="text/javascript">
@@ -220,15 +221,57 @@
     return false;
   }
 
+  function openCameraPopup() {
+    document.getElementById('camera-popup').style.display="block";
+  }
+
+  function closeCamPopup(ele) {
+    closePopup(ele);
+  }
+
+  function sendWebcamData(data) {
+    var redirect = function(url, method) {
+      var form = document.createElement('form');
+      form.method = method;
+      form.action = url;
+      form.innerHTML+='{% csrf_token %}';
+      var input1 = document.createElement('input');
+      input.type = 'hidden';
+      input.name = "qnumber";
+      input.value = "{{ QNum }}";
+      form.appendChild(input);
+      var input2 = document.createElement('input');
+      input.type = 'file';
+      input.name = "file";
+      input.value = data;
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    };
+
+    redirect('{% url 'upload_answer' %}', 'post');
+  }
+
+
+
   </script>
 {% endblock %}
 
 
 {% block content %}
 
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="alert alert-info"{% endif %}>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
   <div class="fluid-container">
-    <div class="time"><h3>The quiz will end in: <div id="time"></div>
-    </h3></div>
+    <h2>The quiz will end in: <div id="time"></div>
+    </h2>
+    <hr>
     <div class="row">
       <div class="col-lg-9">
         <div id="nav-questions">
@@ -244,6 +287,20 @@
             </p>
             <button id="save-changes-popup-continue">Continue</button>
             <button onclick="closePopup(this)">Go back</button>
+          </div>
+        </div>
+        <div id="camera-popup" class="popup">
+          <div class="popup-message">
+            <div class="camera">
+              <video id="video">Video stream not available.</video>
+            </div>
+            <div><button id="startbutton">Take photo</button></div>
+            <div><button id="startbutton" onclick="uploadWebcamPicture()">Upload photo</button></div>
+            <canvas id="canvas"></canvas>
+            <div class="output">
+              <img id="photo" alt="The screen capture will appear in this box.">
+            </div>
+            <button id="close-cam-btn" type="button" name="button" onclick="closeCamPopup(this)">Close</button>
           </div>
         </div>
         <div class="answer-section">
@@ -319,12 +376,13 @@
                 <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
                   {% csrf_token %}
                   <div class="fieldWrapper" id="fileFieldWrapper">
-                    <label for="id_file">Upload answers:</label>
-                    <input type="file" name="file" required id="id_file">
+                    <label for="id_file">Browse images:</label>
+                    <input type="file" name="file" required id="id_file" accept="image/*">
                   </div>
                   <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
                   <input type="submit" name="" value="Submit">
                 </form>
+                <button id="open-cam-btn" type="button">Use webcam</button>
                 <br>
                 <h6>Uploaded Answers:</h6>
                 <div id="uploadedAnswers">
@@ -377,7 +435,7 @@
                   {% csrf_token %}
                   <div class="fieldWrapper" id="fileFieldWrapper">
                     <label for="id_file">Upload answers:</label>
-                    <input type="file" name="file" required id="id_file">
+                    <input type="file" name="file" required id="id_file" accept="image/*">
                   </div>
                   <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
                   <input type="submit" name="" value="Submit">
@@ -428,5 +486,5 @@
       </div>
     </div>
   </div>
-
+  <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
 {% endblock %}
