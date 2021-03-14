@@ -24,7 +24,7 @@
 
 {% block content %}
 
-  <div class="container">
+  <div class="fluid-container">
     <form action="{% url 'update_accounts' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="fieldWrapper" id="fileFieldWrapper">

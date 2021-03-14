@@ -9,6 +9,7 @@
     <title>{% block title %}Mimamsa Quiz Portal{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
+
     {% block script %}
     {% endblock %}
     
@@ -17,12 +18,59 @@
 
   </head>
     <body>
-
       {% if user.is_authenticated %}
       <!-- Add header and menu elements here -->
+      <header class="s-header">
+        
+        <!-- <div class="header-logo">
+            <a class="site-logo" href="http://mimamsa.iiserpune.ac.in">
+                <img src="http://mimamsa.iiserpune.ac.in/images/mimamsawhite.png" alt="Homepage">
+            </a>
+        </div>
+        <div class="header-logo_1">
+            <a class="site-logo" href="http://praj.net">
+                <img src="http://mimamsa.iiserpune.ac.in/images/prajwhite.png" alt="Homepage" align="right">
+            </a>
+        </div> -->
+        <div id="logo" class="pull-left">
+          <a href="#"><img src="http://mimamsa.iiserpune.ac.in/images/mimamsawhite.png" alt="" title="" /></a>
+          <a href="#"><img src="http://mimamsa.iiserpune.ac.in/images/prajwhite.png" alt="" title="" /></a>
+        </div>
+        
+        <div id="menu" class="sidenav closed">
+          <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+
+          <!-- <div id="members" class="col-lg-3">
+            <h3>Team id:</h3>
+            <h4>{{team.team_id}}</h4>
+            <br>
+            <h3>Team members:</h3>
+            {% for member in team.users.all %}
+            {{member}}<br>
+            {% endfor %}
+          </div> -->
+          <ul class="list-group">
+            <li class=""><a href="../">Dashboard</a></li>
+            <li class=""><a href="{% url 'change_password' %}">Change Password</a></li>
+            <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
+          </ul>
+        </div>
+
+      <div class="sidepane"><p onclick="openNav()">MENU &#9776;</p></div>
+
+      
+      </header>
       {% endif %}
 
       {% block content %}
       {% endblock %}
+
+      <footer>
+        <div class="fluid-container">
+          <hr>
+          <h2>Mimamsa 2021</h2>
+        </div>
+      </footer>
+
     </body>
 </html>
