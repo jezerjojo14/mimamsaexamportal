@@ -38,7 +38,7 @@ import io
 import base64
 from threading import *
 
-
+from django.contrib import messages
 
 #Function for uploading file onto S3
 
@@ -234,7 +234,7 @@ def dashboard(request):
 
 
 @login_required
-def open_test(request,qnumber=None):
+def open_test(request, qnumber=None, message=""):
     now = timezone.now()
     test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 0, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 30, 0))})[0]).test_start
     test_end=GlobalVariables.objects.get(pk=1).test_end
@@ -397,6 +397,7 @@ def upload_answer(request):
     team=user.team_set.first()
     print(request.POST)
     answerfile=request.FILES["file"]
+
     qnumber=request.POST["qnumber"]
     try:
         q=Question.objects.get(question_number=int(qnumber))
@@ -409,6 +410,15 @@ def upload_answer(request):
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
     #Resize and compress uploaded image
 
+    try:
+        im = Image.open(answerfile)
+        im.verify() #I perform also verify, don't know if he sees other types o defects
+        # im1.close() #reload is necessary in my case
+    except:
+        #manage exceptions here
+        messages.info(request, 'Image file corrupt or unsupported')
+        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    # im.seek(0)
     im = Image.open(answerfile)
     w, h = im.size
     f=(250000/(w*h))**(0.5)
