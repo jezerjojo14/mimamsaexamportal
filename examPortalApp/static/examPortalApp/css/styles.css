@@ -6,22 +6,109 @@ body {
   font-family: "Montserrat", sans-serif;
 }
 
-h2 {
-  /* color: #39b54a; */
-  font-family: "Montserrat", sans-serif;
-  font-weight: 600;
-  margin: 10px;
-  font-size: 28px;
+footer hr {
+  margin: 112px 0 0 0;
+  border-top: 5px solid #aaa;
 }
 
-hr {
-  border-top: 1px solid #aaa;
+.fluid-container {
+  margin: 20px;
 }
 
-#time {
-display:inline-block
+/* pageheading */
+h2{
+  display: block;
+  text-align: center;
+  padding: 20px;
+  font-size: 32px;
 }
 
+/* header */
+.s-header {
+  width: 100%;
+  height: 110px;
+  background-color: transparent;
+}
+
+/* header-logo */
+#logo img {
+  height: 100px;
+  filter: invert(1);
+  margin:5px;
+}
+
+/* header-menu */
+.sidepane {
+  cursor: pointer;
+  position: fixed;
+  top: 20px;
+  right: 40px;
+  font-size: 32px;
+  padding: 5px;
+}
+
+.sidepane p {
+  margin: 0;
+}
+
+.sidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  background-color: #fff;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+  border:1px solid #aaa;
+}
+
+.opened {
+ width: 20%;
+}
+
+.closed {
+  width: 0;
+}
+
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 24px;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a:hover {
+  font-weight: 800;
+}
+
+.sidenav .closebtn {
+  position: absolute;
+  color: #111;
+  top: 0;
+  right: 25px;
+  font-size: 50px;
+  margin-left: 50px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+@media screen and (max-width: 600px) {
+  .opened {
+    width: 70%
+  }
+  .s-header {
+    height: 90px;
+  }
+}
+
+/* Question navigation  */
 #nav-questions {
   overflow-x: auto;
   white-space: nowrap;
@@ -30,7 +117,7 @@ display:inline-block
 #nav-questions button{
   width: 50px;
   height: 50px;
-  margin:5px;
+  margin:10px;
   border:none;
   background-color: black;
   border-radius: 50%;
@@ -56,48 +143,10 @@ display:inline-block
   /* border:4px solid #39b54a; */
   color: black;
   background-color: #dd0;
+  margin: 20px;
 }
 
-
-#q-content {
-  padding:10px;
-  font-size: 30px;
-  margin: 10px auto 50px auto;
-  padding: 50px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #aaa;
-}
-
-#save-changes-popup {
-  top: 0;
-  left: 0;
-  display: none;
-  z-index: 20;
-  background-color: rgba(0, 0, 0, 0.5);
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-}
-
-#popup-message {
-  background-color: white;
-}
-
-#members h3{
-  font-size: 30px;
-}
-
-#nav_buttons{
-  margin: 50px auto 20px auto;
-}
-
-/* pageheading */
-h2{
-  text-align: center;
-  padding: 20px;
-  font-size: 34px;
-}
+/* pagewise custom styling */
 
 .login p{
   font-size: 18px;
@@ -112,4 +161,55 @@ h2{
 .login a{
   font-size: 22px ;
   line-height: 50px;
+}
+
+
+#time {
+  display:inline-block
+}
+
+.time h3 {
+    /* color: #39b54a; */
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin: 0;
+    padding: 5px;
+}
+  
+#q-content {
+  overflow-y: auto;
+  height: 400px;
+  padding:10px;
+  font-size: 30px;
+  margin: 10px auto 50px auto;
+  padding: 20px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #aaa;
+}
+
+
+#save-changes-popup {
+  top: 0;
+  left: 0;
+  display: none;
+  z-index: 20;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+}
+
+
+#popup-message {
+  background-color: white;
+}
+
+#members h3{
+  font-size: 30px;
+}
+
+#nav_buttons{ 
+  margin: 50px auto 20px auto;
 }
