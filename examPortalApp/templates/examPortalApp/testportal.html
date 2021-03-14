@@ -268,14 +268,12 @@
   </ul>
   {% endif %}
 
-  <div class="container">
+  <div class="fluid-container">
     <h2>The quiz will end in: <div id="time"></div>
     </h2>
     <hr>
     <div class="row">
-      <div class="col-lg-9 ">
-
-
+      <div class="col-lg-9">
         <div id="nav-questions">
           {% for i in ''|center:QCount %}
           <button onclick='getQuestion({{forloop.counter}})' class='btn {% if forloop.counter == QNum %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
