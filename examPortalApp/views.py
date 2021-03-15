@@ -30,7 +30,7 @@ from django.utils import timezone
 import datetime
 import pytz
 
-from .models import User, Team, Ordering, GlobalVariables, Question, Answer
+from .models import User, Team, Ordering, GlobalVariables, Question, Answer, AnswerFiles
 
 from PIL import Image
 import io
@@ -254,7 +254,8 @@ def open_test(request, qnumber=None, message=""):
         answered_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='a').values_list('question_number', flat=True))
         if q.question_type=='s':
             a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
-            return render(request, "examPortalApp/testportal.html", {"answer_text": a.answer_content, "selected_options": [], "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": [], "options": [], "QNum": q_current, "QCount": q_count, "QType": 's', "content": q.question_content, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+            uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
+            return render(request, "examPortalApp/testportal.html", {"uploaded_files":uploaded_files, "answer_text": a.answer_content, "selected_options": [], "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": [], "options": [], "QNum": q_current, "QCount": q_count, "QType": 's', "content": q.question_content, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
         if q.question_type=='m':
             a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
             if a.answer_content=="":
@@ -272,6 +273,7 @@ def open_test(request, qnumber=None, message=""):
             return render(request, "examPortalApp/testportal.html", {"answer_text": "", "selected_options": selected_options, "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": labels, "options": option_sets, "QNum": q_current, "QCount": q_count, "QType": 'm', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
         if q.question_type=='t':
             a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
+            uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
             if a.answer_content=="":
                 a.answer_content=str([[], ""])
                 a.save()
@@ -279,13 +281,13 @@ def open_test(request, qnumber=None, message=""):
             content=ast.literal_eval(q.question_content)
             setup=content[0]
             options=content[1]
-            return render(request, "examPortalApp/testportal.html", {"answer_text": (ast.literal_eval(a.answer_content))[1], "selected_options": selected_option, "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": [], "options": options, "QNum": q_current, "QCount": q_count, "QType": 't', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+            return render(request, "examPortalApp/testportal.html", {"uploaded_files":uploaded_files, "answer_text": (ast.literal_eval(a.answer_content))[1], "selected_options": selected_option, "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": [], "options": options, "QNum": q_current, "QCount": q_count, "QType": 't', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
 
     return render(request, "examPortalApp/testended.html")
 
 
 @login_required
-def get_answers(request, qnumber):
+def get_answers(request, page_no, qnumber):
 
     team=request.user.team_set.first()
 
@@ -384,6 +386,7 @@ def upload_text_answer(request):
     qnumber=request.POST["qnumber"]
     subject=q.question_subject
     a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+    AnswerFiles.objects.filter(answer_instance = a).delete()
     user=request.user
     team=user.team_set.first()
 
@@ -423,7 +426,6 @@ def upload_answer(request):
     subject=q.question_subject
 
     if q.question_type=='s':
-        print("TEEEEEESSSSTTTIIINNNGGGGG")
         a.answer_content=""
     elif q.question_type=='t':
         a.answer_content=[(ast.literal_eval(a.answer_content))[0], ""]
@@ -455,15 +457,22 @@ def upload_answer(request):
 
     s3 = boto3.client('s3')
 
-    response = s3.list_objects_v2(
+    """response = s3.list_objects_v2(
         Bucket='mimamsauploadedanswers',
         Prefix =subject+'/Q'+str(qnumber)+'/'+team.team_id,
-        MaxKeys=100)
+        MaxKeys=100)"""
 
-    if "Contents" in response:
-        s3.upload_fileobj(b, "mimamsauploadedanswers", subject+'/Q'+qnumber+'/'+team.team_id+'/'+str(len(response['Contents']))+'.jpeg')
-    else:
-        s3.upload_fileobj(b, "mimamsauploadedanswers", subject+'/Q'+qnumber+'/'+team.team_id+'/0.jpeg')
+    ansinst = Answer.objects.get_or_create(team_instance = team, question_instance = q)
+    ansinst[0].save()
+    noofpages = AnswerFiles.objects.filter(answer_instance = (ansinst[0])).count()
+    print("oyeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+    print(noofpages)
+
+    file_name = os.path.basename(answerfile.name)
+
+    s3.upload_fileobj(b, "mimamsauploadedanswers", subject+'/Q'+qnumber+'/'+team.team_id+'/'+str(noofpages)+'.jpeg')
+    af = AnswerFiles.objects.create(answer_instance=ansinst[0], answer_filename=file_name, page_no = noofpages)
+    af.save()
 
     return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 

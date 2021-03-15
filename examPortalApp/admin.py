@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User, Team, Ordering, GlobalVariables, Question, Answer
+from .models import User, Team, Ordering, GlobalVariables, Question, Answer, AnswerFiles
 
 # Register your models here.
 
@@ -12,3 +12,4 @@ admin.site.register(Ordering)
 admin.site.register(GlobalVariables)
 admin.site.register(Question)
 admin.site.register(Answer)
+admin.site.register(AnswerFiles)

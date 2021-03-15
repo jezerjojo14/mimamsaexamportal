@@ -50,3 +50,9 @@ class Answer(models.Model):
     answer_content = models.TextField(default="")
     #u=unanswered, a=answered, r=marked for review
     status = models.CharField(max_length=2, default='u')
+
+
+class AnswerFiles(models.Model):
+    answer_instance = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    answer_filename = models.TextField()
+    page_no = models.IntegerField()
