@@ -26,7 +26,7 @@
       }
       return cookieValue;
     }
-    function startTimer(datetime, display) {
+    function startTimer(datetime, displays) {
       var start = Date.now(),
         diff,
         minutes,
@@ -36,24 +36,21 @@
         diff = ((datetime - Date.now()) / 1000);
 
         // does the same job as parseInt truncates the float
-        days = (diff / (60 * 60 * 24)) | 0;
-        diff = (diff % (60 * 60 * 24)) | 0;
         hours = (diff / (60 * 60)) | 0;
         diff = (diff % (60 * 60)) | 0;
         minutes = (diff / 60) | 0;
         seconds = (diff % 60) | 0;
-        if (days > 0) {
-          display.textContent = days + " days " + hours + " hours " + minutes + " minutes and " + seconds + " seconds";
-        }
-        else if (hours > 0) {
-          display.textContent = hours + " hours " + minutes + " minutes and " + seconds + " seconds";
-        }
-        else if (minutes > 0) {
-          display.textContent = minutes + " minutes and " + seconds + " seconds";
-        }
-        else {
-          display.textContent = seconds + " seconds";
-        }
+        displays.forEach((display, i) => {
+          if (hours > 0) {
+            display.innerHTML = "<b>Timer</b>  " + hours + ":" + minutes + ":" + seconds;
+          }
+          else if (minutes > 0) {
+            display.innerHTML = "<b>Timer</b>  " + minutes + ":" + seconds;
+          }
+          else {
+            display.innerHTML = "<b>Timer</b>  " + seconds + " seconds";
+          }
+        });
         if (diff <= 0) {
           // add one second so that the count down starts at the full duration
           // example 05:00 not 04:59
@@ -75,7 +72,7 @@
       d.setUTCMinutes({{ UTCMinutes }});
       d.setUTCSeconds({{ UTCSeconds }});
       console.log(d);
-      var timer_display = document.querySelector('#time');
+      var timer_display = document.querySelectorAll('.time');
       startTimer(d.getTime(), timer_display);
       // var que_display = document.querySelector('#nav-questions')
       // display_question_numbers(que_display);
@@ -85,8 +82,13 @@
 
 
     function getQuestion(questionNumber) {
-      console.log(questionNumber);
-      window.location.href = ("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'test_no' qnumber=1 %}").length - 1) + questionNumber;
+      if (!unsaved)
+      {
+        window.location=(("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'test_no' qnumber=1 %}").length - 1) + questionNumber);
+      }
+      else {
+        saveChangesPopup(("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'test_no' qnumber=1 %}").length - 1) + questionNumber);
+      }
     }
 
     function nextQuestion() {
@@ -236,15 +238,15 @@
       form.action = url;
       form.innerHTML+='{% csrf_token %}';
       var input1 = document.createElement('input');
-      input.type = 'hidden';
-      input.name = "qnumber";
-      input.value = "{{ QNum }}";
-      form.appendChild(input);
+      input1.type = 'hidden';
+      input1.name = "qnumber";
+      input1.value = "{{ QNum }}";
+      form.appendChild(input1);
       var input2 = document.createElement('input');
-      input.type = 'file';
-      input.name = "file";
-      input.value = data;
-      form.appendChild(input);
+      input2.type = 'file';
+      input2.name = "file";
+      input2.value = data;
+      form.appendChild(input2);
       document.body.appendChild(form);
       form.submit();
     };
@@ -252,11 +254,65 @@
     redirect('{% url 'upload_answer' %}', 'post');
   }
 
+  function imgFormSubmit(e) {
+    e.preventDefault();
+    if ((("{{answer_text}}").trim()).length==0) {
+      document.getElementById('img-form').submit();
+    }
+    else {
+      openImgSubmitPopup();
+      return false;
+    }
+  }
 
+  function txtFormSubmit(e) {
+    e.preventDefault();
+    if (true) {
+      document.getElementById('txt-form').submit();
+    }
+    else {
+      openTxtSubmitPopup();
+      return false;
+    }
+  }
+
+  function openImgSubmitPopup() {
+    document.getElementById('img-submit-popup').style.display="block";
+
+  }
+
+  function openTxtSubmitPopup() {
+    document.getElementById('tex-submit-popup').style.display="block";
+  }
 
   </script>
 {% endblock %}
 
+{% block header_center %}
+<div class="time"></div>
+{% endblock %}
+
+{% block sidepane %}
+<div class="sidepane-timer">
+<div class="time"></div>
+<br><hr><br>
+</div>
+<div id="members">
+  <h3>Team id:</h3>
+  <h4>{{team.team_id}}</h4>
+  <br>
+  <h3>Team members:</h3>
+  {% for member in team.users.all %}
+  {{member}}<br>
+  {% endfor %}
+</div>
+<br><hr><br>
+<ul class="list-group">
+  <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
+  <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
+</ul>
+<br><br><br>
+{% endblock %}
 
 {% block content %}
 
@@ -269,17 +325,32 @@
   {% endif %}
 
   <div class="fluid-container">
-    <h2>The quiz will end in: <div id="time"></div>
-    </h2>
-    <hr>
     <div class="row">
-      <div class="col-lg-9">
+      <div class="col-lg-12">
         <div id="nav-questions">
           {% for i in ''|center:QCount %}
           <button onclick='getQuestion({{forloop.counter}})' class='btn {% if forloop.counter == QNum %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
           {% endfor %}
         </div>
         <div id="q-content">{{content|safe}}</div>
+        <div id="img-submit-popup" class="popup">
+          <div class="popup-message">
+            <p>
+              A text based answer was already submitted for this question. Uploading an image would delete the former.
+            </p>
+            <button onclick="document.getElementById('img-form').submit()">Continue</button>
+            <button onclick="closePopup(this)">Go back</button>
+          </div>
+        </div>
+        <div id="txt-submit-popup" class="popup">
+          <div class="popup-message">
+            <p>
+              An uploaded image was already submitted for this question. Submitting a text based answer would delete the former.
+            </p>
+            <button onclick="document.getElementById('txt-form').submit()">Continue</button>
+            <button onclick="closePopup(this)">Go back</button>
+          </div>
+        </div>
         <div id="save-changes-popup" class="popup">
           <div class="popup-message">
             <p>
@@ -295,7 +366,7 @@
               <video id="video">Video stream not available.</video>
             </div>
             <div><button id="startbutton">Take photo</button></div>
-            <div><button id="startbutton" onclick="uploadWebcamPicture()">Upload photo</button></div>
+            <div><button id="upload-photo-btn">Upload photo</button></div>
             <canvas id="canvas"></canvas>
             <div class="output">
               <img id="photo" alt="The screen capture will appear in this box.">
@@ -364,16 +435,16 @@
             <div class="card-header">
               <ul class="nav nav-tabs card-header-tabs">
                 <li class="nav-item">
-                  <a id="img-upload-tab-btn" class="nav-link active" aria-current="true" onclick="activateImgUploadForm()" href="javascript:;">Upload Images</a>
+                  <a id="img-upload-tab-btn" class="nav-link{% if answer_text == "" %} active{% endif %}" aria-current="true" onclick="activateImgUploadForm()" href="javascript:;">Upload Images</a>
                 </li>
                 <li class="nav-item">
-                  <a id="typebox-upload-tab-btn" class="nav-link" aria-current="true" onclick="activateTextboxForm()" href="javascript:;">Type answer</a>
+                  <a id="typebox-upload-tab-btn" class="nav-link{% if answer_text != "" %} active{% endif %}" aria-current="true" onclick="activateTextboxForm()" href="javascript:;">Type answer</a>
                 </li>
               </ul>
             </div>
             <div class="card-body">
-              <div id="img-upload-tab-body">
-                <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
+              <div id="img-upload-tab-body" style="display: {% if answer_text != "" %}none{% else %}block{% endif %}">
+                <form id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data" onsubmit="return imgFormSubmit(event);">
                   {% csrf_token %}
                   <div class="fieldWrapper" id="fileFieldWrapper">
                     <label for="id_file">Browse images:</label>
@@ -389,8 +460,8 @@
 
                 </div>
               </div>
-              <div id="typebox-upload-tab-body" style="display: none">
-                <form action="{% url 'upload_text_answer' %}" method="post">
+              <div id="typebox-upload-tab-body" style="display: {% if answer_text == "" %}none{% else %}block{% endif %}">
+                <form id="txt-form" action="{% url 'upload_text_answer' %}" method="post" onsubmit="return txtFormSubmit(event);">
                   {% csrf_token %}
                   <textarea oninput="answerChange()" autocomplete="off" id="answer-textarea" style="resize: both" name="answer_text" rows="8" cols="50">{{answer_text}}</textarea>
                   <br>
@@ -422,16 +493,16 @@
             <div class="card-header">
               <ul class="nav nav-tabs card-header-tabs">
                 <li class="nav-item">
-                  <a id="img-upload-tab-btn" class="nav-link active" aria-current="true" onclick="activateImgUploadForm()" href="javascript:;">Upload Images</a>
+                  <a id="img-upload-tab-btn" class="nav-link{% if answer_text == "" %} active{% endif %}" aria-current="true" onclick="activateImgUploadForm()" href="javascript:;">Upload Images</a>
                 </li>
                 <li class="nav-item">
-                  <a id="typebox-upload-tab-btn" class="nav-link" aria-current="true" onclick="activateTextboxForm()" href="javascript:;">Type answer</a>
+                  <a id="typebox-upload-tab-btn" class="nav-link{% if answer_text != "" %} active{% endif %}" aria-current="true" onclick="activateTextboxForm()" href="javascript:;">Type answer</a>
                 </li>
               </ul>
             </div>
             <div class="card-body">
-              <div id="img-upload-tab-body">
-                <form action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
+              <div id="img-upload-tab-body" style="display: {% if answer_text != "" %}none{% else %}block{% endif %}">
+                <form id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data" onsubmit="return imgFormSubmit(event);">
                   {% csrf_token %}
                   <div class="fieldWrapper" id="fileFieldWrapper">
                     <label for="id_file">Upload answers:</label>
@@ -440,14 +511,15 @@
                   <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
                   <input type="submit" name="" value="Submit">
                 </form>
+                <button id="open-cam-btn" type="button">Use webcam</button>
                 <br>
                 <h6>Uploaded Answers:</h6>
                 <div id="uploadedAnswers">
 
                 </div>
               </div>
-              <div id="typebox-upload-tab-body" style="display: none">
-                <form action="{% url 'upload_text_answer' %}" method="post">
+              <div id="typebox-upload-tab-body" style="display: {% if answer_text == "" %}none{% else %}block{% endif %}">
+                <form id="txt-form" action="{% url 'upload_text_answer' %}" method="post" onsubmit="return txtFormSubmit(event);">
                   {% csrf_token %}
                   <textarea oninput="answerChange()" autocomplete="off" id="answer-textarea" style="resize: both" name="answer_text" rows="8" cols="50">{{answer_text}}</textarea>
                   <br>
@@ -475,7 +547,7 @@
           </div>
         </div>
       </div>
-      <div id="members" class="col-lg-3">
+      <!-- <div id="members" class="col-lg-3">
         <h3>Team id:</h3>
         <h4>{{team.team_id}}</h4>
         <br>
@@ -483,8 +555,14 @@
         {% for member in team.users.all %}
         {{member}}<br>
         {% endfor %}
-      </div>
+      </div> -->
     </div>
   </div>
+  {% if QType == 's' %}
   <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
+  {% elif QType == 't' %}
+    {% if selected_options|length != 0 %}
+    <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
+    {% endif %}
+  {% endif %}
 {% endblock %}

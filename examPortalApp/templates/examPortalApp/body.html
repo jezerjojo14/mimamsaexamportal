@@ -12,7 +12,7 @@
 
     {% block script %}
     {% endblock %}
-    
+
     <!-- common script for collapsible menu -->
     <script type="text/javascript" src="{% static 'examPortalApp/js/menu.js' %}"></script>
 
@@ -21,7 +21,7 @@
       {% if user.is_authenticated %}
       <!-- Add header and menu elements here -->
       <header class="s-header">
-        
+
         <!-- <div class="header-logo">
             <a class="site-logo" href="http://mimamsa.iiserpune.ac.in">
                 <img src="http://mimamsa.iiserpune.ac.in/images/mimamsawhite.png" alt="Homepage">
@@ -33,10 +33,16 @@
             </a>
         </div> -->
         <div id="logo" class="pull-left">
-          <a href="#"><img src="http://mimamsa.iiserpune.ac.in/images/mimamsawhite.png" alt="" title="" /></a>
-          <a href="#"><img src="http://mimamsa.iiserpune.ac.in/images/prajwhite.png" alt="" title="" /></a>
+          <img src="http://mimamsa.iiserpune.ac.in/images/mimamsawhite.png" alt="" title="" />
+          <img src="http://mimamsa.iiserpune.ac.in/images/prajwhite.png" alt="" title="" />
         </div>
-        
+
+        <div class="header-center">
+          {% block header_center %}
+          Mimamsa Exam Portal
+          {% endblock %}
+        </div>
+
         <div id="menu" class="sidenav closed">
           <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
 
@@ -49,16 +55,16 @@
             {{member}}<br>
             {% endfor %}
           </div> -->
+          {% block sidepane %}
           <ul class="list-group">
-            <li class=""><a href="../">Dashboard</a></li>
-            <li class=""><a href="{% url 'change_password' %}">Change Password</a></li>
-            <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
+            <li class=""><a href="mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
           </ul>
+          {% endblock %}
         </div>
 
-      <div class="sidepane"><p onclick="openNav()">MENU &#9776;</p></div>
+      <div class="sidepane" onclick="openNav()"><p>&#9776;</p></div>
 
-      
+
       </header>
       {% endif %}
 
@@ -68,9 +74,10 @@
       <footer>
         <div class="fluid-container">
           <hr>
-          <h2>Mimamsa 2021</h2>
+          <br>
+          In case of technical difficulties, contact +917994104661
+          <br>
         </div>
       </footer>
-
     </body>
 </html>

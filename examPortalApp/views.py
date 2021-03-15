@@ -382,7 +382,23 @@ def submit_TT(request):
 def upload_text_answer(request):
     q=Question.objects.get(question_number=request.POST["qnumber"])
     qnumber=request.POST["qnumber"]
+    subject=q.question_subject
     a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+    user=request.user
+    team=user.team_set.first()
+
+    s3 = boto3.client('s3')
+
+    response = s3.list_objects_v2(
+        Bucket='mimamsauploadedanswers',
+        Prefix =subject+'/Q'+str(qnumber)+'/'+team.team_id,
+        MaxKeys=100)
+
+    if "Contents" in response:
+        for i in range(len(response["Contents"])):
+            s3.delete_object(Bucket="mimamsauploadedanswers", Key=(subject+'/Q'+qnumber+'/'+team.team_id+'/'+str(i)+'.jpeg'))
+
+
     if q.question_type=='s':
         a.answer_content=request.POST["answer_text"]
     elif q.question_type=='t':
@@ -397,7 +413,6 @@ def upload_answer(request):
     team=user.team_set.first()
     print(request.POST)
     answerfile=request.FILES["file"]
-
     qnumber=request.POST["qnumber"]
     try:
         q=Question.objects.get(question_number=int(qnumber))
@@ -406,6 +421,14 @@ def upload_answer(request):
         print(qnumber)
         raise Http404;
     subject=q.question_subject
+
+    if q.question_type=='s':
+        print("TEEEEEESSSSTTTIIINNNGGGGG")
+        a.answer_content=""
+    elif q.question_type=='t':
+        a.answer_content=[(ast.literal_eval(a.answer_content))[0], ""]
+    a.save()
+
     if team is None:
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
     #Resize and compress uploaded image

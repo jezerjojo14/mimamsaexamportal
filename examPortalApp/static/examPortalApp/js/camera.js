@@ -94,5 +94,8 @@
     document.getElementById('open-cam-btn').onclick = ()=>{
       camStartup();
     };
+    document.getElementById('upload-photo-btn').onclick = ()=>{
+      uploadWebcamPicture();
+    };
   })
 })();
