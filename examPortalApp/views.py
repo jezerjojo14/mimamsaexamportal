@@ -287,7 +287,7 @@ def open_test(request, qnumber=None, message=""):
 
 
 @login_required
-def get_answers(request, page_no, qnumber):
+def get_answers(request, qnumber):
 
     team=request.user.team_set.first()
 
