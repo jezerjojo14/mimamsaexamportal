@@ -1,0 +1,46 @@
+<div class="card">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs">
+      <li class="nav-item">
+        <a id="img-upload-tab-btn" class="nav-link{% if answer_text == "" %} active{% endif %}" aria-current="true" onclick="activateImgUploadForm()" href="javascript:;">Upload Images</a>
+      </li>
+      <li class="nav-item">
+        <a id="typebox-upload-tab-btn" class="nav-link{% if answer_text != "" %} active{% endif %}" aria-current="true" onclick="activateTextboxForm()" href="javascript:;">Type answer</a>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+    <div id="img-upload-tab-body" style="display: {% if answer_text != "" %}none{% else %}block{% endif %}">
+      <form id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data" onsubmit="return imgFormSubmit(event);">
+        {% csrf_token %}
+        <div class="fieldWrapper" id="fileFieldWrapper">
+          <label for="id_file"><b>Upload answers:</b></label>
+          <br>
+          <input type="file" name="file" required id="id_file" accept="image/*">
+        </div>
+        <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
+        <input type="submit" name="" value="Submit">
+      </form>
+      <br>
+      <button id="open-cam-btn" type="button">Use webcam</button>
+      <br><br>
+      <h6><b>Uploaded Answers:</b></h6>
+      <div id="uploadedAnswers">
+        {% for file in uploaded_files %}
+        <div id="file{{forloop.counter}}" class="uploaded-file">
+          {{ forloop.counter }}. {{file}}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div id="typebox-upload-tab-body" style="display: {% if answer_text == "" %}none{% else %}block{% endif %}">
+      <form id="txt-form" action="{% url 'upload_text_answer' %}" method="post" onsubmit="return txtFormSubmit(event);">
+        {% csrf_token %}
+        <textarea oninput="answerChange()" autocomplete="off" id="answer-textarea" style="resize: both" name="answer_text" rows="8" cols="50">{{answer_text}}</textarea>
+        <br>
+        <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
+        <input type="submit" name="" value="Submit">
+      </form>
+    </div>
+  </div>
+</div>

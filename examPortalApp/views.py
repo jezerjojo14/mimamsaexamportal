@@ -287,7 +287,7 @@ def open_test(request, qnumber=None, message=""):
 
 
 @login_required
-def get_answers(request, qnumber):
+def get_answer(request, page_no, qnumber):
 
     team=request.user.team_set.first()
 
@@ -299,24 +299,23 @@ def get_answers(request, qnumber):
             Bucket='mimamsauploadedanswers',
             Prefix =subject+'/Q'+str(q.question_number)+'/'+team.team_id,
             MaxKeys=100 )
-    print(response)
-    images=[]
-    if "Contents" in response:
-        for i in range(len(response["Contents"])):
-            fh = io.BytesIO()
 
-            # Initialise a downloader object to download the file
-            s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.question_number)+'/'+team.team_id+'/'+str(i)+'.jpeg', fh)
+    image=""
 
-            fh.seek(0)
+    if "Contents" in response and page_no<len(response["Contents"]):
+        fh = io.BytesIO()
 
-            prefix = 'data:image/jpeg;base64,'
-            contents=fh.read()
-            data_url = prefix + str((base64.b64encode(contents)).decode('ascii'))
-            images+=[data_url]
+        # Initialise a downloader object to download the file
+        s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.question_number)+'/'+team.team_id+'/'+str(page_no)+'.jpeg', fh)
 
-    #Pass the list of data blob text in a JSON response
-    return JsonResponse({"images":images})
+        fh.seek(0)
+
+        prefix = 'data:image/jpeg;base64,'
+        contents=fh.read()
+        data_url = prefix + str((base64.b64encode(contents)).decode('ascii'))
+        image=data_url
+
+    return JsonResponse({"image":image})
 
 @login_required
 def get_m_answers(request, qnumber):

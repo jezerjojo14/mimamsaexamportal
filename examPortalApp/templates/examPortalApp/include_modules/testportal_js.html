@@ -1,0 +1,284 @@
+
+  <script type="text/javascript">
+
+    var unsaved=false;
+
+    function answerChange() {
+      unsaved=true;
+    }
+
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = jQuery.trim(cookies[i]);
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    function startTimer(datetime, displays) {
+      var start = Date.now(),
+        diff,
+        minutes,
+        seconds;
+      function timer() {
+
+        diff = ((datetime - Date.now()) / 1000);
+
+        // does the same job as parseInt truncates the float
+        hours = (diff / (60 * 60)) | 0;
+        diff = (diff % (60 * 60)) | 0;
+        minutes = (diff / 60) | 0;
+        seconds = (diff % 60) | 0;
+        displays.forEach((display, i) => {
+          if (hours > 0) {
+            display.innerHTML = "<b>Timer</b>  " + hours + ":" + minutes + ":" + seconds;
+          }
+          else if (minutes > 0) {
+            display.innerHTML = "<b>Timer</b>  " + minutes + ":" + seconds;
+          }
+          else {
+            display.innerHTML = "<b>Timer</b>  " + seconds + " seconds";
+          }
+        });
+        if (diff <= 0) {
+          // add one second so that the count down starts at the full duration
+          // example 05:00 not 04:59
+          start = Date.now() + 1000;
+        }
+      };
+      // we don't want to wait a full second before the timer starts
+      timer();
+      setInterval(timer, 1000);
+    };
+
+
+    window.onload = function () {
+      var d = new Date();
+      d.setUTCDate({{ UTCDate }});
+      d.setUTCMonth({{ UTCMonth }}-1);
+      d.setUTCFullYear({{ UTCYear }});
+      d.setUTCHours({{ UTCHours }});
+      d.setUTCMinutes({{ UTCMinutes }});
+      d.setUTCSeconds({{ UTCSeconds }});
+      console.log(d);
+      var timer_display = document.querySelectorAll('.time');
+      startTimer(d.getTime(), timer_display);
+      // var que_display = document.querySelector('#nav-questions')
+      // display_question_numbers(que_display);
+    };
+
+    var currentQNo;
+
+
+    function getQuestion(questionNumber) {
+      if (!unsaved)
+      {
+        window.location=(("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'test_no' qnumber=1 %}").length - 1) + questionNumber);
+      }
+      else {
+        saveChangesPopup(("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'test_no' qnumber=1 %}").length - 1) + questionNumber);
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQNo < {{ QCount }})
+      {
+        currentQNo += 1;
+        getQuestion(currentQNo);
+        // Qactive(currentQNo);
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQNo > 1) {
+        currentQNo -= 1;
+        getQuestion(currentQNo);
+        // Qactive(currentQNo);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      currentQNo = {{ QNum }};
+      if (currentQNo == 1) {
+        document.getElementById('prev').setAttribute("disabled", "disabled")
+      }
+      if (currentQNo == {{ QCount }})
+      {
+        document.getElementById('next').setAttribute("disabled", "disabled");
+      }
+      {% if QType != 'm' %}
+      fetchAnswers();
+      {% endif %}
+      // getQuestion(currentQNo);
+    });
+
+    function saveChangesPopup(url) {
+      document.getElementById('save-changes-popup').style.display="block";
+      document.getElementById('save-changes-popup-continue').onclick=()=>{
+        window.location=url;
+      };
+    }
+
+    function closePopup(ele) {
+      ele.closest('.popup').style.display="none";
+    }
+
+    function markAnswered() {
+      if (!unsaved)
+      {
+        window.location=(("{% url 'answered' qnumber=1 %}").substring(0, ("{% url 'answered' qnumber=1 %}").length - 1) + currentQNo);
+      }
+      else {
+        saveChangesPopup(("{% url 'answered' qnumber=1 %}").substring(0, ("{% url 'answered' qnumber=1 %}").length - 1) + currentQNo);
+      }
+    }
+
+    function markReview() {
+      if (!unsaved) {
+        window.location=(("{% url 'review' qnumber=1 %}").substring(0, ("{% url 'review' qnumber=1 %}").length - 1) + currentQNo);
+      }
+      else {
+        saveChangesPopup(("{% url 'review' qnumber=1 %}").substring(0, ("{% url 'review' qnumber=1 %}").length - 1) + currentQNo);
+      }
+    }
+
+    function markUnanswered() {
+      if (!unsaved) {
+        window.location=(("{% url 'unanswered' qnumber=1 %}").substring(0, ("{% url 'unanswered' qnumber=1 %}").length - 1) + currentQNo);
+      }
+      else {
+        saveChangesPopup(("{% url 'unanswered' qnumber=1 %}").substring(0, ("{% url 'unanswered' qnumber=1 %}").length - 1) + currentQNo);
+      }
+    }
+
+    {% if QType != 'm' %}
+    function fetchAnswers() {
+      // document.getElementById('uploadedAnswers').innerHTML = "Loading";
+      // fetch()
+      //   .then(response => response.json())
+      //   .then((data) => {
+      //     document.getElementById('uploadedAnswers').innerHTML = "";
+      //     var URIList = data["images"];
+      //     for (var i = 0; i < URIList.length; i++) {
+      //       var URI = URIList[i];
+      //       document.getElementById('uploadedAnswers').innerHTML += "<img width='200' src='" + URI + "'>";
+      //     }
+      //   })
+    }
+    {% endif %}
+
+    function resetForm(form) {
+    // clearing inputs
+      answerChange();
+      var inputs = form.getElementsByTagName('input');
+      for (var i = 0; i<inputs.length; i++) {
+          switch (inputs[i].type) {
+              // case 'hidden':
+              case 'text':
+                  inputs[i].value = '';
+                  break;
+              case 'radio':
+              case 'checkbox':
+                  inputs[i].checked = false;
+          }
+      }
+
+      // clearing selects
+      var selects = form.getElementsByTagName('select');
+      for (var i = 0; i<selects.length; i++)
+          selects[i].selectedIndex = 0;
+
+      // clearing textarea
+      var text= form.getElementsByTagName('textarea');
+      for (var i = 0; i<text.length; i++)
+          text[i].innerHTML= '';
+
+      return false;
+  }
+
+  function activateTextboxForm() {
+    document.getElementById('typebox-upload-tab-body').style.display="block";
+    document.getElementById('img-upload-tab-body').style.display="none";
+    document.getElementById('typebox-upload-tab-btn').classList.add('active');
+    document.getElementById('img-upload-tab-btn').classList.remove('active');
+    return false;
+  }
+
+  function activateImgUploadForm() {
+    document.getElementById('typebox-upload-tab-body').style.display="none";
+    document.getElementById('img-upload-tab-body').style.display="block";
+    document.getElementById('typebox-upload-tab-btn').classList.remove('active');
+    document.getElementById('img-upload-tab-btn').classList.add('active');
+    return false;
+  }
+
+  function openCameraPopup() {
+    document.getElementById('camera-popup').style.display="block";
+  }
+
+  function closeCamPopup(ele) {
+    closePopup(ele);
+  }
+
+  function sendWebcamData(data) {
+    var redirect = function(url, method) {
+      var form = document.createElement('form');
+      form.method = method;
+      form.action = url;
+      form.innerHTML+='{% csrf_token %}';
+      var input1 = document.createElement('input');
+      input1.type = 'hidden';
+      input1.name = "qnumber";
+      input1.value = "{{ QNum }}";
+      form.appendChild(input1);
+      var input2 = document.createElement('input');
+      input2.type = 'file';
+      input2.name = "file";
+      input2.value = data;
+      form.appendChild(input2);
+      document.body.appendChild(form);
+      form.submit();
+    };
+
+    redirect('{% url 'upload_answer' %}', 'post');
+  }
+
+  function imgFormSubmit(e) {
+    e.preventDefault();
+    if ((("{{answer_text}}").trim()).length==0) {
+      document.getElementById('img-form').submit();
+    }
+    else {
+      openImgSubmitPopup();
+      return false;
+    }
+  }
+
+  function txtFormSubmit(e) {
+    e.preventDefault();
+    if (true) {
+      document.getElementById('txt-form').submit();
+    }
+    else {
+      openTxtSubmitPopup();
+      return false;
+    }
+  }
+
+  function openImgSubmitPopup() {
+    document.getElementById('img-submit-popup').style.display="block";
+
+  }
+
+  function openTxtSubmitPopup() {
+    document.getElementById('tex-submit-popup').style.display="block";
+  }
+
+  </script>
