@@ -239,6 +239,11 @@ h2{
 
 .popup-message {
   background-color: white;
+  max-width: max-content;
+  min-width: min-content;
+  padding: 50px;
+  overflow-y: auto;
+  max-height: 100vh;
 }
 
 #members h3{

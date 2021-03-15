@@ -12,7 +12,7 @@
       if (document.cookie && document.cookie !== '') {
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
-          var cookie = jQuery.trim(cookies[i]);
+          var cookie = cookies[i].trim();
           // Does this cookie string begin with the name we want?
           if (cookie.substring(0, name.length + 1) === (name + '=')) {
             cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
@@ -113,9 +113,6 @@
       {
         document.getElementById('next').setAttribute("disabled", "disabled");
       }
-      {% if QType != 'm' %}
-      fetchAnswers();
-      {% endif %}
       // getQuestion(currentQNo);
     });
 
@@ -158,21 +155,73 @@
       }
     }
 
-    {% if QType != 'm' %}
-    function fetchAnswers() {
-      // document.getElementById('uploadedAnswers').innerHTML = "Loading";
-      // fetch()
-      //   .then(response => response.json())
-      //   .then((data) => {
-      //     document.getElementById('uploadedAnswers').innerHTML = "";
-      //     var URIList = data["images"];
-      //     for (var i = 0; i < URIList.length; i++) {
-      //       var URI = URIList[i];
-      //       document.getElementById('uploadedAnswers').innerHTML += "<img width='200' src='" + URI + "'>";
-      //     }
-      //   })
+    function viewImage(ele) {
+      document.getElementById('view-img-popup').style.display = "block";
+      document.getElementById('answer-img-container').innerHTML = "Loading... <br>";
+      page_no=ele.parentElement.dataset.pageno;
+      fetch(("{% url 'get_answer' qnumber=1 page_no=1 %}").substring(0, ("{% url 'get_answer' qnumber=1 page_no=1 %}").length - 3) + currentQNo + '/' + page_no)
+        .then(response => response.json())
+        .then((data) => {
+          var URI = data["image"];
+          document.getElementById('answer-img-container').innerHTML = "<img src='" + URI + "'>";
+        })
     }
-    {% endif %}
+
+    function deleteImage(ele) {
+      page_no=ele.parentElement.dataset.pageno;
+      let csrftoken = getCookie('csrftoken');
+      fetch(("{% url 'del_answer' qnumber=1 page_no=1 %}").substring(0, ("{% url 'del_answer' qnumber=1 page_no=1 %}").length - 3) + currentQNo + '/' + page_no, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          "X-CSRFToken": csrftoken
+        },
+        body: null
+      })
+        .then(response => {
+          if (response.ok) {
+            location.reload();
+          }
+        })
+    }
+
+    async function moveAnswerUp(ele) {
+      let page_no=ele.parentElement.dataset.pageno;
+      let csrftoken = getCookie('csrftoken');
+      let response= await fetch("{% url 'move_up' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({"qnumber":currentQNo, "page_no": page_no})
+      })
+      if (response.ok) {
+        location.reload();
+      }
+      else {
+        console.log(response)
+      }
+    }
+
+    async function moveAnswerDown(ele) {
+      let page_no=ele.parentElement.dataset.pageno;
+      let csrftoken = getCookie('csrftoken');
+      let response= await fetch("{% url 'move_down' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({"qnumber":currentQNo, "page_no": page_no})
+      })
+      if (response.ok) {
+        location.reload();
+      }
+      else {
+        console.log(response)
+      }
+    }
 
     function resetForm(form) {
     // clearing inputs

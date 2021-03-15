@@ -4,6 +4,7 @@
 
 import boto3
 from botocore.exceptions import ClientError
+import botocore
 
 
 
@@ -39,30 +40,6 @@ import base64
 from threading import *
 
 from django.contrib import messages
-
-#Function for uploading file onto S3
-
-def upload_file(file_name, object_name=None):
-    """Upload a file to an S3 bucket
-
-    :param file_name: File to upload
-    :param bucket: Bucket to upload to
-    :param object_name: S3 object name. If not specified then file_name is used
-    :return: True if file was uploaded, else False
-    """
-
-    # If S3 object_name was not specified, use file_name
-    if object_name is None:
-        object_name = file_name
-
-        # Upload the file
-        s3_client = boto3.client('s3')
-        try:
-            response = s3_client.upload_file(file_name, "mimamsauploadedanswers", object_name)
-        except ClientError as e:
-            print("oh no")
-            return False
-        return True
 
 
 
@@ -293,6 +270,8 @@ def get_answer(request, page_no, qnumber):
 
     q=Question.objects.get(question_number=int(qnumber))
     subject=q.question_subject
+    a=Answer.objects.get(team_instance=team, question_instance=q)
+    af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no)
 
     s3 = boto3.client("s3")
     response = s3.list_objects_v2(
@@ -306,7 +285,7 @@ def get_answer(request, page_no, qnumber):
         fh = io.BytesIO()
 
         # Initialise a downloader object to download the file
-        s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.question_number)+'/'+team.team_id+'/'+str(page_no)+'.jpeg', fh)
+        s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.question_number)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg', fh)
 
         fh.seek(0)
 
@@ -316,6 +295,117 @@ def get_answer(request, page_no, qnumber):
         image=data_url
 
     return JsonResponse({"image":image})
+
+@login_required
+def del_answer(request, page_no, qnumber):
+
+    team=request.user.team_set.first()
+
+    q=Question.objects.get(question_number=int(qnumber))
+    a=Answer.objects.get(team_instance=team, question_instance=q)
+
+    subject=q.question_subject
+
+    s3 = boto3.client("s3")
+    response = s3.list_objects_v2(
+            Bucket='mimamsauploadedanswers',
+            Prefix =subject+'/Q'+str(q.question_number)+'/'+team.team_id,
+            MaxKeys=100 )
+
+
+    if "Contents" in response and page_no<len(response["Contents"]):
+        af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no)
+        filename=af.answer_filename
+        noofpages = AnswerFiles.objects.filter(answer_instance = a).count()
+
+        s3.delete_object(Bucket='mimamsauploadedanswers', Key=subject+'/Q'+str(q.question_number)+'/'+team.team_id+'/'+filename+'.jpeg')
+        af.delete()
+
+        #noofpages=5
+        #page_no=2
+
+        # 0 1 2 3 4  ->  0 1 3 4
+        # no of iterations needed = 2 = noofpages-page_no-1
+        #First iteration: get instance with page_no 3 = page_no+i+1
+
+        for i in range(noofpages-page_no-1):
+            af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no+i+1)
+            af.page_no=page_no+i
+            af.save()
+
+        return HttpResponse(status=201)
+
+    return HttpResponse(status=404)
+
+
+@login_required
+def move_up(request):
+
+    post_data = json.loads(request.body.decode("utf-8"))
+
+    qnumber=post_data["qnumber"]
+    page_no=int(post_data["page_no"])
+
+    print(page_no)
+    print(page_no-1)
+
+    team=request.user.team_set.first()
+
+    q=Question.objects.get(question_number=int(qnumber))
+    a=Answer.objects.get(team_instance=team, question_instance=q)
+
+    print(a.pk)
+
+    subject=q.question_subject
+
+    af1=AnswerFiles.objects.get(answer_instance=a, page_no=page_no)
+    try:
+        af2=AnswerFiles.objects.get(answer_instance=a, page_no=page_no-1)
+    except Exception as e:
+        print(e)
+
+    t=af1.page_no
+    af1.page_no=af2.page_no
+    af2.page_no=t
+    af1.save()
+    af2.save()
+
+    return HttpResponse(status="201")
+
+
+@login_required
+def move_down(request):
+
+    post_data = json.loads(request.body.decode("utf-8"))
+
+    qnumber=post_data["qnumber"]
+    page_no=int(post_data["page_no"])
+
+    print(page_no)
+    print(page_no+1)
+
+    team=request.user.team_set.first()
+
+    q=Question.objects.get(question_number=int(qnumber))
+    a=Answer.objects.get(team_instance=team, question_instance=q)
+
+    subject=q.question_subject
+
+    try:
+        af1=AnswerFiles.objects.get(answer_instance=a, page_no=page_no)
+        af2=AnswerFiles.objects.get(answer_instance=a, page_no=page_no+1)
+    except:
+        print("oops")
+
+    t=af1.page_no
+    af1.page_no=af2.page_no
+    af2.page_no=t
+    af1.save()
+    af2.save()
+
+    return HttpResponse(status="201")
+
+
 
 @login_required
 def get_m_answers(request, qnumber):
@@ -385,21 +475,15 @@ def upload_text_answer(request):
     qnumber=request.POST["qnumber"]
     subject=q.question_subject
     a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
-    AnswerFiles.objects.filter(answer_instance = a).delete()
     user=request.user
     team=user.team_set.first()
 
-    s3 = boto3.client('s3')
 
-    response = s3.list_objects_v2(
-        Bucket='mimamsauploadedanswers',
-        Prefix =subject+'/Q'+str(qnumber)+'/'+team.team_id,
-        MaxKeys=100)
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket('mimamsauploadedanswers')
+    bucket.objects.filter(Prefix=subject+'/Q'+str(qnumber)+'/'+team.team_id).delete()
 
-    if "Contents" in response:
-        for i in range(len(response["Contents"])):
-            s3.delete_object(Bucket="mimamsauploadedanswers", Key=(subject+'/Q'+qnumber+'/'+team.team_id+'/'+str(i)+'.jpeg'))
-
+    AnswerFiles.objects.filter(answer_instance = a).delete()
 
     if q.question_type=='s':
         a.answer_content=request.POST["answer_text"]
@@ -454,23 +538,37 @@ def upload_answer(request):
     rgb_im.save(b, "JPEG", optimize=True, quality=70)
     b.seek(0)
 
-    s3 = boto3.client('s3')
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket('mimamsauploadedanswers')
+    suff=0
+    fn=os.path.basename(answerfile.name)
+    key = fn[0:fn.find(".")]+str(suff)
 
-    """response = s3.list_objects_v2(
-        Bucket='mimamsauploadedanswers',
-        Prefix =subject+'/Q'+str(qnumber)+'/'+team.team_id,
-        MaxKeys=100)"""
+    exists=True
+
+    while exists:
+        try:
+            s3.Object('mimamsauploadedanswers', subject+'/Q'+qnumber+'/'+team.team_id+'/'+key+".jpeg").load()
+        except botocore.exceptions.ClientError as e:
+            if e.response['Error']['Code'] == "404":
+                # The object does not exist.
+                exists=False
+            else:
+                # Something else has gone wrong.
+                raise
+        else:
+            # The object does exist.
+            suff+=1
+            key = fn[0:fn.find(".")]+str(suff)
+
 
     ansinst = Answer.objects.get_or_create(team_instance = team, question_instance = q)
     ansinst[0].save()
     noofpages = AnswerFiles.objects.filter(answer_instance = (ansinst[0])).count()
-    print("oyeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-    print(noofpages)
 
-    file_name = os.path.basename(answerfile.name)
 
-    s3.upload_fileobj(b, "mimamsauploadedanswers", subject+'/Q'+qnumber+'/'+team.team_id+'/'+str(noofpages)+'.jpeg')
-    af = AnswerFiles.objects.create(answer_instance=ansinst[0], answer_filename=file_name, page_no = noofpages)
+    bucket.upload_fileobj(b, subject+'/Q'+qnumber+'/'+team.team_id+'/'+key+'.jpeg')
+    af = AnswerFiles.objects.create(answer_instance=ansinst[0], answer_filename=key, page_no = noofpages)
     af.save()
 
     return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
