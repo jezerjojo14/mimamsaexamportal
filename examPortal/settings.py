@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +26,7 @@ SECRET_KEY = 'r0yc*776ty^e9*02oos(f44rccz%+3@zx5fv-s6uw%b05tn5wo'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', "localhost", 'env1.ap-south-1.elasticbeanstalk.com', 'examportal-dev2.ap-south-1.elasticbeanstalk.com', '172.31.12.13', 'examportal.eba-ngubpvi9.ap-south-1.elasticbeanstalk.com', 'examportal-dev.ap-south-1.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['mimamsa-quiz-portal.herokuapp.com', '127.0.0.1', "localhost", 'env1.ap-south-1.elasticbeanstalk.com', 'examportal-dev2.ap-south-1.elasticbeanstalk.com', '172.31.12.13', 'examportal.eba-ngubpvi9.ap-south-1.elasticbeanstalk.com', 'examportal-dev.ap-south-1.elasticbeanstalk.com']
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
@@ -127,3 +128,5 @@ USE_TZ = True
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+django_heroku.settings(locals())
