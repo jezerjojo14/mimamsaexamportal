@@ -803,10 +803,10 @@ def edit_question(request):
         print(('{"content":"')+(q.question_content)+('", "subject":"'+q.question_subject+'"}'))
         return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
 
-# TODO:
-@login_required
-def move_to(request):
-    pass
+
+def loader(request):
+    return HttpResponse("loaderio-bc4611489ba175954b1027ee937bd232")
+
 
 # TODO:
 @login_required

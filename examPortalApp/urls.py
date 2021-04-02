@@ -33,4 +33,6 @@ urlpatterns = [
     path('post-question', views.post_question, name="post_question"),
     path('edit-question', views.edit_question, name="edit_question"),
     path('del-question', views.delete_question, name="del_question"),
+
+    path('loaderio-bc4611489ba175954b1027ee937bd232/', views.loader)
 ]
