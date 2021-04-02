@@ -20,6 +20,7 @@ class Team(models.Model):
     users = models.ManyToManyField(User)
     college = models.CharField(max_length=200)
     zone = models.CharField(max_length=5)
+    extra_time = models.IntegerField(default=0)
 
 #This database adds an extra datum to each connection between a group and its members expressing the ordering of the users in their teams
 class Ordering(models.Model):

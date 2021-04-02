@@ -1,11 +1,20 @@
 {% extends 'examPortalApp/body.html' %}
+
+{% block sidepane %}
+<ul class="list-group">
+  <li class=""><a href="http://mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
+</ul>
+{% endblock %}
+
 {% block content %}
   <div class="fluid-container">
     <div class="login">
       <h2>Dashboard</h2>
 
+      {% if user.username != 'admin' %}
       <a href="{% url 'test_no' qnumber=1 %}">Open Test</a>
       <br>
+      {% endif %}
       <a href="{% url 'change_password' %}">Change Password</a>
       <br>
       {% if user.username == 'admin' %}

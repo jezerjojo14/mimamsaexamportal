@@ -1,5 +1,3 @@
-
-
 # S3 API
 
 import boto3
@@ -214,11 +212,11 @@ def dashboard(request):
 def open_test(request, qnumber=None, message=""):
     now = timezone.now()
     test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 0, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 30, 0))})[0]).test_start
-    test_end=GlobalVariables.objects.get(pk=1).test_end
+    team=request.user.team_set.first()
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
     q_count= Question.objects.all().count();
     q_current = 1 if (qnumber is None) else int(qnumber);
     q=Question.objects.get(question_number=qnumber)
-    team=request.user.team_set.first()
 
     #If test hasn't started yet, show the waiting page,
     #If it has started but hasn't ended, show the testportal
@@ -232,7 +230,9 @@ def open_test(request, qnumber=None, message=""):
         if q.question_type=='s':
             a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
             uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
+
             return render(request, "examPortalApp/testportal.html", {"uploaded_files":uploaded_files, "answer_text": a.answer_content, "selected_options": [], "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": [], "options": [], "QNum": q_current, "QCount": q_count, "QType": 's', "content": q.question_content, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+
         if q.question_type=='m':
             a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
             if a.answer_content=="":
@@ -265,77 +265,85 @@ def open_test(request, qnumber=None, message=""):
 
 @login_required
 def get_answer(request, page_no, qnumber):
-
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
-    q=Question.objects.get(question_number=int(qnumber))
-    subject=q.question_subject
-    a=Answer.objects.get(team_instance=team, question_instance=q)
-    af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no)
+    if now<test_end and now>test_start:
 
-    s3 = boto3.client("s3")
-    response = s3.list_objects_v2(
-            Bucket='mimamsauploadedanswers',
-            Prefix =subject+'/Q'+str(q.question_number)+'/'+team.team_id,
-            MaxKeys=100 )
+        q=Question.objects.get(question_number=int(qnumber))
+        subject=q.question_subject
+        a=Answer.objects.get(team_instance=team, question_instance=q)
+        af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no)
 
-    image=""
+        s3 = boto3.client("s3")
+        response = s3.list_objects_v2(
+                Bucket='mimamsauploadedanswers',
+                Prefix =subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg',
+                MaxKeys=100 )
 
-    if "Contents" in response and page_no<len(response["Contents"]):
-        fh = io.BytesIO()
+        image=""
 
-        # Initialise a downloader object to download the file
-        s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.question_number)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg', fh)
+        if "Contents" in response:
+            fh = io.BytesIO()
 
-        fh.seek(0)
+            # Initialise a downloader object to download the file
+            s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg', fh)
+            fh.seek(0)
 
-        prefix = 'data:image/jpeg;base64,'
-        contents=fh.read()
-        data_url = prefix + str((base64.b64encode(contents)).decode('ascii'))
-        image=data_url
+            prefix = 'data:image/jpeg;base64,'
+            contents=fh.read()
+            image = prefix + str((base64.b64encode(contents)).decode('ascii'))
+        else:
+            af.delete()
 
-    return JsonResponse({"image":image})
+        return JsonResponse({"image":image})
 
 @login_required
 def del_answer(request, page_no, qnumber):
-
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
-    q=Question.objects.get(question_number=int(qnumber))
-    a=Answer.objects.get(team_instance=team, question_instance=q)
+    if now<test_end and now>test_start:
 
-    subject=q.question_subject
+        q=Question.objects.get(question_number=int(qnumber))
+        a=Answer.objects.get(team_instance=team, question_instance=q)
 
-    s3 = boto3.client("s3")
-    response = s3.list_objects_v2(
-            Bucket='mimamsauploadedanswers',
-            Prefix =subject+'/Q'+str(q.question_number)+'/'+team.team_id,
-            MaxKeys=100 )
+        subject=q.question_subject
+
+        s3 = boto3.client("s3")
+        response = s3.list_objects_v2(
+                Bucket='mimamsauploadedanswers',
+                Prefix =subject+'/Q'+str(q.id)+'/'+team.team_id,
+                MaxKeys=100 )
 
 
-    if "Contents" in response and page_no<len(response["Contents"]):
-        af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no)
-        filename=af.answer_filename
-        noofpages = AnswerFiles.objects.filter(answer_instance = a).count()
+        if "Contents" in response and page_no<len(response["Contents"]):
+            af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no)
+            filename=af.answer_filename
+            noofpages = AnswerFiles.objects.filter(answer_instance = a).count()
 
-        s3.delete_object(Bucket='mimamsauploadedanswers', Key=subject+'/Q'+str(q.question_number)+'/'+team.team_id+'/'+filename+'.jpeg')
-        af.delete()
+            s3.delete_object(Bucket='mimamsauploadedanswers', Key=subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+filename+'.jpeg')
+            af.delete()
 
-        #noofpages=5
-        #page_no=2
+            #noofpages=5
+            #page_no=2
 
-        # 0 1 2 3 4  ->  0 1 3 4
-        # no of iterations needed = 2 = noofpages-page_no-1
-        #First iteration: get instance with page_no 3 = page_no+i+1
+            # 0 1 2 3 4  ->  0 1 3 4
+            # no of iterations needed = 2 = noofpages-page_no-1
+            #First iteration: get instance with page_no 3 = page_no+i+1
 
-        for i in range(noofpages-page_no-1):
-            af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no+i+1)
-            af.page_no=page_no+i
-            af.save()
+            for i in range(noofpages-page_no-1):
+                af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no+i+1)
+                af.page_no=page_no+i
+                af.save()
 
-        return HttpResponse(status=201)
+            return HttpResponse(status=201)
 
-    return HttpResponse(status=404)
+        return HttpResponse(status=404)
 
 
 @login_required
@@ -409,225 +417,275 @@ def move_down(request):
 
 @login_required
 def get_m_answers(request, qnumber):
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
-    q=Question.objects.get(question_number=int(qnumber))
-    try:
-        a=Answer.objects.get(team_instance=team, question_instance=q)
-        return JsonResponse({"answers":ast.literal_eval(a.answer_content)})
-    except:
-        return JsonResponse({"answers": []})
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+
+    if now<test_end and now>test_start:
+        q=Question.objects.get(question_number=int(qnumber))
+        try:
+            a=Answer.objects.get(team_instance=team, question_instance=q)
+            return JsonResponse({"answers":ast.literal_eval(a.answer_content)})
+        except:
+            return JsonResponse({"answers": []})
 
 
 @login_required
 def get_t_answers(request, qnumber):
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
-    q=Question.objects.get(question_number=int(qnumber))
-    try:
-        a=Answer.objects.get(team_instance=team, question_instance=q)
-        l=ast.literal_eval(a.answer_content)
-        if len(l)==1:
-            return JsonResponse({"choice":l[0][0], "text": ""})
-        else:
-            return JsonResponse({"choice":l[0][0], "text": l[1]})
-    except:
-        return JsonResponse({"choice":-1, "images": [], "text": ""})
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+
+    if now<test_end and now>test_start:
+        q=Question.objects.get(question_number=int(qnumber))
+        try:
+            a=Answer.objects.get(team_instance=team, question_instance=q)
+            l=ast.literal_eval(a.answer_content)
+            if len(l)==1:
+                return JsonResponse({"choice":l[0][0], "text": ""})
+            else:
+                return JsonResponse({"choice":l[0][0], "text": l[1]})
+        except:
+            return JsonResponse({"choice":-1, "images": [], "text": ""})
 
 
 @login_required
 def submit_MCQ(request):
-    qnumber=request.POST["qnumber"]
-    i=1
-    answer=[]
-    while "choice-"+str(i) in request.POST:
-        answer+=[int(request.POST["choice-"+str(i)])]
-        i+=1
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
+    test_end=GlobalVariables.objects.get(pk=1).test_end
 
-    q=Question.objects.get(question_number=request.POST["qnumber"])
-    a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
-    a.answer_content=str(answer)
-    if len(answer)!=0:
-        a.status='a'
-    elif a.status=='a':
-        a.status='u'
-    a.save()
-    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    if now<test_end and now>test_start:
+        qnumber=request.POST["qnumber"]
+        i=1
+        answer=[]
+        while "choice-"+str(i) in request.POST:
+            answer+=[int(request.POST["choice-"+str(i)])]
+            i+=1
+
+        q=Question.objects.get(question_number=request.POST["qnumber"])
+        a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
+        a.answer_content=str(answer)
+        if len(answer)!=0:
+            a.status='a'
+        elif a.status=='a':
+            a.status='u'
+        a.save()
+        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 #This function is for saving the choice, not the explanation. The latter is handled by upload_answer/upload_text_answer
 @login_required
 def submit_TT(request):
-    i=1
-    answer=[[], ""]
-    if "choice" in request.POST:
-        answer[0]=[int(request.POST["choice"])]
-    q=Question.objects.get(question_number=request.POST["qnumber"])
-    qnumber=request.POST["qnumber"]
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
+    test_end=GlobalVariables.objects.get(pk=1).test_end
 
-    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
-    if a.answer_content!="":
-        answer[1]=(ast.literal_eval(a.answer_content))[1]
-    a.answer_content=str(answer)
-    a.save()
-    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    if now<test_end and now>test_start:
+        i=1
+        answer=[[], ""]
+        if "choice" in request.POST:
+            answer[0]=[int(request.POST["choice"])]
+        q=Question.objects.get(question_number=request.POST["qnumber"])
+        qnumber=request.POST["qnumber"]
+
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
+        if a.answer_content!="":
+            answer[1]=(ast.literal_eval(a.answer_content))[1]
+        a.answer_content=str(answer)
+        a.save()
+        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 @login_required
 def upload_text_answer(request):
-    q=Question.objects.get(question_number=request.POST["qnumber"])
-    qnumber=request.POST["qnumber"]
-    subject=q.question_subject
-    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
-    user=request.user
-    team=user.team_set.first()
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
+    test_end=GlobalVariables.objects.get(pk=1).test_end
+
+    if now<test_end and now>test_start:
+        q=Question.objects.get(question_number=request.POST["qnumber"])
+        qnumber=request.POST["qnumber"]
+        subject=q.question_subject
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+        user=request.user
 
 
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket('mimamsauploadedanswers')
-    bucket.objects.filter(Prefix=subject+'/Q'+str(qnumber)+'/'+team.team_id).delete()
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket('mimamsauploadedanswers')
+        bucket.objects.filter(Prefix=subject+'/Q'+str(q.id)+'/'+team.team_id).delete()
 
-    AnswerFiles.objects.filter(answer_instance = a).delete()
+        AnswerFiles.objects.filter(answer_instance = a).delete()
 
-    if q.question_type=='s':
-        a.answer_content=request.POST["answer_text"]
-    elif q.question_type=='t':
-        a.answer_content=[(ast.literal_eval(a.answer_content))[0], request.POST["answer_text"]]
-    a.save()
-    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        if q.question_type=='s':
+            a.answer_content=request.POST["answer_text"]
+        elif q.question_type=='t':
+            a.answer_content=[(ast.literal_eval(a.answer_content))[0], request.POST["answer_text"]]
+        a.save()
+        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 
 @login_required
 def upload_answer(request):
-    user=request.user
-    team=user.team_set.first()
-    print(request.POST)
-    answerfile=request.FILES["file"]
-    qnumber=request.POST["qnumber"]
-    try:
-        q=Question.objects.get(question_number=int(qnumber))
-        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
-    except:
-        print(qnumber)
-        raise Http404;
-    subject=q.question_subject
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
+    team=request.user.team_set.first()
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
-    if q.question_type=='s':
-        a.answer_content=""
-    elif q.question_type=='t':
-        a.answer_content=[(ast.literal_eval(a.answer_content))[0], ""]
-    a.save()
-
-    if team is None:
-        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
-    #Resize and compress uploaded image
-
-    try:
-        im = Image.open(answerfile)
-        im.verify() #I perform also verify, don't know if he sees other types o defects
-        # im1.close() #reload is necessary in my case
-    except:
-        #manage exceptions here
-        messages.info(request, 'Image file corrupt or unsupported')
-        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
-    # im.seek(0)
-    im = Image.open(answerfile)
-    w, h = im.size
-    f=(250000/(w*h))**(0.5)
-
-    im=im.resize((int(w*f), int(h*f)))
-    rgb_im = im.convert("RGB")
-
-    b = io.BytesIO()
-    rgb_im.save(b, "JPEG", optimize=True, quality=70)
-    b.seek(0)
-
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket('mimamsauploadedanswers')
-    suff=0
-    fn=os.path.basename(answerfile.name)
-    key = fn[0:fn.find(".")]+str(suff)
-
-    exists=True
-
-    while exists:
+    if now<test_end and now>test_start:
+        user=request.user
+        team=user.team_set.first()
+        print(request.POST)
+        answerfile=request.FILES["file"]
+        qnumber=request.POST["qnumber"]
         try:
-            s3.Object('mimamsauploadedanswers', subject+'/Q'+qnumber+'/'+team.team_id+'/'+key+".jpeg").load()
-        except botocore.exceptions.ClientError as e:
-            if e.response['Error']['Code'] == "404":
-                # The object does not exist.
-                exists=False
+            q=Question.objects.get(question_number=int(qnumber))
+            a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+        except:
+            print(qnumber)
+            raise Http404;
+        subject=q.question_subject
+
+        if q.question_type=='s':
+            a.answer_content=""
+        elif q.question_type=='t':
+            a.answer_content=[(ast.literal_eval(a.answer_content))[0], ""]
+        a.save()
+
+        if team is None:
+            return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        #Resize and compress uploaded image
+
+        try:
+            im = Image.open(answerfile)
+            im.verify() #I perform also verify, don't know if he sees other types o defects
+            # im1.close() #reload is necessary in my case
+        except:
+            #manage exceptions here
+            messages.info(request, 'Image file corrupt or unsupported')
+            return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        # im.seek(0)
+        im = Image.open(answerfile)
+        w, h = im.size
+        f=(250000/(w*h))**(0.5)
+
+        im=im.resize((int(w*f), int(h*f)))
+        rgb_im = im.convert("RGB")
+
+        b = io.BytesIO()
+        rgb_im.save(b, "JPEG", optimize=True, quality=70)
+        b.seek(0)
+
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket('mimamsauploadedanswers')
+        suff=0
+        fn=os.path.basename(answerfile.name)
+        key = fn[0:fn.find(".")]+str(suff)
+
+        exists=True
+
+        while exists:
+            try:
+                s3.Object('mimamsauploadedanswers', subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+key+".jpeg").load()
+            except botocore.exceptions.ClientError as e:
+                if e.response['Error']['Code'] == "404":
+                    # The object does not exist.
+                    exists=False
+                else:
+                    # Something else has gone wrong.
+                    raise
             else:
-                # Something else has gone wrong.
-                raise
-        else:
-            # The object does exist.
-            suff+=1
-            key = fn[0:fn.find(".")]+str(suff)
+                # The object does exist.
+                suff+=1
+                key = fn[0:fn.find(".")]+str(suff)
 
 
-    ansinst = Answer.objects.get_or_create(team_instance = team, question_instance = q)
-    ansinst[0].save()
-    noofpages = AnswerFiles.objects.filter(answer_instance = (ansinst[0])).count()
+        ansinst = Answer.objects.get_or_create(team_instance = team, question_instance = q)
+        ansinst[0].save()
+        noofpages = AnswerFiles.objects.filter(answer_instance = (ansinst[0])).count()
 
 
-    bucket.upload_fileobj(b, subject+'/Q'+qnumber+'/'+team.team_id+'/'+key+'.jpeg')
-    af = AnswerFiles.objects.create(answer_instance=ansinst[0], answer_filename=key, page_no = noofpages)
-    af.save()
+        bucket.upload_fileobj(b, subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+key+'.jpeg')
+        af = AnswerFiles.objects.create(answer_instance=ansinst[0], answer_filename=key, page_no = noofpages)
+        af.save()
 
-    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 
 # TODO:
-@login_required
-def end_test(request):
-    pass
+# @login_required
+# def end_test(request):
+#     pass
 
 
 @login_required
 def mark_for_review(request, qnumber):
-    user=request.user
-    team=user.team_set.first()
-    q=Question.objects.get(question_number=int(qnumber))
-    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
-    a.status='r'
-    a.save()
-    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
+    test_end=GlobalVariables.objects.get(pk=1).test_end
+
+    if now<test_end and now>test_start:
+        user=request.user
+        q=Question.objects.get(question_number=int(qnumber))
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+        a.status='r'
+        a.save()
+        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 @login_required
 def mark_as_answered(request, qnumber):
-    user=request.user
-    team=user.team_set.first()
-    q=Question.objects.get(question_number=int(qnumber))
-    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
-    a.status='a'
-    a.save()
-    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
+    team=request.user.team_set.first()
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+
+    if now<test_end and now>test_start:
+        user=request.user
+        team=user.team_set.first()
+        q=Question.objects.get(question_number=int(qnumber))
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+        a.status='a'
+        a.save()
+        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 @login_required
 def mark_as_unanswered(request, qnumber):
-    user=request.user
-    team=user.team_set.first()
-    q=Question.objects.get(question_number=int(qnumber))
-    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
-    if a.question_instance.question_type=='m':
-        if a.answer_content=="[]":
-            a.status='u'
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
+    test_end=GlobalVariables.objects.get(pk=1).test_end
+
+    if now<test_end and now>test_start:
+        user=request.user
+        q=Question.objects.get(question_number=int(qnumber))
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+        if a.question_instance.question_type=='m':
+            if a.answer_content=="[]":
+                a.status='u'
+            else:
+                a.status='a'
         else:
-            a.status='a'
-    else:
-        a.status='u'
-    a.save()
-    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+            a.status='u'
+        a.save()
+        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 
 @login_required
 def clear_t_options(request, qnumber):
-    user=request.user
-    team=user.team_set.first()
-    q=Question.objects.get(question_number=int(qnumber))
-    a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
-    a.answer_content=str([[], (ast.literal_eval(a.answer_content))[1]])
-    if a.status=='a':
-        a.status='u';
-    a.save()
-    return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    now = timezone.now()
+    test_start=GlobalVariables.objects.get(pk=1).test_start
+    team=request.user.team_set.first()
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+
+    if now<test_end and now>test_start:
+        user=request.user
+        team=user.team_set.first()
+        q=Question.objects.get(question_number=int(qnumber))
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+        a.answer_content=str([[], (ast.literal_eval(a.answer_content))[1]])
+        if a.status=='a':
+            a.status='u';
+        a.save()
+        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 
 
@@ -689,7 +747,6 @@ def post_question(request):
 
 
 
-# TODO:
 @login_required
 def delete_question(request):
     if request.user.username=="admin":

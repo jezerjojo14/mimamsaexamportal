@@ -38,6 +38,7 @@
 
           {% block sidepane %}
           <ul class="list-group">
+            <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
             <li class=""><a href="http://mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
           </ul>
           {% endblock %}
@@ -52,13 +53,16 @@
       {% block content %}
       {% endblock %}
 
-      <footer>
-        <div class="fluid-container">
-          <hr>
-          <br>
-          In case of technical difficulties, contact +917994104661
-          <br>
-        </div>
-      </footer>
+      <footer style="background-color: #333">
+
+          <div class="footer-bottom">
+
+              <div class="col-twelve">
+                  <span>In case of technical difficulties, contact +917994104661 </span>
+              </div>
+
+          </div> <!-- end footer-bottom -->
+
+      </footer> <!-- end footer -->
     </body>
 </html>
