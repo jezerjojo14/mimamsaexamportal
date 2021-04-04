@@ -331,7 +331,7 @@
 
   function imgFormSubmit(e) {
     e.preventDefault();
-    if ((("{{answer_text}}").trim()).length==0) {
+    if ((("{{answer_text|br}}").trim()).length==0) {
       document.getElementById('img-form').submit();
     }
     else {
@@ -342,7 +342,7 @@
 
   function txtFormSubmit(e) {
     e.preventDefault();
-    if (true) {
+    if ((("{{answer_text|br}}").trim()).length!=0) {
       document.getElementById('txt-form').submit();
     }
     else {
