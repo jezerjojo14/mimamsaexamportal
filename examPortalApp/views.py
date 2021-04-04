@@ -456,6 +456,7 @@ def submit_MCQ(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
     test_end=GlobalVariables.objects.get(pk=1).test_end
+    team=request.user.team_set.first()
 
     if now<test_end and now>test_start:
         qnumber=request.POST["qnumber"]
@@ -481,6 +482,7 @@ def submit_TT(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
     test_end=GlobalVariables.objects.get(pk=1).test_end
+    team=request.user.team_set.first()
 
     if now<test_end and now>test_start:
         i=1
@@ -502,6 +504,7 @@ def upload_text_answer(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
     test_end=GlobalVariables.objects.get(pk=1).test_end
+    team=request.user.team_set.first()
 
     if now<test_end and now>test_start:
         q=Question.objects.get(question_number=request.POST["qnumber"])
