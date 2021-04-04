@@ -21,8 +21,8 @@
         <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
         <input type="submit" name="" value="Submit">
       </form>
-      <br>
-      <button id="open-cam-btn" type="button">Use webcam</button>
+      <!-- <br>
+      <button id="open-cam-btn" type="button">Use webcam</button> -->
       <br><br>
       <h6><b>Uploaded Answers:</b></h6>
       <div id="uploadedAnswers">
@@ -31,8 +31,12 @@
           {{ forloop.counter }}. {{file}}
           <button onclick="viewImage(this)" type="button" name="button">View</button>
           <button onclick="deleteImage(this)" type="button" name="button">Delete</button>
+          {% if forloop.counter != 1 %}
           <button onclick="moveAnswerUp(this)" type="button" name="button">Move Up</button>
+          {% endif %}
+          {% if forloop.counter != uploaded_files|length %}
           <button onclick="moveAnswerDown(this)" type="button" name="button">Move Down</button>
+          {% endif %}
         </div>
         {% endfor %}
       </div>

@@ -20,6 +20,7 @@ class Team(models.Model):
     users = models.ManyToManyField(User)
     college = models.CharField(max_length=200)
     zone = models.CharField(max_length=5)
+    extra_time = models.IntegerField(default=0)
 
 #This database adds an extra datum to each connection between a group and its members expressing the ordering of the users in their teams
 class Ordering(models.Model):
@@ -42,12 +43,12 @@ class Question(models.Model):
     question_subject = models.CharField(max_length=15)
     #s=subjective, m=mcq, t=train of thought
     question_type = models.CharField(max_length=2, default='s')
-    question_answers = models.CharField(max_length=100)
+    question_answers = models.CharField(max_length=100, default="", blank=True)
 
 class Answer(models.Model):
     team_instance = models.ForeignKey(Team, on_delete=models.CASCADE)
     question_instance = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer_content = models.TextField(default="")
+    answer_content = models.TextField(default="", blank=True)
     #u=unanswered, a=answered, r=marked for review
     status = models.CharField(max_length=2, default='u')
 

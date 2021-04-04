@@ -25,7 +25,7 @@ SECRET_KEY = 'r0yc*776ty^e9*02oos(f44rccz%+3@zx5fv-s6uw%b05tn5wo'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', "localhost", 'env1.ap-south-1.elasticbeanstalk.com', 'examportal-dev2.ap-south-1.elasticbeanstalk.com', '172.31.12.13', 'examportal.eba-ngubpvi9.ap-south-1.elasticbeanstalk.com', 'examportal-dev.ap-south-1.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['new-env.ap-south-1.elasticbeanstalk.com', '127.0.0.1', "localhost", 'env1.ap-south-1.elasticbeanstalk.com', 'examportal-dev2.ap-south-1.elasticbeanstalk.com', '172.31.12.13', 'examportal.eba-ngubpvi9.ap-south-1.elasticbeanstalk.com', 'examportal-dev.ap-south-1.elasticbeanstalk.com']
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
@@ -78,10 +78,21 @@ WSGI_APPLICATION = 'examPortal.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'mimamsa',
+        'USER': 'postgres',
+        'PASSWORD': 'mimamsaAWS14',
+        'HOST': 'database-2.cxa9mi9i4k9z.ap-south-1.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
 
