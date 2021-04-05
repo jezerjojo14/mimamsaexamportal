@@ -1,0 +1,238 @@
+{% extends 'examPortalApp/body.html' %}
+{% load static %}
+
+{% block script %}
+<script type="text/javascript">
+  function startTimer(duration, displays) {
+    var timer = duration, minutes, seconds;
+    setInterval(function () {
+        minutes = parseInt(timer / 60, 10)
+        seconds = parseInt(timer % 60, 10);
+
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        for (var i=0; i<displays.length; i++) {
+          displays[i].innerHTML = "<b>Timer</b>  " + minutes + ":" + seconds;
+        }
+        if (--timer < 0) {
+            timer = duration;
+        }
+    }, 1000);
+  }
+
+  window.onload = function () {
+    var fiveMinutes = 60 * 5;
+    var displays = document.querySelectorAll('.time');
+    startTimer(fiveMinutes, displays);
+  };
+
+  function activateTextboxForm() {
+    document.getElementById('typebox-upload-tab-body').style.display="block";
+    document.getElementById('img-upload-tab-body').style.display="none";
+    document.getElementById('typebox-upload-tab-btn').classList.add('active');
+    document.getElementById('img-upload-tab-btn').classList.remove('active');
+    return false;
+  }
+
+  function activateImgUploadForm() {
+    document.getElementById('typebox-upload-tab-body').style.display="none";
+    document.getElementById('img-upload-tab-body').style.display="block";
+    document.getElementById('typebox-upload-tab-btn').classList.remove('active');
+    document.getElementById('img-upload-tab-btn').classList.add('active');
+    return false;
+  }
+</script>
+{% endblock %}
+
+{% block header_center %}
+<div class="time"></div>
+{% endblock %}
+
+{% block sidepane %}
+<div class="sidepane-timer">
+  <div class="time"></div>
+  <br><hr><br>
+</div>
+<div id="members">
+  <h3>Team id:</h3>
+  <h4>{{team.team_id}}</h4>
+  <br>
+  <h3>Team members:</h3>
+  {% for member in team.users.all %}
+  {{member}}<br>
+  {% endfor %}
+</div>
+<br><hr><br>
+<ul class="list-group">
+  <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
+  <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
+</ul>
+<br><hr><br>
+<div style="color: #777; padding: 20px; font-size: 16px">
+  The making of this portal was led by Jezer Jojo with the immense support of Parth Gupte and Samarth Pardhi, along with contributions from Venkata Sai Sreyas Adury and Ipsa Bezbarua
+</div>
+<br><br><br>
+{% endblock %}
+
+{% block content %}
+  <div class="fluid-container">
+    <h2 style="color: #36b247">How to use the portal</h2>
+    <br>
+    <div class="instructions-body">
+      <ul>
+        <li>
+          <p>
+
+            Timers counting down to the end of the test are located on the top of the screen (for laptops and other widescreen devices) and in the sidebar which you can open by clicking on the hamburger icon on the top right (for all devices including mobile phones).
+            <br>
+            On this page you'll see a dummy timer in those locations looping over a 5 minute countdown.
+          </p>
+          <br>
+        </li>
+        <li>
+          <p>
+            To navigate through the paper, links for all the questions are listed on the navigation bar.
+          </p>
+          <div id="nav-questions" style="max-width: calc(100% - 30px)">
+            {% for i in ''|center:16 %}
+              <button id="q-btn-{{forloop.counter}}" class='nav-btn btn {% if forloop.counter == 1 %}visited active{% endif %} {% if forloop.counter == 4 %}btn-review{% elif forloop.counter == 2 %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
+            {% endfor %}
+          </div>
+          <p>
+            You can also use the buttons on the bottom of the portal to get to the previous/next page
+            <div id="nav_buttons">
+              <button id="prev" type="button">Previous</button>
+              <button id="next" type="button">Next</button>
+            </div>
+          </p>
+          <br>
+        </li>
+        <li>
+          <p>
+            You are free to leave the exam at any moment. If the exam hasn't ended, you won't be barred from entering again if you are to leave at any point. There is no final button you need to click to submit your paper; all the answers you'd saved will remain saved when the test ends.
+            <br>
+            Clicking on the Leave Test button doesn't mean you won't be able to enter again.
+          </p>
+          <button id="finish-btn" type="button">Leave Test</button>
+          <br><br><br>
+        </li>
+        <li>
+          <p>
+            For questions that require you to explain your answer, you'll be given the option of either typing out your answer or submitting image files; but not both.
+          </p>
+          <div class="card" style="font-size: 16px; width: 80%">
+            <div class="card-header">
+              <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                  <a id="img-upload-tab-btn" class="nav-link active" aria-current="true" onclick="activateImgUploadForm()" href="javascript:;">Upload Images</a>
+                </li>
+                <li class="nav-item">
+                  <a id="typebox-upload-tab-btn" class="nav-link" aria-current="true" onclick="activateTextboxForm()" href="javascript:;">Type answer</a>
+                </li>
+              </ul>
+            </div>
+            <div class="card-body">
+              <div id="img-upload-tab-body" style="display: block">
+                <form id="img-form" action="#" method="get" enctype="multipart/form-data" onsubmit="return false">
+                  <div class="fieldWrapper" id="fileFieldWrapper">
+                    <label for="id_file"><b>Upload answers:</b></label>
+                    <br>
+                    <input type="file" name="file" required id="id_file" accept="image/*">
+                  </div>
+                  <input type="submit" name="" value="Submit">
+                </form>
+                <!-- <br>
+                <button id="open-cam-btn" type="button">Use webcam</button> -->
+                <br><br>
+                <h6><b>Uploaded Answers:</b></h6>
+                <div id="uploadedAnswers">
+                  <div id="file0" data-pageno="0" class="uploaded-file">
+                    1. dummyFile0.jpeg
+                    <button class="view-img-btn" type="button" name="button">View</button>
+                    <button class="del-img-btn" type="button" name="button">Delete</button>
+                    <button class="move-img-down-btn" type="button" name="button">Move Down</button>
+                  </div>
+                  <div id="file1" data-pageno="1" class="uploaded-file">
+                    2. dummyFile1.jpeg
+                    <button class="view-img-btn" type="button" name="button">View</button>
+                    <button class="del-img-btn" type="button" name="button">Delete</button>
+                    <button class="move-img-up-btn" type="button" name="button">Move Up</button>
+                    <button class="move-img-down-btn" type="button" name="button">Move Down</button>
+                  </div>
+                  <div id="file2" data-pageno="2" class="uploaded-file">
+                    3. dummyFile2.jpeg
+                    <button class="view-img-btn" type="button" name="button">View</button>
+                    <button class="del-img-btn" type="button" name="button">Delete</button>
+                    <button class="move-img-up-btn" type="button" name="button">Move Up</button>
+                  </div>
+                </div>
+              </div>
+              <div id="typebox-upload-tab-body" style="display: none">
+                <form id="txt-form" action="#" method="get" onsubmit="return false">
+                  <textarea autocomplete="off" id="answer-textarea" name="answer_text" rows="8" cols="50"></textarea>
+                  <br>
+                  <input type="submit" name="" value="Submit">
+                </form>
+              </div>
+            </div>
+          </div>
+          <br><br>
+        </li>
+        <li>
+          <p>
+            Regarding MCQs and typed answers, you are expected to save frequently. Many of the buttons on the site involve refreshing the page and clicking on them will prompt you either to continue and discard your unsaved changes (if you have any), or to stay back and save your changes.
+          </p>
+          <br>
+          <div id="save-changes-popup" class="popup" style="display: block; position:relative; width: 80vw; height: 70vh; z-index: 0">
+            <div class="popup-message" style="position: relative; z-index: 0; max-height: 80vh; font-size: 16px">
+              <p>
+                You've made unsaved changes to your answer. Discard changes and continue?
+              </p>
+              <button id="save-changes-popup-continue">Continue</button>
+              <button class="close-popup">Go back</button>
+            </div>
+          </div>
+          <br><br>
+        </li>
+        <li>
+          <p>
+            You should keep in mind that while this is a collaborative quiz, changes made by your teammates don't show up in realtime. If you're typing out an answer on a question, you need to be sure that none of your teammates are on the same question. If two people save answers for the same question back to back, the answer that's saved last will be retained while the other answer will be lost.
+            <br>
+            So be sure to communicate with your teammates constantly.
+          </p>
+          <br>
+        </li>
+        <li>
+          <p>
+            You can mark a question for review, or as answered by clicking on these buttons.
+          </p>
+          <button class="mark-review" type="button" name="review">Mark for Review</button>
+          <button class="mark-answered" type="button" name="review">Mark as Answered</button>
+          <p>
+            This changes the color of the question in the navigation bar for you and for your teammates the next time they refresh the page. Green for answered questions, and beige for questions marked for review.
+            <br>
+            The purpose of marking questions is simply for you and your team to keep track of different questions, and it won't be seen by those who are correcting your paper.
+            <br>
+            Note that these buttons cause the page to refresh, so be sure to <b>save your answers</b> before clicking on them.
+          </p>
+          <br>
+        </li>
+        <li>
+          <p>
+            As mentioned earlier, you can't see the changes made by your teammates in realtime. You have to refresh the page often to see new changes. This can also be done by clicking on the sync icons.
+          </p>
+          <div class="sync-container" style="position: relative;">
+            <a class="sync-btn" onclick="location.reload()" href="javascript:;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
+                <path class="sync-btn" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+              </svg>
+            </a>
+          </div>
+          <br><br>
+        </li>
+        <li>
+          All the best!
+        </li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}

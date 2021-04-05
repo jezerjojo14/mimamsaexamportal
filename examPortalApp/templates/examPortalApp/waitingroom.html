@@ -56,10 +56,36 @@
   </script>
 {% endblock %}
 
+{% block sidepane %}
+<div id="members">
+  <h3>Team id:</h3>
+  <h4>{{team.team_id}}</h4>
+  <br>
+  <h3>Team members:</h3>
+  {% for member in team.users.all %}
+  {{member}}<br>
+  {% endfor %}
+</div>
+<br><hr><br>
+<ul class="list-group">
+  <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
+  <li><a href="{% url 'instructions' %}">How to use the portal</a></li>
+  <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
+</ul>
+<br><hr><br>
+<div style="color: #777; padding: 20px; font-size: 16px">
+  The making of this portal was led by Jezer Jojo with the immense support of Parth Gupte and Samarth Pardhi, along with contributions from Venkata Sai Sreyas Adury and Ipsa Bezbarua
+</div>
+<br><br><br>
+{% endblock %}
+
 {% block content %}
-  <div class="fluid-container">
+  <div class="fluid-container" style="text-align: center">
+    <br><br>
     <h2>The quiz will begin in</h2>
     <h2 id="time">
     </h2>
+    <br><br>
+    <p>Read the instructions on <a href="{% url 'instructions' %}" target="_blank">how to use the portal</a> in the meantime?</p>
   </div>
 {% endblock %}

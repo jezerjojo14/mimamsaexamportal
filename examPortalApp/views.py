@@ -56,7 +56,7 @@ def login_view(request):
         if User.objects.filter(username=email).exists():
             user=User.objects.get(username=email)
             if user.check_password(password):
-                if user.session_key: # check if user has session_key. This will be true for users logged in on another device
+                if user.session_key and user.username!='admin': # check if user has session_key. This will be true for users logged in on another device
                     try:
                         s = Session.objects.get(session_key=user.session_key)
                         s.delete()
@@ -186,7 +186,7 @@ def logout_view(request):
 
 
 
-# Dashboard
+# Misc
 
 
 
@@ -194,12 +194,17 @@ def logout_view(request):
 def dashboard(request):
     if request.user.is_authenticated:
         if request.user.passwordSet or request.user.username=="admin":
-            return render(request, "examPortalApp/dashboard.html")
+            team=request.user.team_set.first()
+            return render(request, "examPortalApp/dashboard.html", {"team": team})
         else:
             return HttpResponseRedirect(reverse("change_password"))
     #If not logged in, redirect to login page
     else:
         return HttpResponseRedirect(reverse("index"))
+
+def instructions(request):
+    team=request.user.team_set.first()
+    return render(request, "examPortalApp/instructions.html", {"team": team})
 
 
 
@@ -859,10 +864,11 @@ def edit_question(request):
         return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
 
 def db_test(request):
-    QCount=Question.objects.all().count();
-    qnumber=int(random.random()*QCount)+1
-    q=Question.objects.get(question_number=qnumber)
-    return HttpResponse(q.question_content)
+    users=User.objects.filter(passwordSet=False)
+    d={}
+    for user in users:
+        d[user.username]=user.generated_pass
+    return JsonResponse(d)
 
 def loader(request):
     return HttpResponse("loaderio-bc4611489ba175954b1027ee937bd232")

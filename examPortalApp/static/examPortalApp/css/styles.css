@@ -6,6 +6,26 @@ body {
   font-family: "Montserrat", sans-serif;
 }
 
+.instructions-body {
+  font-size: 20px;
+}
+
+a:link {
+  text-decoration: none;
+}
+
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+a:active {
+  text-decoration: none;
+}
+
 button, input[type=button], input[type=submit], input[type=reset] {
   color: white;
   background-color: #444;

@@ -27,8 +27,13 @@
 <br><hr><br>
 <ul class="list-group">
   <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
+  <li><a href="{% url 'instructions' %}">How to use the portal</a></li>
   <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
 </ul>
+<br><hr><br>
+<div style="color: #777; padding: 20px; font-size: 16px">
+  The making of this portal was led by Jezer Jojo with the immense support of Parth Gupte and Samarth Pardhi, along with contributions from Venkata Sai Sreyas Adury and Ipsa Bezbarua
+</div>
 <br><br><br>
 {% endblock %}
 
@@ -136,7 +141,7 @@
             <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
             <input id="clear-response-btn" type="reset" value="Clear Response">
             <br>
-            <input type="submit" name="" value="Save Answer">
+            <input type="submit" name="" value="Save Choice">
           </form>
           {% if answer_status != 'r' %}
             <button class="mark-review" type="button" name="review">Mark for Review</button>

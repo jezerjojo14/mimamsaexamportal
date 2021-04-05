@@ -10,6 +10,7 @@ urlpatterns = [
     path('unset-passwords', views.unset_passwords, name="unset_passwords"),  #"unset" is an adjective here, not a verb
 
     path('dashboard', views.dashboard, name="dashboard"),
+    path('instructions', views.instructions, name="instructions"),
 
     path('test/<int:qnumber>', views.open_test, name="test_no"),
     path('upload-answer', views.upload_answer, name="upload_answer"),

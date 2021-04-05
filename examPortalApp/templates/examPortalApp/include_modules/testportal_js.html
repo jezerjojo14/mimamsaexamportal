@@ -37,17 +37,17 @@
         diff = (diff % (60 * 60)) | 0;
         minutes = (diff / 60) | 0;
         seconds = (diff % 60) | 0;
-        displays.forEach((display, i) => {
+        for (var i=0; i<displays; i++) {
           if (hours > 0) {
-            display.innerHTML = "<b>Timer</b>  " + hours + ":" + minutes.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            displays[i].innerHTML = "<b>Timer</b>  " + hours + ":" + minutes.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
           }
           else if (minutes > 0) {
-            display.innerHTML = "<b>Timer</b>  " + minutes + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            displays[i].innerHTML = "<b>Timer</b>  " + minutes + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
           }
           else {
-            display.innerHTML = "<b>Timer</b>  " + seconds + " seconds";
+            displays[i].innerHTML = "<b>Timer</b>  " + seconds + " seconds";
           }
-        });
+        }
         if ((datetime - Date.now()) <= 0) {
           clearInterval(intervalVar);
           location.reload();
@@ -137,11 +137,11 @@
       };
       var closePopupList = document.querySelectorAll(".close-popup");
       for(var i = 0; i < closePopupList.length; i++) {
-        closePopupList[i].onclick = closePopup.bind(this, [closePopupList[i]]);
+        closePopupList[i].onclick = closePopup.bind(this, closePopupList[i]);
       }
       var navBtnList = document.querySelectorAll(".nav-btn");
       for(var i = 0; i < navBtnList.length; i++) {
-        navBtnList[i].onclick = getQuestion.bind(this, [parseInt(navBtnList[i].innerHTML)]);
+        navBtnList[i].onclick = getQuestion.bind(this, parseInt(navBtnList[i].innerHTML));
       }
       var mcqBtnList = document.querySelectorAll(".mcq-btn");
       for(var i = 0; i < mcqBtnList.length; i++) {
@@ -153,7 +153,7 @@
       }
       var clearResponseBtn=document.getElementById('clear-response-btn');
       if (clearResponseBtn) {
-        clearResponseBtn.onclick = resetForm.bind(this, [clearResponseBtn.form]);
+        clearResponseBtn.onclick = resetForm.bind(this, clearResponseBtn.form);
       }
 
       var markReviewBtn = document.querySelector(".mark-review");
@@ -173,19 +173,19 @@
       document.getElementById('next').onclick = nextQuestion;
       var viewImgBtnList = document.querySelectorAll(".view-img-btn");
       for(var i = 0; i < viewImgBtnList.length; i++) {
-        viewImgBtnList[i].onclick = viewImage.bind(this, [viewImgBtnList[i]]);
+        viewImgBtnList[i].onclick = viewImage.bind(this, viewImgBtnList[i]);
       }
       var delImgBtnList = document.querySelectorAll(".del-img-btn");
       for(var i = 0; i < delImgBtnList.length; i++) {
-        delImgBtnList[i].onclick = deleteImage.bind(this, [delImgBtnList[i]]);
+        delImgBtnList[i].onclick = deleteImage.bind(this, delImgBtnList[i]);
       }
       var moveImgUpBtnList = document.querySelectorAll(".move-img-up-btn");
       for(var i = 0; i < moveImgUpBtnList.length; i++) {
-        moveImgUpBtnList[i].onclick = moveAnswerUp.bind(this, [moveImgUpBtnList[i]]);
+        moveImgUpBtnList[i].onclick = moveAnswerUp.bind(this, moveImgUpBtnList[i]);
       }
       var moveImgDownBtnList = document.querySelectorAll(".move-img-down-btn");
       for(var i = 0; i < moveImgDownBtnList.length; i++) {
-        moveImgDownBtnList[i].onclick = moveAnswerUp.bind(this, [moveImgDownBtnList[i]]);
+        moveImgDownBtnList[i].onclick = moveAnswerDown.bind(this, moveImgDownBtnList[i]);
       }
       var answerTextarea = document.getElementById('answer-textarea');
       if (answerTextarea) {
@@ -201,6 +201,14 @@
       if (typeboxUploadTabBtn) {
         typeboxUploadTabBtn.onclick = activateTextboxForm;
       }
+      var uploadField = document.getElementById("id_file");
+
+      uploadField.onchange = function() {
+          if(this.files[0].size > 1048576000){
+             alert("File is too big!");
+             this.value = "";
+          };
+      };
 
     });
 
@@ -244,6 +252,8 @@
     }
 
     function viewImage(ele) {
+      console.log(ele);
+      console.log(ele.parentElement);
       document.getElementById('view-img-popup').style.display = "block";
       document.getElementById('answer-img-container').innerHTML = "Loading... <br>";
       page_no=ele.parentElement.dataset.pageno;
@@ -417,7 +427,9 @@
 
   function imgFormSubmit(e) {
     e.preventDefault();
-    if ((("{{answer_text|linebreaks}}").trim()).length==0) {
+    var d=document.createElement('DIV');
+    d.innerHTML=("{{answer_text|linebreaks}}").trim();
+    if (d.textContent.trim()==="") {
       document.getElementById('img-form').submit();
     }
     else {

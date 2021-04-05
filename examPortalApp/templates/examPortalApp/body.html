@@ -29,7 +29,7 @@
 
         <div class="header-center">
           {% block header_center %}
-          Mimamsa Exam Portal
+          <a href="{% url 'index' %}" style="color: #eee">Mimamsa Exam Portal</a>
           {% endblock %}
         </div>
 
@@ -40,8 +40,13 @@
           <ul class="list-group">
             <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
             <li class=""><a href="http://mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
+            <li><a href="{% url 'instructions' %}">How to use the portal</a></li>
             <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
           </ul>
+          <br><hr><br>
+          <div style="width:70vw; color: #77; font-size: 16px">
+            The making of this portal was led by Jezer Jojo with the immense support of Parth Gupte and Samarth Pardhi, along with contributions from Venkata Sai Sreyas Adury and Ipsa Bezbarua
+          </div>
           {% endblock %}
         </div>
 
@@ -54,16 +59,17 @@
       {% block content %}
       {% endblock %}
 
-      <footer style="background-color: #333">
-
-          <div class="footer-bottom">
-
-              <div class="col-twelve">
-                  <span>In case of technical difficulties, contact +917994104661 </span>
-              </div>
-
-          </div> <!-- end footer-bottom -->
-
+      <footer style="background-color: #1a1a1a">
+        <div class="row footer-main" style="text-align: center; width: min-content; margin: 0 auto;">
+          <center>
+            <div class="footer-logo" style="background:url(http://mimamsa.iiserpune.ac.in/images/iiser.png) no-repeat center; background-size: 110px 100px; width: 110px; height: 100px;">
+            </div>
+          </center>
+        </div>
+        <br>
+        <div class="footer-bottom" style="text-align: center; margin: 0 auto;">
+          <span>In case of technical difficulties, mail mimamsatest@gmail.com </span>
+        </div> <!-- end footer-bottom -->
       </footer> <!-- end footer -->
     </body>
 </html>
