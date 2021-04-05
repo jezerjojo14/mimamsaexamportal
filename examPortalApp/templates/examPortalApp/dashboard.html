@@ -6,9 +6,11 @@
   <h4>{{team.team_id}}</h4>
   <br>
   <h3>Team members:</h3>
-  {% for member in team.users.all %}
-  {{member}}<br>
-  {% endfor %}
+  <div class="members">
+    {% for member in team.users.all %}
+    {{member}}<br>
+    {% endfor %}
+  </div>
 </div>
 <br><hr><br>
 <ul class="list-group">
@@ -33,6 +35,8 @@
         <a href="{% url 'test_no' qnumber=1 %}">Open Test</a>
         <br>
         {% endif %}
+        <a href="{% url 'instructions' %}">Exam portal instructions</a>
+        <br>
         <a href="{% url 'change_password' %}">Change Password</a>
         <br>
         {% if user.username == 'admin' %}
