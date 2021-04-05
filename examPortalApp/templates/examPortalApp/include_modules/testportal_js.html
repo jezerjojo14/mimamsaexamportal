@@ -115,7 +115,93 @@
         document.getElementById('next').setAttribute("disabled", "disabled");
         document.getElementById('next').style.opacity=0.5;
       }
-      // getQuestion(currentQNo);
+
+      // testportal
+
+      var syncBtnList=document.querySelectorAll(".sync-btn")
+      for(var i = 0; i < syncBtnList.length; i++) {
+        syncBtnList[i].onclick= ()=>{
+          if (unsaved) {
+            saveChangesPopup(window.location.href)
+          }
+          else {
+            location.reload();
+          }
+        };
+      }
+      document.getElementById('img-submit-popup-continue').onclick=()=>{
+        document.getElementById('img-form').submit();
+      };
+      document.getElementById('txt-submit-popup-continue').onclick=()=>{
+        document.getElementById('txt-form').submit();
+      };
+      var closePopupList = document.querySelectorAll(".close-popup");
+      for(var i = 0; i < closePopupList.length; i++) {
+        closePopupList[i].onclick = closePopup.bind(this, [closePopupList[i]]);
+      }
+      var navBtnList = document.querySelectorAll(".nav-btn");
+      for(var i = 0; i < navBtnList.length; i++) {
+        navBtnList[i].onclick = getQuestion.bind(this, [parseInt(navBtnList[i].innerHTML)]);
+      }
+      var mcqBtnList = document.querySelectorAll(".mcq-btn");
+      for(var i = 0; i < mcqBtnList.length; i++) {
+        mcqBtnList[i].oninput = answerChange;
+      }
+      var ttBtnList = document.querySelectorAll(".tt-btn");
+      for(var i = 0; i < ttBtnList.length; i++) {
+        ttBtnList[i].oninput = answerChange;
+      }
+      var clearResponseBtn=document.getElementById('clear-response-btn');
+      if (clearResponseBtn) {
+        clearResponseBtn.onclick = resetForm.bind(this, [clearResponseBtn.form]);
+      }
+
+      var markReviewBtn = document.querySelector(".mark-review");
+      if (markReviewBtn) {
+        markReviewBtn.onclick = markReview;
+      }
+      var markAnsweredBtn = document.querySelector(".mark-answered");
+      if (markAnsweredBtn) {
+        markAnsweredBtn.onclick = markAnswered;
+      }
+      var markedBtn = document.querySelector(".marked");
+      if (markedBtn) {
+        markedBtn.onclick = markUnanswered;
+      }
+
+      document.getElementById('prev').onclick = prevQuestion;
+      document.getElementById('next').onclick = nextQuestion;
+      var viewImgBtnList = document.querySelectorAll(".view-img-btn");
+      for(var i = 0; i < viewImgBtnList.length; i++) {
+        viewImgBtnList[i].onclick = viewImage.bind(this, [viewImgBtnList[i]]);
+      }
+      var delImgBtnList = document.querySelectorAll(".del-img-btn");
+      for(var i = 0; i < delImgBtnList.length; i++) {
+        delImgBtnList[i].onclick = deleteImage.bind(this, [delImgBtnList[i]]);
+      }
+      var moveImgUpBtnList = document.querySelectorAll(".move-img-up-btn");
+      for(var i = 0; i < moveImgUpBtnList.length; i++) {
+        moveImgUpBtnList[i].onclick = moveAnswerUp.bind(this, [moveImgUpBtnList[i]]);
+      }
+      var moveImgDownBtnList = document.querySelectorAll(".move-img-down-btn");
+      for(var i = 0; i < moveImgDownBtnList.length; i++) {
+        moveImgDownBtnList[i].onclick = moveAnswerUp.bind(this, [moveImgDownBtnList[i]]);
+      }
+      var answerTextarea = document.getElementById('answer-textarea');
+      if (answerTextarea) {
+        answerTextarea.oninput = answerChange;
+      }
+
+      // forms_card
+      var imgUploadTabBtn = document.getElementById('img-upload-tab-btn');
+      if (imgUploadTabBtn) {
+        imgUploadTabBtn.onclick = activateImgUploadForm;
+      }
+      var typeboxUploadTabBtn = document.getElementById('typebox-upload-tab-btn');
+      if (typeboxUploadTabBtn) {
+        typeboxUploadTabBtn.onclick = activateTextboxForm;
+      }
+
     });
 
     function saveChangesPopup(url) {
@@ -264,70 +350,70 @@
     return false;
   }
 
-  function openCameraPopup() {
-    document.getElementById('camera-popup').style.display="block";
-  }
-
-  function closeCamPopup(ele) {
-    closePopup(ele);
-  }
-
-  function b64toBlob(b64Data, contentType, sliceSize) {
-    contentType = contentType || '';
-    sliceSize = sliceSize || 512;
-
-    var byteCharacters = atob(b64Data);
-    var byteArrays = [];
-
-    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-      var slice = byteCharacters.slice(offset, offset + sliceSize);
-
-      var byteNumbers = new Array(slice.length);
-      for (var i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
-      }
-
-      var byteArray = new Uint8Array(byteNumbers);
-
-      byteArrays.push(byteArray);
-    }
-
-  var blob = new Blob(byteArrays, {type: contentType});
-  return blob;
-}
-
-  function sendWebcamData(data) {
-    var ImageURL=data
-    var block = ImageURL.split(";");
-    // Get the content type of the image
-    var contentType = block[0].split(":")[1];// In this case "image/gif"
-    // get the real base64 content of the file
-    var realData = block[1].split(",")[1];// In this case "R0lGODlhPQBEAPeoAJosM...."
-
-    // Convert it to a blob to upload
-    var blob = b64toBlob(realData, contentType);
-
-    var redirect = function(url, method) {
-      var form = document.createElement('form');
-      form.method = method;
-      form.action = url;
-      form.innerHTML+='{% csrf_token %}';
-      var input1 = document.createElement('input');
-      input1.type = 'hidden';
-      input1.name = "qnumber";
-      input1.value = "{{ QNum }}";
-      form.appendChild(input1);
-      var input2 = document.createElement('input');
-      input2.type = 'file';
-      input2.name = "file";
-      input2.value = blob;
-      form.appendChild(input2);
-      document.body.appendChild(form);
-      form.submit();
-    };
-
-    redirect('{% url 'upload_answer' %}', 'post');
-  }
+//   function openCameraPopup() {
+//     document.getElementById('camera-popup').style.display="block";
+//   }
+//
+//   function closeCamPopup(ele) {
+//     closePopup(ele);
+//   }
+//
+//   function b64toBlob(b64Data, contentType, sliceSize) {
+//     contentType = contentType || '';
+//     sliceSize = sliceSize || 512;
+//
+//     var byteCharacters = atob(b64Data);
+//     var byteArrays = [];
+//
+//     for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+//       var slice = byteCharacters.slice(offset, offset + sliceSize);
+//
+//       var byteNumbers = new Array(slice.length);
+//       for (var i = 0; i < slice.length; i++) {
+//         byteNumbers[i] = slice.charCodeAt(i);
+//       }
+//
+//       var byteArray = new Uint8Array(byteNumbers);
+//
+//       byteArrays.push(byteArray);
+//     }
+//
+//   var blob = new Blob(byteArrays, {type: contentType});
+//   return blob;
+// }
+//
+//   function sendWebcamData(data) {
+//     var ImageURL=data
+//     var block = ImageURL.split(";");
+//     // Get the content type of the image
+//     var contentType = block[0].split(":")[1];// In this case "image/gif"
+//     // get the real base64 content of the file
+//     var realData = block[1].split(",")[1];// In this case "R0lGODlhPQBEAPeoAJosM...."
+//
+//     // Convert it to a blob to upload
+//     var blob = b64toBlob(realData, contentType);
+//
+//     var redirect = function(url, method) {
+//       var form = document.createElement('form');
+//       form.method = method;
+//       form.action = url;
+//       form.innerHTML+='{% csrf_token %}';
+//       var input1 = document.createElement('input');
+//       input1.type = 'hidden';
+//       input1.name = "qnumber";
+//       input1.value = "{{ QNum }}";
+//       form.appendChild(input1);
+//       var input2 = document.createElement('input');
+//       input2.type = 'file';
+//       input2.name = "file";
+//       input2.value = blob;
+//       form.appendChild(input2);
+//       document.body.appendChild(form);
+//       form.submit();
+//     };
+//
+//     redirect('{% url 'upload_answer' %}', 'post');
+//   }
 
   function imgFormSubmit(e) {
     e.preventDefault();
@@ -342,7 +428,7 @@
 
   function txtFormSubmit(e) {
     e.preventDefault();
-    if ((("{{answer_text|linebreaks}}").trim()).length!=0) {
+    if ({{uploaded_files|length}}==0) {
       document.getElementById('txt-form').submit();
     }
     else {
@@ -357,7 +443,7 @@
   }
 
   function openTxtSubmitPopup() {
-    document.getElementById('tex-submit-popup').style.display="block";
+    document.getElementById('txt-submit-popup').style.display="block";
   }
 
 

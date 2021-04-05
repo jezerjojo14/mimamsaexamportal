@@ -12,8 +12,8 @@
 
 {% block sidepane %}
 <div class="sidepane-timer">
-<div class="time"></div>
-<br><hr><br>
+  <div class="time"></div>
+  <br><hr><br>
 </div>
 <div id="members">
   <h3>Team id:</h3>
@@ -47,11 +47,11 @@
       <div class="col-lg-12">
         <div id="nav-questions">
           {% for i in ''|center:QCount %}
-            <button onclick='getQuestion({{forloop.counter}})' class='btn {% if forloop.counter == QNum %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
+            <button id="q-btn-{{forloop.counter}}" class='nav-btn btn {% if forloop.counter == QNum %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
           {% endfor %}
         </div>
-        <div class="sync-container" style="margin:15px; display: inline-block; position: absolute">
-          <a href="#" onclick="location.reload()">
+        <div class="sync-container">
+          <a class="sync-btn" href="#">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
               <path class="sync-btn" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
             </svg>
@@ -66,8 +66,8 @@
             <p>
               A text based answer was already submitted for this question. Uploading an image would delete the former.
             </p>
-            <button onclick="document.getElementById('img-form').submit()">Continue</button>
-            <button onclick="closePopup(this)">Go back</button>
+            <button id="img-submit-popup-continue">Continue</button>
+            <button class="close-popup">Go back</button>
           </div>
         </div>
         <div id="txt-submit-popup" class="popup">
@@ -75,8 +75,8 @@
             <p>
               An uploaded image was already submitted for this question. Submitting a text based answer would delete the former.
             </p>
-            <button onclick="document.getElementById('txt-form').submit()">Continue</button>
-            <button onclick="closePopup(this)">Go back</button>
+            <button id="txt-submit-popup-continue">Continue</button>
+            <button class="close-popup">Go back</button>
           </div>
         </div>
         <div id="save-changes-popup" class="popup">
@@ -85,10 +85,10 @@
               You've made unsaved changes to your answer. Discard changes and continue?
             </p>
             <button id="save-changes-popup-continue">Continue</button>
-            <button onclick="closePopup(this)">Go back</button>
+            <button class="close-popup">Go back</button>
           </div>
         </div>
-        <div id="camera-popup" class="popup">
+        <!-- <div id="camera-popup" class="popup">
           <div class="popup-message">
             <div class="camera">
               <video id="video">Video stream not available.</video>
@@ -99,14 +99,14 @@
             <div class="output">
               <img id="photo" alt="The screen capture will appear in this box.">
             </div>
-            <button id="close-cam-btn" type="button" name="button" onclick="closeCamPopup(this)">Close</button>
+            <button class="close-popup" id="close-cam-btn" type="button" name="button">Close</button>
           </div>
-        </div>
+        </div> -->
         <div id="view-img-popup" class="popup">
           <div class="popup-message">
             <div id="answer-img-container">
             </div>
-            <button onclick="closePopup(this)">Close</button>
+            <button class="close-popup">Close</button>
           </div>
 
         </div>
@@ -127,22 +127,21 @@
                   <h5>{{option}}</h5>
                 {% else %}
                   <label for="opt-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">{{option}}</label>
-                  <input {% if forloop.parentloop.counter0|mul:4|add:forloop.counter0 in selected_options %}checked{% endif %} id="mcq-btn-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}" oninput="answerChange()" type="radio" name="choice-{{forloop.parentloop.counter}}" value="{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">
+                  <input {% if forloop.parentloop.counter0|mul:4|add:forloop.counter0 in selected_options %}checked{% endif %} class="mcq-btn" id="mcq-btn-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}" type="radio" name="choice-{{forloop.parentloop.counter}}" value="{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">
                   <br>
                 {% endif %}
               {% endfor %}
             {% endfor %}
             <br>
             <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-            <input type="reset" onclick="return resetForm(this.form);" value="Clear Response">
+            <input id="clear-response-btn" type="reset" value="Clear Response">
             <br>
             <input type="submit" name="" value="Save Answer">
           </form>
           {% if answer_status != 'r' %}
-            <button class="mark-review" type="button" name="review" onclick="markReview()">Mark for Review</button>
+            <button class="mark-review" type="button" name="review">Mark for Review</button>
           {% else %}
-            <button class="mark-answered" type="button" name="review" onclick="markAnswered()">Mark as Answered</button>
-            <button class="mark-review marked" type="button" name="review" onclick="markUnanswered()">Marked for Review</button>
+            <button class="mark-review marked" type="button" name="review">Marked for Review</button>
           {% endif %}
 
 
@@ -155,12 +154,12 @@
               {% csrf_token %}
               {% for option in options %}
                 <label for="opt-{{forloop.counter}}">{{option}}</label>
-                <input {% if forloop.counter in selected_options %}checked{% endif %} id="tt-btn-{{forloop.counter}}" oninput="answerChange()" type="radio" name="choice" value="{{forloop.counter}}">
+                <input {% if forloop.counter in selected_options %}checked{% endif %} class="tt-btn" id="tt-btn-{{forloop.counter}}" type="radio" name="choice" value="{{forloop.counter}}">
                 <br>
               {% endfor %}
               <br>
               <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-              <input type="reset" onclick="return resetForm(this.form);" value="Clear Response">
+              <input id="clear-response-btn" type="reset" value="Clear Response">
               <br>
               <input type="submit" name="" value="Save Choice">
             </form>
@@ -180,16 +179,16 @@
           {% endif %}
 
           {% if selected_options|length != 0 %}
-              {% if answer_status != 'a' %}
-                <button class="mark-answered" type="button" name="review" onclick="markAnswered()">Mark as Answered</button>
-              {% else %}
-                <button class="mark-answered marked" type="button" name="review" onclick="markUnanswered()">Marked as Answered</button>
-              {% endif %}
-            {% endif %}
-            {% if answer_status != 'r' %}
-              <button class="mark-review" type="button" name="review" onclick="markReview()">Mark for Review</button>
+            {% if answer_status != 'a' %}
+              <button class="mark-answered" type="button" name="review">Mark as Answered</button>
             {% else %}
-            <button class="mark-review marked" type="button" name="review" onclick="markUnanswered()">Marked for Review</button>
+              <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
+            {% endif %}
+          {% endif %}
+          {% if answer_status != 'r' %}
+            <button class="mark-review" type="button" name="review">Mark for Review</button>
+          {% else %}
+          <button class="mark-review marked" type="button" name="review">Marked for Review</button>
           {% endif %}
 
 
@@ -200,20 +199,21 @@
             <br><br>
 
             {% if answer_status != 'a' %}
-              <button class="mark-answered" type="button" name="review" onclick="markAnswered()">Mark as Answered</button>
+              <button class="mark-answered" type="button" name="review">Mark as Answered</button>
             {% else %}
-              <button class="mark-answered marked" type="button" name="review" onclick="markUnanswered()">Marked as Answered</button>
+              <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
             {% endif %}
 
             {% if answer_status != 'r' %}
-              <button class="mark-review" type="button" name="review" onclick="markReview()">Mark for Review</button>
+              <button class="mark-review" type="button" name="review">Mark for Review</button>
             {% else %}
-              <button class="mark-review marked" type="button" name="review" onclick="markUnanswered()">Marked for Review</button>
+              <button class="mark-review marked" type="button" name="review">Marked for Review</button>
             {% endif %}
 
           {% endif %}
-          <div class="sync-container" style="margin-left: 15px; display: inline-block; position: absolute">
-            <a href="#" onclick="location.reload()">
+
+          <div class="sync-container">
+            <a class="sync-btn" href="#">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
                 <path class="sync-btn" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
               </svg>
@@ -221,17 +221,22 @@
           </div>
         </div>
         <div id="nav_buttons">
-          <button onclick="prevQuestion();" id="prev" type="button">Previous</button>
-          <button onclick="nextQuestion();" id="next" type="button" style="float: right;">Next</button>
+          <button id="prev" type="button">Previous</button>
+          <button id="next" type="button">Next</button>
+        </div>
+        <br>
+        <div class="finish-div">
+          <button onclick="document.location='{% url 'index' %}'" id="finish-btn" type="button">Leave Test</button>
         </div>
       </div>
     </div>
   </div>
-  {% if QType == 's' %}
+
+  <!-- {% if QType == 's' %}
   <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
   {% elif QType == 't' %}
     {% if selected_options|length != 0 %}
     <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
     {% endif %}
-  {% endif %}
+  {% endif %} -->
 {% endblock %}

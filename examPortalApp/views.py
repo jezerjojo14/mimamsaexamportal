@@ -222,16 +222,54 @@ def open_test(request, qnumber=None, message=""):
     #If it has started but hasn't ended, show the testportal
     #If it's ended show the "Test ended" page
 
+
     if now<test_start:
-        return render(request, "examPortalApp/waitingroom.html", {"UTCDate": test_start.day, "UTCMonth": test_start.month, "UTCYear": test_start.year, "UTCHours": test_start.hour, "UTCMinutes": test_start.minute, "UTCSeconds": test_start.second})
+        template_var= {
+        "UTCDate": test_start.day,
+        "UTCMonth": test_start.month,
+        "UTCYear": test_start.year,
+        "UTCHours": test_start.hour,
+        "UTCMinutes": test_start.minute,
+        "UTCSeconds": test_start.second
+        }
+        return render(request, "examPortalApp/waitingroom.html", template_var)
+
+    template_var= {
+    "UTCDate": test_end.day,
+    "UTCMonth": test_end.month,
+    "UTCYear": test_end.year,
+    "UTCHours": test_end.hour,
+    "UTCMinutes": test_end.minute,
+    "UTCSeconds": test_end.second
+    }
+
     if now<test_end:
         review_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='r').values_list('question_number', flat=True))
         answered_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='a').values_list('question_number', flat=True))
+
+        a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
+
+        template_var["review_questions"]=review_questions
+        template_var["answered_questions"]=answered_questions
+        template_var["answer_status"]=a.status
+        template_var["team"]=team
+        template_var["QNum"]=q_current
+        template_var["QCount"]=q_count
+
+
         if q.question_type=='s':
-            a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
             uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
 
-            return render(request, "examPortalApp/testportal.html", {"uploaded_files":uploaded_files, "answer_text": a.answer_content, "selected_options": [], "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": [], "options": [], "QNum": q_current, "QCount": q_count, "QType": 's', "content": q.question_content, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+            template_var["QType"]='s'
+            template_var["content"]=q.question_content
+            template_var["labels"]=[]
+            template_var["options"]=[]
+            template_var["selected_options"]=[]
+            template_var["uploaded_files"]=uploaded_files
+            template_var["answer_text"]=a.answer_content
+
+
+            return render(request, "examPortalApp/testportal.html", template_var)
 
         if q.question_type=='m':
             a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
@@ -247,7 +285,17 @@ def open_test(request, qnumber=None, message=""):
             while i<len(content):
                 option_sets+=[[content[i][0]]+content[i][1]]
                 i+=1
-            return render(request, "examPortalApp/testportal.html", {"answer_text": "", "selected_options": selected_options, "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": labels, "options": option_sets, "QNum": q_current, "QCount": q_count, "QType": 'm', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+
+            template_var["QType"]='m'
+            template_var["content"]=setup
+            template_var["labels"]=labels
+            template_var["options"]=option_sets
+            template_var["selected_options"]=selected_options
+            template_var["uploaded_files"]=[]
+            template_var["answer_text"]=""
+
+            return render(request, "examPortalApp/testportal.html", template_var)
+
         if q.question_type=='t':
             a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
             uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
@@ -258,7 +306,16 @@ def open_test(request, qnumber=None, message=""):
             content=ast.literal_eval(q.question_content)
             setup=content[0]
             options=content[1]
-            return render(request, "examPortalApp/testportal.html", {"uploaded_files":uploaded_files, "answer_text": (ast.literal_eval(a.answer_content))[1], "selected_options": selected_option, "review_questions": review_questions, "answered_questions": answered_questions, "answer_status": a.status, "team": team, "labels": [], "options": options, "QNum": q_current, "QCount": q_count, "QType": 't', "content": setup, "UTCDate": test_end.day, "UTCMonth": test_end.month, "UTCYear": test_end.year, "UTCHours": test_end.hour, "UTCMinutes": test_end.minute, "UTCSeconds": test_end.second})
+
+            template_var["QType"]='t'
+            template_var["content"]=setup
+            template_var["labels"]=[]
+            template_var["options"]=options
+            template_var["selected_options"]=selected_option
+            template_var["uploaded_files"]=uploaded_files
+            template_var["answer_text"]=(ast.literal_eval(a.answer_content))[1]
+
+            return render(request, "examPortalApp/testportal.html", template_var)
 
     return render(request, "examPortalApp/testended.html")
 
@@ -615,11 +672,6 @@ def upload_answer(request):
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 
-# TODO:
-# @login_required
-# def end_test(request):
-#     pass
-
 
 @login_required
 def mark_for_review(request, qnumber):
@@ -806,6 +858,11 @@ def edit_question(request):
         print(('{"content":"')+(q.question_content)+('", "subject":"'+q.question_subject+'"}'))
         return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
 
+def db_test(request):
+    QCount=Question.objects.all().count();
+    qnumber=int(random.random()*QCount)+1
+    q=Question.objects.get(question_number=qnumber)
+    return HttpResponse(q.question_content)
 
 def loader(request):
     return HttpResponse("loaderio-bc4611489ba175954b1027ee937bd232")
