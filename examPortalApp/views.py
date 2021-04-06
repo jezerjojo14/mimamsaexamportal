@@ -136,7 +136,7 @@ def unset_passwords(request):
             password_list[user.email]=user.generated_pass
     return JsonResponse(password_list)
 
-@login_required
+@login_required(login_url='/')
 def change_password(request):
     if request.method == 'POST':
         user = request.user
@@ -213,7 +213,7 @@ def instructions(request):
 
 
 
-@login_required
+@login_required(login_url='/')
 def open_test(request, qnumber=None, message=""):
     now = timezone.now()
     test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 0, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 30, 0))})[0]).test_start
@@ -325,7 +325,7 @@ def open_test(request, qnumber=None, message=""):
     return render(request, "examPortalApp/testended.html")
 
 
-@login_required
+@login_required(login_url='/')
 def get_answer(request, page_no, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -362,7 +362,7 @@ def get_answer(request, page_no, qnumber):
 
         return JsonResponse({"image":image})
 
-@login_required
+@login_required(login_url='/')
 def del_answer(request, page_no, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -408,7 +408,7 @@ def del_answer(request, page_no, qnumber):
         return HttpResponse(status=404)
 
 
-@login_required
+@login_required(login_url='/')
 def move_up(request):
 
     post_data = json.loads(request.body.decode("utf-8"))
@@ -443,7 +443,7 @@ def move_up(request):
     return HttpResponse(status="201")
 
 
-@login_required
+@login_required(login_url='/')
 def move_down(request):
 
     post_data = json.loads(request.body.decode("utf-8"))
@@ -477,7 +477,7 @@ def move_down(request):
 
 
 
-@login_required
+@login_required(login_url='/')
 def get_m_answers(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -493,7 +493,7 @@ def get_m_answers(request, qnumber):
             return JsonResponse({"answers": []})
 
 
-@login_required
+@login_required(login_url='/')
 def get_t_answers(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -513,7 +513,7 @@ def get_t_answers(request, qnumber):
             return JsonResponse({"choice":-1, "images": [], "text": ""})
 
 
-@login_required
+@login_required(login_url='/')
 def submit_MCQ(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -539,7 +539,7 @@ def submit_MCQ(request):
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 #This function is for saving the choice, not the explanation. The latter is handled by upload_answer/upload_text_answer
-@login_required
+@login_required(login_url='/')
 def submit_TT(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -561,7 +561,7 @@ def submit_TT(request):
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
-@login_required
+@login_required(login_url='/')
 def upload_text_answer(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -590,7 +590,7 @@ def upload_text_answer(request):
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 
-@login_required
+@login_required(login_url='/')
 def upload_answer(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -678,7 +678,7 @@ def upload_answer(request):
 
 
 
-@login_required
+@login_required(login_url='/')
 def mark_for_review(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -692,7 +692,7 @@ def mark_for_review(request, qnumber):
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
-@login_required
+@login_required(login_url='/')
 def mark_as_answered(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -708,7 +708,7 @@ def mark_as_answered(request, qnumber):
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
-@login_required
+@login_required(login_url='/')
 def mark_as_unanswered(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -729,7 +729,7 @@ def mark_as_unanswered(request, qnumber):
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
 
 
-@login_required
+@login_required(login_url='/')
 def clear_t_options(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
@@ -755,7 +755,7 @@ def clear_t_options(request, qnumber):
 
 
 
-@login_required
+@login_required(login_url='/')
 def question_making_page(request, page=1):
     if request.user.username=="admin":
         q=Paginator(Question.objects.all().order_by("question_number"), 10)
@@ -767,7 +767,7 @@ def question_making_page(request, page=1):
         return HttpResponseRedirect(reverse("dashboard"))
 
 
-@login_required
+@login_required(login_url='/')
 def post_question(request):
     if request.user.username=="admin":
         if request.POST["qtype"]=='s':
@@ -807,7 +807,7 @@ def post_question(request):
 
 
 
-@login_required
+@login_required(login_url='/')
 def delete_question(request):
     if request.user.username=="admin":
         print(request.body)
@@ -825,7 +825,7 @@ def delete_question(request):
         print(('{"content":"')+(q.question_content)+('", "subject":"'+q.question_subject+'"}'))
         return HttpResponse(status=201)
 
-@login_required
+@login_required(login_url='/')
 def edit_question(request):
     subjects=["Physics", "Biology", "Math", "Chemistry"]
     if request.user.username=="admin":
