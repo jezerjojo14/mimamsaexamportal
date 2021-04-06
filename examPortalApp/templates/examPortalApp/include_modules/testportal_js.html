@@ -203,12 +203,15 @@
       }
       var uploadField = document.getElementById("id_file");
 
-      uploadField.onchange = function() {
-          if(this.files[0].size > 1572864000){
-             alert("File is too big!");
-             this.value = "";
-          };
-      };
+      if (uploadField)
+      {
+        uploadField.onchange = function() {
+            if(this.files[0].size > 1572864000){
+               alert("File is too big!");
+               this.value = "";
+            };
+        };
+      }
 
     });
 

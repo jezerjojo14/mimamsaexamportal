@@ -4,7 +4,7 @@ from django.db import models
 #User instances are created when registration sheets are inputted;
 #They're updated when (1) sessions are created and removed, and (2) when passwords are changed
 class User(AbstractUser):
-    phone_number = models.CharField(max_length=15)
+    phone_number = models.CharField(max_length=25)
     #generated_pass is the initial server generated password that can be seen by us (unlike the default password field) and is initially also stored in hashed form in the default password field
     generated_pass = models.CharField(max_length=100)
     #Once the user updates their actual password from the server generated one, password_set takes the value "True". At this point no one knows their password except them

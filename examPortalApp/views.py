@@ -88,29 +88,26 @@ def update_accounts(request):
                 generated_passwords={}
                 print("It begins")
                 for row in reader:
-                    team_id = row["TEAM ID"]
-                    print(row["SEQUENCE"])
+                    team_id = row["Code"]
+                    print(row["Code"])
                     try:
-                        team=Team.objects.create(team_id=team_id, sequence=row["SEQUENCE"], college=row["COLLEGE"], zone=row["ZONE CODE"])
+                        team=Team.objects.create(team_id=team_id, sequence=row["Code of Team"], college=row["Name Of College"], zone=row["Zone Code of your College (Zone)"])
                         team.save()
                         print(team_id+" saved")
                     except IntegrityError:
                         team=Team.objects.get(team_id=team_id)
                         print(team_id)
                     for i in range(4):
-                        if row["EMAIL ID "+str(i+1)]=="":
+                        if row["Email of Participant "+str(i+1)]=="":
                             continue
                         try:
                             password=''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-                            user=User.objects.create_user(username=(row["EMAIL ID "+str(i+1)]).lower(), email=(row["EMAIL ID "+str(i+1)]).lower(), password=password, generated_pass=password)
-                            if i==0:
-                                user.phone_number=row["PHONE 1"]
-                                user.save()
+                            user=User.objects.create_user(username=(row["Email of Participant "+str(i+1)]).lower(), email=(row["Email of Participant "+str(i+1)]).lower(), password=password, generated_pass=password, phone_number=row["Phone Number of Participant "+str(i+1)])
                         except IntegrityError:
-                            print(row["EMAIL ID "+str(i+1)])
-                            user=User.objects.get(email=(row["EMAIL ID "+str(i+1)]).lower())
+                            print(row["Email of Participant "+str(i+1)])
+                            user=User.objects.get(email=(row["Email of Participant "+str(i+1)]).lower())
                         if user.passwordSet==False:
-                            generated_passwords[(row["EMAIL ID "+str(i+1)]).lower()]=user.generated_pass
+                            generated_passwords[(row["Email of Participant "+str(i+1)]).lower()]=user.generated_pass
                         if team.users.all().filter(email=user.email).count()==0:
                             team.users.add(user)
                             ordering=Ordering.objects.create(team_instance=team, user_instance=user, order_index=i+1)
@@ -237,6 +234,7 @@ def open_test(request, qnumber=None, message=""):
         "UTCMinutes": test_start.minute,
         "UTCSeconds": test_start.second
         }
+        template_var["team"]=team
         return render(request, "examPortalApp/waitingroom.html", template_var)
 
     template_var= {

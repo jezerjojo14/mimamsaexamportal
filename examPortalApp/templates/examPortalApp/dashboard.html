@@ -1,6 +1,7 @@
 {% extends 'examPortalApp/body.html' %}
 
 {% block sidepane %}
+{% if user.username != 'admin' %}
 <div id="members">
   <h3>Team id:</h3>
   <h4>{{team.team_id}}</h4>
@@ -13,6 +14,7 @@
   </div>
 </div>
 <br><hr><br>
+{% endif %}
 <ul class="list-group">
   <li class=""><a href="http://mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
   <li><a href="{% url 'instructions' %}">How to use the portal</a></li>
