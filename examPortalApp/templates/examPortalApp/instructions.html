@@ -53,6 +53,7 @@
   <br><hr><br>
 </div>
 <div id="members">
+  {% if user.is_authenticated %}
   <h3>Team id:</h3>
   <h4>{{team.team_id}}</h4>
   <br>
@@ -62,6 +63,7 @@
     {{member}}<br>
     {% endfor %}
   </div>
+  {% endif %}
 </div>
 <br><hr><br>
 <ul class="list-group">
