@@ -200,7 +200,10 @@ def dashboard(request):
         return HttpResponseRedirect(reverse("index"))
 
 def instructions(request):
-    team=request.user.team_set.first()
+    try:
+        team=request.user.team_set.first()
+    except:
+        return render(request, "examPortalApp/instructions.html")
     return render(request, "examPortalApp/instructions.html", {"team": team})
 
 
