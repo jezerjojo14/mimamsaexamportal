@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'r0yc*776ty^e9*02oos(f44rccz%+3@zx5fv-s6uw%b05tn5wo'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['mimamsaexamportal.com', 'www.mimamsaexamportal.com', 'new-env.ap-south-1.elasticbeanstalk.com', '127.0.0.1', "localhost", 'env1.ap-south-1.elasticbeanstalk.com', 'examportal-dev2.ap-south-1.elasticbeanstalk.com', '172.31.12.13', 'examportal.eba-ngubpvi9.ap-south-1.elasticbeanstalk.com', 'examportal-dev.ap-south-1.elasticbeanstalk.com']
 
