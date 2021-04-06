@@ -2,10 +2,10 @@
   <div class="card-header">
     <ul class="nav nav-tabs card-header-tabs">
       <li class="nav-item">
-        <a id="img-upload-tab-btn" class="nav-link{% if answer_text == "" %} active{% endif %}" aria-current="true" onclick="activateImgUploadForm()" href="javascript:;">Upload Images</a>
+        <a id="img-upload-tab-btn" class="nav-link{% if answer_text == "" %} active{% endif %}" aria-current="true" href="javascript:;">Upload Images</a>
       </li>
       <li class="nav-item">
-        <a id="typebox-upload-tab-btn" class="nav-link{% if answer_text != "" %} active{% endif %}" aria-current="true" onclick="activateTextboxForm()" href="javascript:;">Type answer</a>
+        <a id="typebox-upload-tab-btn" class="nav-link{% if answer_text != "" %} active{% endif %}" aria-current="true" href="javascript:;">Type answer</a>
       </li>
     </ul>
   </div>
@@ -19,20 +19,24 @@
           <input type="file" name="file" required id="id_file" accept="image/*">
         </div>
         <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-        <input type="submit" name="" value="Submit">
+        <input type="submit" name="" value="Upload">
       </form>
-      <br>
-      <button id="open-cam-btn" type="button">Use webcam</button>
+      <!-- <br>
+      <button id="open-cam-btn" type="button">Use webcam</button> -->
       <br><br>
       <h6><b>Uploaded Answers:</b></h6>
       <div id="uploadedAnswers">
         {% for file in uploaded_files %}
         <div id="file{{forloop.counter}}" data-pageno="{{ forloop.counter0 }}" class="uploaded-file">
           {{ forloop.counter }}. {{file}}
-          <button onclick="viewImage(this)" type="button" name="button">View</button>
-          <button onclick="deleteImage(this)" type="button" name="button">Delete</button>
-          <button onclick="moveAnswerUp(this)" type="button" name="button">Move Up</button>
-          <button onclick="moveAnswerDown(this)" type="button" name="button">Move Down</button>
+          <button class="view-img-btn" type="button" name="button">View</button>
+          <button class="del-img-btn" type="button" name="button">Delete</button>
+          {% if forloop.counter != 1 %}
+          <button class="move-img-up-btn" type="button" name="button">Move Up</button>
+          {% endif %}
+          {% if forloop.counter != uploaded_files|length %}
+          <button class="move-img-down-btn" type="button" name="button">Move Down</button>
+          {% endif %}
         </div>
         {% endfor %}
       </div>
@@ -40,10 +44,10 @@
     <div id="typebox-upload-tab-body" style="display: {% if answer_text == "" %}none{% else %}block{% endif %}">
       <form id="txt-form" action="{% url 'upload_text_answer' %}" method="post" onsubmit="return txtFormSubmit(event);">
         {% csrf_token %}
-        <textarea oninput="answerChange()" autocomplete="off" id="answer-textarea" style="resize: both" name="answer_text" rows="8" cols="50">{{answer_text}}</textarea>
+        <textarea autocomplete="off" id="answer-textarea" name="answer_text" rows="8" cols="50">{{answer_text}}</textarea>
         <br>
         <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-        <input type="submit" name="" value="Submit">
+        <input type="submit" name="" value="Save Answer">
       </form>
     </div>
   </div>

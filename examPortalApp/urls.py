@@ -10,6 +10,7 @@ urlpatterns = [
     path('unset-passwords', views.unset_passwords, name="unset_passwords"),  #"unset" is an adjective here, not a verb
 
     path('dashboard', views.dashboard, name="dashboard"),
+    path('instructions', views.instructions, name="instructions"),
 
     path('test/<int:qnumber>', views.open_test, name="test_no"),
     path('upload-answer', views.upload_answer, name="upload_answer"),
@@ -33,4 +34,7 @@ urlpatterns = [
     path('post-question', views.post_question, name="post_question"),
     path('edit-question', views.edit_question, name="edit_question"),
     path('del-question', views.delete_question, name="del_question"),
+
+    path('loaderio-bc4611489ba175954b1027ee937bd232/', views.loader),
+    path('dbtest', views.db_test)
 ]

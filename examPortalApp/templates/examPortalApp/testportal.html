@@ -1,5 +1,73 @@
 {% load static %}
 {% load mathfilters %}
+<<<<<<< HEAD
+=======
+{% load static %}
+
+{% block script %}
+  {% include 'examPortalApp/include_modules/testportal_js.html' %}
+{% endblock %}
+
+{% block header_center %}
+<div class="time"></div>
+{% endblock %}
+
+{% block sidepane %}
+<div class="sidepane-timer">
+  <div class="time"></div>
+  <br><hr><br>
+</div>
+<div id="members">
+  <h3>Team id:</h3>
+  <h4>{{team.team_id}}</h4>
+  <br>
+  <h3>Team members:</h3>
+  <div class="members">
+    {% for member in team.users.all %}
+    {{member}}<br>
+    {% endfor %}
+  </div>
+</div>
+<br><hr><br>
+<ul class="list-group">
+  <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
+  <li><a href="{% url 'instructions' %}">How to use the portal</a></li>
+  <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
+</ul>
+<br><hr><br>
+<div style="color: #777; padding: 20px; font-size: 14px">
+  The making of this portal was led by Jezer Jojo with the immense support of Parth Gupte and Samarth Pardhi, along with contributions from Venkata Sai Sreyas Adury and Ipsa Bezbarua
+</div>
+<br><br><br>
+{% endblock %}
+
+{% block content %}
+
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li{% if message.tags %} class="alert alert-info"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <div class="fluid-container" oncopy="return false" oncut="return false" onpaste="return false">
+    <div class="row">
+      <div class="col-lg-12">
+        <div id="nav-questions">
+          {% for i in ''|center:QCount %}
+            <button id="q-btn-{{forloop.counter}}" class='nav-btn btn {% if forloop.counter == QNum %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
+          {% endfor %}
+        </div>
+        <div class="sync-container">
+          <a class="sync-btn" href="#">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
+              <path class="sync-btn" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+            </svg>
+          </a>
+        </div>
+        <div id="q-content">{{content|safe}}</div>
+>>>>>>> master_dev3
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -11,6 +79,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
 
+<<<<<<< HEAD
     <script type="text/javascript">
 
       var unsaved=false;
@@ -385,6 +454,55 @@
           </ul>
           <br><br><br>
         </div>
+=======
+        <div id="img-submit-popup" class="popup">
+          <div class="popup-message">
+            <p>
+              A text based answer was already submitted for this question. Uploading an image would delete the former.
+            </p>
+            <button id="img-submit-popup-continue">Continue</button>
+            <button class="close-popup">Go back</button>
+          </div>
+        </div>
+        <div id="txt-submit-popup" class="popup">
+          <div class="popup-message">
+            <p>
+              An uploaded image was already submitted for this question. Submitting a text based answer would delete the former.
+            </p>
+            <button id="txt-submit-popup-continue">Continue</button>
+            <button class="close-popup">Go back</button>
+          </div>
+        </div>
+        <div id="save-changes-popup" class="popup">
+          <div class="popup-message">
+            <p>
+              You've made unsaved changes to your answer. Discard changes and continue?
+            </p>
+            <button id="save-changes-popup-continue">Continue</button>
+            <button class="close-popup">Go back</button>
+          </div>
+        </div>
+        <!-- <div id="camera-popup" class="popup">
+          <div class="popup-message">
+            <div class="camera">
+              <video id="video">Video stream not available.</video>
+            </div>
+            <div><button id="startbutton">Take photo</button></div>
+            <div><button id="upload-photo-btn">Upload photo</button></div>
+            <canvas id="canvas"></canvas>
+            <div class="output">
+              <img id="photo" alt="The screen capture will appear in this box.">
+            </div>
+            <button class="close-popup" id="close-cam-btn" type="button" name="button">Close</button>
+          </div>
+        </div> -->
+        <div id="view-img-popup" class="popup">
+          <div class="popup-message">
+            <div id="answer-img-container">
+            </div>
+            <button class="close-popup">Close</button>
+          </div>
+>>>>>>> master_dev3
 
       <div class="sidepane" onclick="openNav()"><p>&#9776;</p></div>
 
@@ -492,11 +610,60 @@
                 {% if answer_status != 'r' %}
                   <button id="mark-review-btn-inactive" type="button" name="review" onclick="markReview()">Mark for Review</button>
                 {% else %}
+<<<<<<< HEAD
                   <button id="mark-review-btn-active" type="button" name="review" onclick="markUnanswered()">Marked for Review</button>
                 {% endif %}
 
 
                 {% elif QType == 't' %}
+=======
+                  <label for="opt-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">{{option}}</label>
+                  <input {% if forloop.parentloop.counter0|mul:4|add:forloop.counter0 in selected_options %}checked{% endif %} class="mcq-btn" id="mcq-btn-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}" type="radio" name="choice-{{forloop.parentloop.counter}}" value="{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">
+                  <br>
+                {% endif %}
+              {% endfor %}
+            {% endfor %}
+            <br>
+            <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
+            <input id="clear-response-btn" type="reset" value="Clear Response">
+            <br>
+            <input type="submit" name="" value="Save Choice">
+          </form>
+          {% if answer_status != 'r' %}
+            <button class="mark-review" type="button" name="review">Mark for Review</button>
+          {% else %}
+            <button class="mark-review marked" type="button" name="review">Marked for Review</button>
+          {% endif %}
+
+
+          {% elif QType == 't' %}
+
+
+          {% if selected_options|length == 0 %}
+            <h5>1) Choose option:</h5>
+            <form action="{% url 'save_t_answer' %}" method="post">
+              {% csrf_token %}
+              {% for option in options %}
+                <label for="opt-{{forloop.counter}}">{{option}}</label>
+                <input {% if forloop.counter in selected_options %}checked{% endif %} class="tt-btn" id="tt-btn-{{forloop.counter}}" type="radio" name="choice" value="{{forloop.counter}}">
+                <br>
+              {% endfor %}
+              <br>
+              <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
+              <input id="clear-response-btn" type="reset" value="Clear Response">
+              <br>
+              <input type="submit" name="" value="Save Choice">
+            </form>
+          {% else %}
+            {% for option in options %}
+              {% if forloop.counter in selected_options %}
+                <h5>Chosen option: {{option}}</h5>
+              {% endif %}
+            {% endfor %}
+            <a href="{% url 'clear_t_options' qnumber=QNum %}">Select a different option</a>
+            <br><br>
+            <h5>2) Upload/Type explanation:</h5>
+>>>>>>> master_dev3
 
 
                 {% if selected_options|length == 0 %}
@@ -523,6 +690,7 @@
                   <br><br>
                   <h5>2) Upload/Type explanation:</h5>
 
+<<<<<<< HEAD
                   <div class="card">
                     <div class="card-header">
                       <ul class="nav nav-tabs card-header-tabs">
@@ -573,6 +741,20 @@
                       </div>
                     </div>
                   </div>
+=======
+          {% if selected_options|length != 0 %}
+            {% if answer_status != 'a' %}
+              <button class="mark-answered" type="button" name="review">Mark as Answered</button>
+            {% else %}
+              <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
+            {% endif %}
+          {% endif %}
+          {% if answer_status != 'r' %}
+            <button class="mark-review" type="button" name="review">Mark for Review</button>
+          {% else %}
+          <button class="mark-review marked" type="button" name="review">Marked for Review</button>
+          {% endif %}
+>>>>>>> master_dev3
 
 
                   <br><br>
@@ -592,6 +774,7 @@
                 {% endif %}
 
 
+<<<<<<< HEAD
                 {% elif QType == 's' %}
 
                 <div class="card">
@@ -644,8 +827,22 @@
                     </div>
                   </div>
                 </div>
+=======
+            {% if answer_status != 'a' %}
+              <button class="mark-answered" type="button" name="review">Mark as Answered</button>
+            {% else %}
+              <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
+            {% endif %}
+
+            {% if answer_status != 'r' %}
+              <button class="mark-review" type="button" name="review">Mark for Review</button>
+            {% else %}
+              <button class="mark-review marked" type="button" name="review">Marked for Review</button>
+            {% endif %}
+>>>>>>> master_dev3
 
 
+<<<<<<< HEAD
                   <br><br>
 
                   {% if answer_status != 'a' %}
@@ -688,3 +885,33 @@
       </footer>
     </body>
 </html>
+=======
+          <div class="sync-container">
+            <a class="sync-btn" href="#">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
+                <path class="sync-btn" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div id="nav_buttons">
+          <button id="prev" type="button">Previous</button>
+          <button id="next" type="button">Next</button>
+        </div>
+        <br>
+        <div class="finish-div">
+          <button onclick="document.location='{% url 'index' %}'" id="finish-btn" type="button">Leave Test</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- {% if QType == 's' %}
+  <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
+  {% elif QType == 't' %}
+    {% if selected_options|length != 0 %}
+    <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
+    {% endif %}
+  {% endif %} -->
+{% endblock %}
+>>>>>>> master_dev3

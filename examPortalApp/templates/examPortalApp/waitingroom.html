@@ -19,26 +19,26 @@
         minutes = (diff / 60) | 0;
         seconds = (diff % 60) | 0;
         if (days > 0) {
-          display.textContent = days + " days " + hours + " hours " + minutes + " minutes and " + seconds + "seconds";
+          display.textContent = days + " days " + hours + " hours " + minutes + " minutes and " + seconds + " seconds";
         }
         else if (hours > 0) {
-          display.textContent = hours + " hours " + minutes + " minutes and " + seconds + "seconds";
+          display.textContent = hours + " hours " + minutes + " minutes and " + seconds + " seconds";
         }
         else if (minutes > 0) {
-          display.textContent = minutes + " minutes and " + seconds + "seconds";
+          display.textContent = minutes + " minutes and " + seconds + " seconds";
         }
         else {
-          display.textContent = seconds + "seconds";
+          display.textContent = seconds + " seconds";
         }
         if ((datetime - Date.now()) <= 0) {
-          // add one second so that the count down starts at the full duration
-          // example 05:00 not 04:59
+          clearInterval(intervalVar);
           location.reload();
         }
       };
       // we don't want to wait a full second before the timer starts
+
       timer();
-      setInterval(timer, 1000);
+      var intervalVar = setInterval(timer, 1000);
     }
 
     window.onload = function () {
@@ -56,10 +56,38 @@
   </script>
 {% endblock %}
 
+{% block sidepane %}
+<div id="members">
+  <h3>Team id:</h3>
+  <h4>{{team.team_id}}</h4>
+  <br>
+  <h3>Team members:</h3>
+  <div class="members">
+    {% for member in team.users.all %}
+    {{member}}<br>
+    {% endfor %}
+  </div>
+</div>
+<br><hr><br>
+<ul class="list-group">
+  <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
+  <li><a href="{% url 'instructions' %}">How to use the portal</a></li>
+  <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
+</ul>
+<br><hr><br>
+<div style="color: #777; padding: 20px; font-size: 14px">
+  The making of this portal was led by Jezer Jojo with the immense support of Parth Gupte and Samarth Pardhi, along with contributions from Venkata Sai Sreyas Adury and Ipsa Bezbarua
+</div>
+<br><br><br>
+{% endblock %}
+
 {% block content %}
-  <div class="fluid-container">
+  <div class="fluid-container" style="text-align: center">
+    <br><br>
     <h2>The quiz will begin in</h2>
-    <div id="time">
-    </div>
+    <h2 id="time">
+    </h2>
+    <br><br>
+    <p>Read the instructions on <a href="{% url 'instructions' %}" target="_blank">how to use the portal</a> in the meantime?</p>
   </div>
 {% endblock %}

@@ -1,20 +1,54 @@
 {% extends 'examPortalApp/body.html' %}
+
+{% block sidepane %}
+{% if user.username != 'admin' %}
+<div id="members">
+  <h3>Team id:</h3>
+  <h4>{{team.team_id}}</h4>
+  <br>
+  <h3>Team members:</h3>
+  <div class="members">
+    {% for member in team.users.all %}
+    {{member}}<br>
+    {% endfor %}
+  </div>
+</div>
+<br><hr><br>
+{% endif %}
+<ul class="list-group">
+  <li class=""><a href="http://mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
+  <li><a href="{% url 'instructions' %}">How to use the portal</a></li>
+  <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
+</ul>
+<br><hr><br>
+<div style="color: #777; padding: 20px; font-size: 14px">
+  The making of this portal was led by Jezer Jojo with the immense support of Parth Gupte and Samarth Pardhi, along with contributions from Venkata Sai Sreyas Adury and Ipsa Bezbarua
+</div>
+<br><br><br>
+{% endblock %}
+
 {% block content %}
   <div class="fluid-container">
     <div class="login">
-      <h2>Dashboard</h2>
-
-      <a href="{% url 'test_no' qnumber=1 %}">Open Test</a>
+      <h2 style="text-align: left; padding: 10vw 0 0 10vw">Dashboard</h2>
       <br>
-      <a href="{% url 'change_password' %}">Change Password</a>
-      <br>
-      {% if user.username == 'admin' %}
-      <a href="{% url 'update_accounts' %}">Update registrations</a>
-      <br>
-      <a href="{% url 'questionportal' page=1 %}">Question Portal</a>
-      <br>
-      {% endif %}
-      <a href="{% url 'logout' %}">Log Out</a>
+      <p style="padding: 20px; padding: 0 0 10vw 10vw">
+        {% if user.username != 'admin' %}
+        <a href="{% url 'test_no' qnumber=1 %}">Open Test</a>
+        <br>
+        {% endif %}
+        <a href="{% url 'instructions' %}">Exam portal instructions</a>
+        <br>
+        <a href="{% url 'change_password' %}">Change Password</a>
+        <br>
+        {% if user.username == 'admin' %}
+        <a href="{% url 'update_accounts' %}">Update registrations</a>
+        <br>
+        <a href="{% url 'questionportal' page=1 %}">Question Portal</a>
+        <br>
+        {% endif %}
+        <a href="{% url 'logout' %}">Log Out</a>
+      </p>
 
     </div>
   </div>

@@ -1,9 +1,17 @@
 {% extends 'examPortalApp/body.html' %}
+
+{% block sidepane %}
+<ul class="list-group">
+  <li class=""><a href="http://mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
+</ul>
+{% endblock %}
+
 {% block content %}
-
-  <div class="fluid-container">
+<br><br><br><br>
+<h1 style="text-align: center; color: #36b247;">Mimamsa Exam Portal</h1>
+<br><br>
+  <div class="fluid-container" style="margin-top: 40px">
     <div class="login">
-
       <h2>Login</h2>
 
       {% if message %}
@@ -11,8 +19,7 @@
         <p>{{ message }}</p>
       </div>
       {% endif %}
-
-      <form action="{% url 'index' %}" method="post">
+      <form action="{% url 'index' %}" method="post" style="width: 320px; margin-left: 50%; transform: translateX(-50%);">
         {% csrf_token %}
         <div class="form-group">
           <input autofocus class="form-control" type="text" name="email" placeholder="Email">
@@ -22,7 +29,6 @@
         </div>
         <input class="btn btn-primary" type="submit" value="Login">
       </form>
-
     </div>
   </div>
 

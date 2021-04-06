@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Mimamsa Quiz Portal{% endblock %}</title>
+    <title>{% block title %}Mimamsa Exam Portal{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
 
@@ -22,14 +22,18 @@
       <!-- Add header and menu elements here -->
       <header class="s-header">
 
-        <div id="logo" class="pull-left">
-          <img src="http://mimamsa.iiserpune.ac.in/images/mimamsawhite.png" alt="" title="" />
-          <img src="http://mimamsa.iiserpune.ac.in/images/prajwhite.png" alt="" title="" />
+        <div id="logo" class="pull-left" style="z-index: 10;position: relative;">
+          <a href="http://mimamsa.iiserpune.ac.in">
+            <img src="http://mimamsa.iiserpune.ac.in/images/mimamsawhite.png" alt="" title="" />
+          </a>
+          <a href="http://praj.net/">
+            <img src="http://mimamsa.iiserpune.ac.in/images/prajwhite.png" alt="" title="" />
+          </a>
         </div>
 
         <div class="header-center">
           {% block header_center %}
-          Mimamsa Exam Portal
+          <a href="{% url 'index' %}" style="color: #eee">Mimamsa Exam Portal</a>
           {% endblock %}
         </div>
 
@@ -38,8 +42,15 @@
 
           {% block sidepane %}
           <ul class="list-group">
-            <li class=""><a href="mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
+            <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
+            <li class=""><a href="http://mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
+            <li><a href="{% url 'instructions' %}">How to use the portal</a></li>
+            <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
           </ul>
+          <br><hr><br>
+          <div style="width:70vw; color: #77; font-size: 14px">
+            The making of this portal was led by Jezer Jojo with the immense support of Parth Gupte and Samarth Pardhi, along with contributions from Venkata Sai Sreyas Adury and Ipsa Bezbarua
+          </div>
           {% endblock %}
         </div>
 
@@ -52,13 +63,19 @@
       {% block content %}
       {% endblock %}
 
-      <footer>
-        <div class="fluid-container">
-          <hr>
-          <br>
-          In case of technical difficulties, contact +917994104661
-          <br>
+      <footer style="background-color: #1a1a1a">
+        {% if user.is_authenticated %}
+        <div class="row footer-main" style="text-align: center; width: min-content; margin: 0 auto;">
+          <center>
+            <div class="footer-logo" style="background:url(http://mimamsa.iiserpune.ac.in/images/iiser.png) no-repeat center; background-size: 110px 100px; width: 110px; height: 100px;">
+            </div>
+          </center>
         </div>
-      </footer>
+        <br>
+        {% endif %}
+        <div class="footer-bottom" style="text-align: center; margin: 0 auto;">
+          <span>In case of technical difficulties, mail mimamsatest@gmail.com </span>
+        </div> <!-- end footer-bottom -->
+      </footer> <!-- end footer -->
     </body>
 </html>
