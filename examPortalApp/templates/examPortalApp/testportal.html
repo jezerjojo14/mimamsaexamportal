@@ -1,7 +1,5 @@
-{% load static %}
+{% extends 'examPortalApp/body.html' %}
 {% load mathfilters %}
-<<<<<<< HEAD
-=======
 {% load static %}
 
 {% block script %}
@@ -67,394 +65,9 @@
           </a>
         </div>
         <div id="q-content">{{content|safe}}</div>
->>>>>>> master_dev3
 
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Mimamsa Quiz Portal</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link href="{% static 'examPortalApp/css/styles.css' %}" rel="stylesheet">
+        <!-- Popups -->
 
-<<<<<<< HEAD
-    <script type="text/javascript">
-
-      var unsaved=false;
-
-      function answerChange() {
-        unsaved=true;
-      }
-
-      function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-          var cookies = document.cookie.split(';');
-          for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
-          }
-        }
-        return cookieValue;
-      }
-      function startTimer(datetime, displays) {
-        var start = Date.now(),
-          diff,
-          minutes,
-          seconds;
-        function timer() {
-
-          diff = ((datetime - Date.now()) / 1000);
-
-          // does the same job as parseInt truncates the float
-          hours = (diff / (60 * 60)) | 0;
-          diff = (diff % (60 * 60)) | 0;
-          minutes = (diff / 60) | 0;
-          seconds = (diff % 60) | 0;
-          displays.forEach((display, i) => {
-            if (hours > 0) {
-              display.innerHTML = "<b>Timer</b>  " + hours + ":" + minutes + ":" + seconds;
-            }
-            else if (minutes > 0) {
-              display.innerHTML = "<b>Timer</b>  " + minutes + ":" + seconds;
-            }
-            else {
-              display.innerHTML = "<b>Timer</b>  " + seconds + " seconds";
-            }
-          });
-          if (diff <= 0) {
-            // add one second so that the count down starts at the full duration
-            // example 05:00 not 04:59
-            start = Date.now() + 1000;
-          }
-        };
-        // we don't want to wait a full second before the timer starts
-        timer();
-        setInterval(timer, 1000);
-      };
-
-
-      window.onload = function () {
-        var d = new Date();
-        d.setUTCDate({{ UTCDate }});
-        d.setUTCMonth({{ UTCMonth }}-1);
-        d.setUTCFullYear({{ UTCYear }});
-        d.setUTCHours({{ UTCHours }});
-        d.setUTCMinutes({{ UTCMinutes }});
-        d.setUTCSeconds({{ UTCSeconds }});
-        console.log(d);
-        var timer_display = document.querySelectorAll('.time');
-        startTimer(d.getTime(), timer_display);
-        // var que_display = document.querySelector('#nav-questions')
-        // display_question_numbers(que_display);
-      };
-
-      var currentQNo;
-
-
-      function getQuestion(questionNumber) {
-        if (!unsaved)
-        {
-          window.location=(("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'test_no' qnumber=1 %}").length - 1) + questionNumber);
-        }
-        else {
-          saveChangesPopup(("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'test_no' qnumber=1 %}").length - 1) + questionNumber);
-        }
-      }
-
-      function nextQuestion() {
-        if (currentQNo < {{ QCount }})
-        {
-          currentQNo += 1;
-          getQuestion(currentQNo);
-          // Qactive(currentQNo);
-        }
-      }
-
-      function prevQuestion() {
-        if (currentQNo > 1) {
-          currentQNo -= 1;
-          getQuestion(currentQNo);
-          // Qactive(currentQNo);
-        }
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        currentQNo = {{ QNum }};
-        if (currentQNo == 1) {
-          document.getElementById('prev').setAttribute("disabled", "disabled")
-        }
-        if (currentQNo == {{ QCount }})
-        {
-          document.getElementById('next').setAttribute("disabled", "disabled");
-        }
-        // getQuestion(currentQNo);
-      });
-
-      function saveChangesPopup(url) {
-        document.getElementById('save-changes-popup').style.display="block";
-        document.getElementById('save-changes-popup-continue').onclick=()=>{
-          window.location=url;
-        };
-      }
-
-      function closePopup(ele) {
-        ele.closest('.popup').style.display="none";
-      }
-
-      function markAnswered() {
-        if (!unsaved)
-        {
-          window.location=(("{% url 'answered' qnumber=1 %}").substring(0, ("{% url 'answered' qnumber=1 %}").length - 1) + currentQNo);
-        }
-        else {
-          saveChangesPopup(("{% url 'answered' qnumber=1 %}").substring(0, ("{% url 'answered' qnumber=1 %}").length - 1) + currentQNo);
-        }
-      }
-
-      function markReview() {
-        if (!unsaved) {
-          window.location=(("{% url 'review' qnumber=1 %}").substring(0, ("{% url 'review' qnumber=1 %}").length - 1) + currentQNo);
-        }
-        else {
-          saveChangesPopup(("{% url 'review' qnumber=1 %}").substring(0, ("{% url 'review' qnumber=1 %}").length - 1) + currentQNo);
-        }
-      }
-
-      function markUnanswered() {
-        if (!unsaved) {
-          window.location=(("{% url 'unanswered' qnumber=1 %}").substring(0, ("{% url 'unanswered' qnumber=1 %}").length - 1) + currentQNo);
-        }
-        else {
-          saveChangesPopup(("{% url 'unanswered' qnumber=1 %}").substring(0, ("{% url 'unanswered' qnumber=1 %}").length - 1) + currentQNo);
-        }
-      }
-
-      function viewImage(ele) {
-        document.getElementById('view-img-popup').style.display = "block";
-        document.getElementById('answer-img-container').innerHTML = "Loading... <br>";
-        page_no=ele.parentElement.dataset.pageno;
-        fetch(("{% url 'get_answer' qnumber=1 page_no=1 %}").substring(0, ("{% url 'get_answer' qnumber=1 page_no=1 %}").length - 3) + currentQNo + '/' + page_no)
-          .then(response => response.json())
-          .then((data) => {
-            var URI = data["image"];
-            document.getElementById('answer-img-container').innerHTML = "<img src='" + URI + "'>";
-          })
-      }
-
-      function deleteImage(ele) {
-        page_no=ele.parentElement.dataset.pageno;
-        let csrftoken = getCookie('csrftoken');
-        fetch(("{% url 'del_answer' qnumber=1 page_no=1 %}").substring(0, ("{% url 'del_answer' qnumber=1 page_no=1 %}").length - 3) + currentQNo + '/' + page_no, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": csrftoken
-          },
-          body: null
-        })
-          .then(response => {
-            if (response.ok) {
-              location.reload();
-            }
-          })
-      }
-
-      async function moveAnswerUp(ele) {
-        let page_no=ele.parentElement.dataset.pageno;
-        let csrftoken = getCookie('csrftoken');
-        let response= await fetch("{% url 'move_up' %}", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": csrftoken
-          },
-          body: JSON.stringify({"qnumber":currentQNo, "page_no": page_no})
-        })
-        if (response.ok) {
-          location.reload();
-        }
-        else {
-          console.log(response)
-        }
-      }
-
-      async function moveAnswerDown(ele) {
-        let page_no=ele.parentElement.dataset.pageno;
-        let csrftoken = getCookie('csrftoken');
-        let response= await fetch("{% url 'move_down' %}", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": csrftoken
-          },
-          body: JSON.stringify({"qnumber":currentQNo, "page_no": page_no})
-        })
-        if (response.ok) {
-          location.reload();
-        }
-        else {
-          console.log(response)
-        }
-      }
-
-      function resetForm(form) {
-      // clearing inputs
-        answerChange();
-        var inputs = form.getElementsByTagName('input');
-        for (var i = 0; i<inputs.length; i++) {
-            switch (inputs[i].type) {
-                // case 'hidden':
-                case 'text':
-                    inputs[i].value = '';
-                    break;
-                case 'radio':
-                case 'checkbox':
-                    inputs[i].checked = false;
-            }
-        }
-
-        // clearing selects
-        var selects = form.getElementsByTagName('select');
-        for (var i = 0; i<selects.length; i++)
-            selects[i].selectedIndex = 0;
-
-        // clearing textarea
-        var text= form.getElementsByTagName('textarea');
-        for (var i = 0; i<text.length; i++)
-            text[i].innerHTML= '';
-
-        return false;
-      }
-
-      function activateTextboxForm() {
-        document.getElementById('typebox-upload-tab-body').style.display="block";
-        document.getElementById('img-upload-tab-body').style.display="none";
-        document.getElementById('typebox-upload-tab-btn').classList.add('active');
-        document.getElementById('img-upload-tab-btn').classList.remove('active');
-        return false;
-      }
-
-      function activateImgUploadForm() {
-        document.getElementById('typebox-upload-tab-body').style.display="none";
-        document.getElementById('img-upload-tab-body').style.display="block";
-        document.getElementById('typebox-upload-tab-btn').classList.remove('active');
-        document.getElementById('img-upload-tab-btn').classList.add('active');
-        return false;
-      }
-
-      function openCameraPopup() {
-        document.getElementById('camera-popup').style.display="block";
-      }
-
-      function closeCamPopup(ele) {
-        closePopup(ele);
-      }
-
-      function sendWebcamData(data) {
-        var redirect = function(url, method) {
-          var form = document.createElement('form');
-          form.method = method;
-          form.action = url;
-          form.innerHTML+='{% csrf_token %}';
-          var input1 = document.createElement('input');
-          input1.type = 'hidden';
-          input1.name = "qnumber";
-          input1.value = "{{ QNum }}";
-          form.appendChild(input1);
-          var input2 = document.createElement('input');
-          input2.type = 'file';
-          input2.name = "file";
-          input2.value = data;
-          form.appendChild(input2);
-          document.body.appendChild(form);
-          form.submit();
-        };
-
-        redirect('{% url 'upload_answer' %}', 'post');
-      }
-
-      function imgFormSubmit(e) {
-        e.preventDefault();
-        if ((("{{answer_text}}").trim()).length==0) {
-          document.getElementById('img-form').submit();
-        }
-        else {
-          openImgSubmitPopup();
-          return false;
-        }
-      }
-
-      function txtFormSubmit(e) {
-        e.preventDefault();
-        if (true) {
-          document.getElementById('txt-form').submit();
-        }
-        else {
-          openTxtSubmitPopup();
-          return false;
-        }
-      }
-
-      function openImgSubmitPopup() {
-        document.getElementById('img-submit-popup').style.display="block";
-
-      }
-
-      function openTxtSubmitPopup() {
-        document.getElementById('tex-submit-popup').style.display="block";
-      }
-
-    </script>
-
-    <!-- common script for collapsible menu -->
-    <script type="text/javascript" src="{% static 'examPortalApp/js/menu.js' %}"></script>
-
-  </head>
-    <body>
-      {% if user.is_authenticated %}
-      <!-- Add header and menu elements here -->
-      <header class="s-header">
-
-        <div id="logo" class="pull-left">
-          <img src="http://mimamsa.iiserpune.ac.in/images/mimamsawhite.png" alt="" title="" />
-          <img src="http://mimamsa.iiserpune.ac.in/images/prajwhite.png" alt="" title="" />
-        </div>
-
-        <div class="header-center">
-          <div class="time"></div>
-        </div>
-
-        <div id="menu" class="sidenav closed">
-          <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-
-          <div class="sidepane-timer">
-          <div class="time"></div>
-          <br><hr><br>
-          </div>
-          <div id="members">
-            <h3>Team id:</h3>
-            <h4>{{team.team_id}}</h4>
-            <br>
-            <h3>Team members:</h3>
-            {% for member in team.users.all %}
-            {{member}}<br>
-            {% endfor %}
-          </div>
-          <br><hr><br>
-          <ul class="list-group">
-            <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
-            <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
-          </ul>
-          <br><br><br>
-        </div>
-=======
         <div id="img-submit-popup" class="popup">
           <div class="popup-message">
             <p>
@@ -502,121 +115,24 @@
             </div>
             <button class="close-popup">Close</button>
           </div>
->>>>>>> master_dev3
 
-      <div class="sidepane" onclick="openNav()"><p>&#9776;</p></div>
+        </div>
 
+        <!-- End popups -->
 
-      </header>
-      {% endif %}
-
-
-        {% if messages %}
-          <ul class="messages">
-            {% for message in messages %}
-              <li{% if message.tags %} class="alert alert-info"{% endif %}>{{ message }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-
-        <div class="fluid-container">
-          <div class="row">
-            <div class="col-lg-12">
-              <div id="nav-questions">
-                {% for i in ''|center:QCount %}
-                  <button onclick='getQuestion({{forloop.counter}})' class='btn {% if forloop.counter == QNum %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
-                {% endfor %}
-              </div>
-              <div id="q-content">{{content|safe}}</div>
-
-              <!-- Popups -->
-
-              <div id="img-submit-popup" class="popup">
-                <div class="popup-message">
-                  <p>
-                    A text based answer was already submitted for this question. Uploading an image would delete the former.
-                  </p>
-                  <button onclick="document.getElementById('img-form').submit()">Continue</button>
-                  <button onclick="closePopup(this)">Go back</button>
-                </div>
-              </div>
-              <div id="txt-submit-popup" class="popup">
-                <div class="popup-message">
-                  <p>
-                    An uploaded image was already submitted for this question. Submitting a text based answer would delete the former.
-                  </p>
-                  <button onclick="document.getElementById('txt-form').submit()">Continue</button>
-                  <button onclick="closePopup(this)">Go back</button>
-                </div>
-              </div>
-              <div id="save-changes-popup" class="popup">
-                <div class="popup-message">
-                  <p>
-                    You've made unsaved changes to your answer. Discard changes and continue?
-                  </p>
-                  <button id="save-changes-popup-continue">Continue</button>
-                  <button onclick="closePopup(this)">Go back</button>
-                </div>
-              </div>
-              <div id="camera-popup" class="popup">
-                <div class="popup-message">
-                  <div class="camera">
-                    <video id="video">Video stream not available.</video>
-                  </div>
-                  <div><button id="startbutton">Take photo</button></div>
-                  <div><button id="upload-photo-btn">Upload photo</button></div>
-                  <canvas id="canvas"></canvas>
-                  <div class="output">
-                    <img id="photo" alt="The screen capture will appear in this box.">
-                  </div>
-                  <button id="close-cam-btn" type="button" name="button" onclick="closeCamPopup(this)">Close</button>
-                </div>
-              </div>
-              <div id="view-img-popup" class="popup">
-                <div class="popup-message">
-                  <div id="answer-img-container">
-                  </div>
-                  <button onclick="closePopup(this)">Close</button>
-                </div>
-
-              </div>
-
-              <!-- End popups -->
-
-              <div class="answer-section">
+        <div class="answer-section">
 
 
-                {% if QType == 'm' %}
+          {% if QType == 'm' %}
 
 
-                <form action="{% url 'save_m_answer' %}" method="post">
-                  {% csrf_token %}
-                  {% for option_set in options %}
-                    {% for option in option_set %}
-                      {% if forloop.counter0 == 0 %}
-                        <h5>{{option}}</h5>
-                      {% else %}
-                        <label for="opt-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">{{option}}</label>
-                        <input {% if forloop.parentloop.counter0|mul:4|add:forloop.counter0 in selected_options %}checked{% endif %} id="mcq-btn-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}" oninput="answerChange()" type="radio" name="choice-{{forloop.parentloop.counter}}" value="{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">
-                      {% endif %}
-                    {% endfor %}
-                  {% endfor %}
-                  <br>
-                  <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-                  <input type="reset" onclick="return resetForm(this.form);" value="Clear Response">
-                  <br>
-                  <input type="submit" name="" value="Save Answer">
-                </form>
-                {% if answer_status != 'r' %}
-                  <button id="mark-review-btn-inactive" type="button" name="review" onclick="markReview()">Mark for Review</button>
+          <form action="{% url 'save_m_answer' %}" method="post">
+            {% csrf_token %}
+            {% for option_set in options %}
+              {% for option in option_set %}
+                {% if forloop.counter0 == 0 %}
+                  <h5>{{option}}</h5>
                 {% else %}
-<<<<<<< HEAD
-                  <button id="mark-review-btn-active" type="button" name="review" onclick="markUnanswered()">Marked for Review</button>
-                {% endif %}
-
-
-                {% elif QType == 't' %}
-=======
                   <label for="opt-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">{{option}}</label>
                   <input {% if forloop.parentloop.counter0|mul:4|add:forloop.counter0 in selected_options %}checked{% endif %} class="mcq-btn" id="mcq-btn-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}" type="radio" name="choice-{{forloop.parentloop.counter}}" value="{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">
                   <br>
@@ -663,85 +179,12 @@
             <a href="{% url 'clear_t_options' qnumber=QNum %}">Select a different option</a>
             <br><br>
             <h5>2) Upload/Type explanation:</h5>
->>>>>>> master_dev3
 
+            {% include 'examPortalApp/include_modules/forms_card.html' %}
 
-                {% if selected_options|length == 0 %}
-                  <h5>1) Choose option:</h5>
-                  <form action="{% url 'save_t_answer' %}" method="post">
-                    {% csrf_token %}
-                    {% for option in options %}
-                      <label for="opt-{{forloop.counter}}">{{option}}</label>
-                      <input {% if forloop.counter in selected_options %}checked{% endif %} id="tt-btn-{{forloop.counter}}" oninput="answerChange()" type="radio" name="choice" value="{{forloop.counter}}">
-                    {% endfor %}
-                    <br>
-                    <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-                    <input type="reset" onclick="return resetForm(this.form);" value="Clear Response">
-                    <br>
-                    <input type="submit" name="" value="Save Choice">
-                  </form>
-                {% else %}
-                  {% for option in options %}
-                    {% if forloop.counter in selected_options %}
-                      <h5>Chosen option: {{option}}</h5>
-                    {% endif %}
-                  {% endfor %}
-                  <a href="{% url 'clear_t_options' qnumber=QNum %}">Select a different option</a>
-                  <br><br>
-                  <h5>2) Upload/Type explanation:</h5>
+            <br><br>
+          {% endif %}
 
-<<<<<<< HEAD
-                  <div class="card">
-                    <div class="card-header">
-                      <ul class="nav nav-tabs card-header-tabs">
-                        <li class="nav-item">
-                          <a id="img-upload-tab-btn" class="nav-link{% if answer_text == "" %} active{% endif %}" aria-current="true" onclick="activateImgUploadForm()" href="javascript:;">Upload Images</a>
-                        </li>
-                        <li class="nav-item">
-                          <a id="typebox-upload-tab-btn" class="nav-link{% if answer_text != "" %} active{% endif %}" aria-current="true" onclick="activateTextboxForm()" href="javascript:;">Type answer</a>
-                        </li>
-                      </ul>
-                    </div>
-                    <div class="card-body">
-                      <div id="img-upload-tab-body" style="display: {% if answer_text != "" %}none{% else %}block{% endif %}">
-                        <form id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data" onsubmit="return imgFormSubmit(event);">
-                          {% csrf_token %}
-                          <div class="fieldWrapper" id="fileFieldWrapper">
-                            <label for="id_file"><b>Upload answers:</b></label>
-                            <br>
-                            <input type="file" name="file" required id="id_file" accept="image/*">
-                          </div>
-                          <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-                          <input type="submit" name="" value="Submit">
-                        </form>
-                        <br>
-                        <button id="open-cam-btn" type="button">Use webcam</button>
-                        <br><br>
-                        <h6><b>Uploaded Answers:</b></h6>
-                        <div id="uploadedAnswers">
-                          {% for file in uploaded_files %}
-                          <div id="file{{forloop.counter}}" data-pageno="{{ forloop.counter0 }}" class="uploaded-file">
-                            {{ forloop.counter }}. {{file}}
-                            <button onclick="viewImage(this)" type="button" name="button">View</button>
-                            <button onclick="deleteImage(this)" type="button" name="button">Delete</button>
-                            <button onclick="moveAnswerUp(this)" type="button" name="button">Move Up</button>
-                            <button onclick="moveAnswerDown(this)" type="button" name="button">Move Down</button>
-                          </div>
-                          {% endfor %}
-                        </div>
-                      </div>
-                      <div id="typebox-upload-tab-body" style="display: {% if answer_text == "" %}none{% else %}block{% endif %}">
-                        <form id="txt-form" action="{% url 'upload_text_answer' %}" method="post" onsubmit="return txtFormSubmit(event);">
-                          {% csrf_token %}
-                          <textarea oninput="answerChange()" autocomplete="off" id="answer-textarea" style="resize: both" name="answer_text" rows="8" cols="50">{{answer_text}}</textarea>
-                          <br>
-                          <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-                          <input type="submit" name="" value="Submit">
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-=======
           {% if selected_options|length != 0 %}
             {% if answer_status != 'a' %}
               <button class="mark-answered" type="button" name="review">Mark as Answered</button>
@@ -754,80 +197,14 @@
           {% else %}
           <button class="mark-review marked" type="button" name="review">Marked for Review</button>
           {% endif %}
->>>>>>> master_dev3
 
 
-                  <br><br>
-                {% endif %}
+          {% elif QType == 's' %}
 
-                {% if selected_options|length != 0 %}
-                    {% if answer_status != 'a' %}
-                      <button id="mark-answered-btn-inactive" type="button" name="review" onclick="markAnswered()">Mark as Answered</button>
-                    {% else %}
-                      <button id="mark-answered-btn-active" type="button" name="review" onclick="markUnanswered()">Marked as Answered</button>
-                    {% endif %}
-                  {% endif %}
-                  {% if answer_status != 'r' %}
-                    <button id="mark-review-btn-inactive" type="button" name="review" onclick="markReview()">Mark for Review</button>
-                  {% else %}
-                  <button id="mark-review-btn-active" type="button" name="review" onclick="markUnanswered()">Marked for Review</button>
-                {% endif %}
+            {% include 'examPortalApp/include_modules/forms_card.html' %}
 
+            <br><br>
 
-<<<<<<< HEAD
-                {% elif QType == 's' %}
-
-                <div class="card">
-                  <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs">
-                      <li class="nav-item">
-                        <a id="img-upload-tab-btn" class="nav-link{% if answer_text == "" %} active{% endif %}" aria-current="true" onclick="activateImgUploadForm()" href="javascript:;">Upload Images</a>
-                      </li>
-                      <li class="nav-item">
-                        <a id="typebox-upload-tab-btn" class="nav-link{% if answer_text != "" %} active{% endif %}" aria-current="true" onclick="activateTextboxForm()" href="javascript:;">Type answer</a>
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="card-body">
-                    <div id="img-upload-tab-body" style="display: {% if answer_text != "" %}none{% else %}block{% endif %}">
-                      <form id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data" onsubmit="return imgFormSubmit(event);">
-                        {% csrf_token %}
-                        <div class="fieldWrapper" id="fileFieldWrapper">
-                          <label for="id_file"><b>Upload answers:</b></label>
-                          <br>
-                          <input type="file" name="file" required id="id_file" accept="image/*">
-                        </div>
-                        <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-                        <input type="submit" name="" value="Submit">
-                      </form>
-                      <br>
-                      <button id="open-cam-btn" type="button">Use webcam</button>
-                      <br><br>
-                      <h6><b>Uploaded Answers:</b></h6>
-                      <div id="uploadedAnswers">
-                        {% for file in uploaded_files %}
-                        <div id="file{{forloop.counter}}" data-pageno="{{ forloop.counter0 }}" class="uploaded-file">
-                          {{ forloop.counter }}. {{file}}
-                          <button onclick="viewImage(this)" type="button" name="button">View</button>
-                          <button onclick="deleteImage(this)" type="button" name="button">Delete</button>
-                          <button onclick="moveAnswerUp(this)" type="button" name="button">Move Up</button>
-                          <button onclick="moveAnswerDown(this)" type="button" name="button">Move Down</button>
-                        </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                    <div id="typebox-upload-tab-body" style="display: {% if answer_text == "" %}none{% else %}block{% endif %}">
-                      <form id="txt-form" action="{% url 'upload_text_answer' %}" method="post" onsubmit="return txtFormSubmit(event);">
-                        {% csrf_token %}
-                        <textarea oninput="answerChange()" autocomplete="off" id="answer-textarea" style="resize: both" name="answer_text" rows="8" cols="50">{{answer_text}}</textarea>
-                        <br>
-                        <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-                        <input type="submit" name="" value="Submit">
-                      </form>
-                    </div>
-                  </div>
-                </div>
-=======
             {% if answer_status != 'a' %}
               <button class="mark-answered" type="button" name="review">Mark as Answered</button>
             {% else %}
@@ -839,53 +216,9 @@
             {% else %}
               <button class="mark-review marked" type="button" name="review">Marked for Review</button>
             {% endif %}
->>>>>>> master_dev3
 
-
-<<<<<<< HEAD
-                  <br><br>
-
-                  {% if answer_status != 'a' %}
-                    <button id="mark-answered-btn-inactive" type="button" name="review" onclick="markAnswered()">Mark as Answered</button>
-                  {% else %}
-                    <button id="mark-answered-btn-active" type="button" name="review" onclick="markUnanswered()">Marked as Answered</button>
-                  {% endif %}
-
-                  {% if answer_status != 'r' %}
-                    <button id="mark-review-btn-inactive" type="button" name="review" onclick="markReview()">Mark for Review</button>
-                  {% else %}
-                    <button id="mark-review-btn-active" type="button" name="review" onclick="markUnanswered()">Marked for Review</button>
-                  {% endif %}
-
-                {% endif %}
-
-                <div id="nav_buttons">
-                  <button onclick="prevQuestion();" id="prev" type="button" class="btn btn-secondary btn-lg">Previous</button>
-                  <button onclick="nextQuestion();" id="next" type="button" class="btn btn-secondary btn-lg" style="float: right;">Next</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {% if QType == 's' %}
-        <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
-        {% elif QType == 't' %}
-          {% if selected_options|length != 0 %}
-          <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
           {% endif %}
-        {% endif %}
 
-      <footer>
-        <div class="fluid-container">
-          <hr>
-          <br>
-          In case of technical difficulties, contact +917994104661
-          <br>
-        </div>
-      </footer>
-    </body>
-</html>
-=======
           <div class="sync-container">
             <a class="sync-btn" href="#">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
@@ -914,4 +247,3 @@
     {% endif %}
   {% endif %} -->
 {% endblock %}
->>>>>>> master_dev3
