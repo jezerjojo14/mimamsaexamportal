@@ -432,14 +432,12 @@
   function imgFormSubmit(e) {
     e.preventDefault();
     var d=document.createElement('DIV');
-    d.innerHTML=("{{answer_text|linebreaks}}").trim();
-    if (d.textContent.trim()==="") {
-      document.getElementById('img-form').submit();
-    }
-    else {
-      openImgSubmitPopup();
-      return false;
-    }
+    {% if answer_text_empty %}
+    document.getElementById('img-form').submit();
+    {% else %}
+    openImgSubmitPopup();
+    return false;
+    {% endif %}
   }
 
   function txtFormSubmit(e) {

@@ -273,6 +273,7 @@ def open_test(request, qnumber=None, message=""):
             template_var["selected_options"]=[]
             template_var["uploaded_files"]=uploaded_files
             template_var["answer_text"]=a.answer_content
+            template_var["answer_text_empty"]=(len(a.answer_content.strip())==0)
 
 
             return render(request, "examPortalApp/testportal.html", template_var)
@@ -299,6 +300,7 @@ def open_test(request, qnumber=None, message=""):
             template_var["selected_options"]=selected_options
             template_var["uploaded_files"]=[]
             template_var["answer_text"]=""
+            template_var["answer_text_empty"]=True
 
             return render(request, "examPortalApp/testportal.html", template_var)
 
@@ -320,6 +322,7 @@ def open_test(request, qnumber=None, message=""):
             template_var["selected_options"]=selected_option
             template_var["uploaded_files"]=uploaded_files
             template_var["answer_text"]=(ast.literal_eval(a.answer_content))[1]
+            template_var["answer_text_empty"]=(len((ast.literal_eval(a.answer_content))[1].strip())==0)
 
             return render(request, "examPortalApp/testportal.html", template_var)
 
