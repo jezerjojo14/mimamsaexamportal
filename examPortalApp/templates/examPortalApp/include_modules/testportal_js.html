@@ -265,7 +265,7 @@
         .then(response => response.json())
         .then((data) => {
           var URI = data["image"];
-          document.getElementById('answer-img-container').innerHTML = "<img src='" + URI + "'>";
+          document.getElementById('answer-img-container').innerHTML = "<img class='uploaded-img' src='" + URI + "'>";
         })
     }
 

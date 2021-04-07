@@ -338,6 +338,10 @@ h2{
   font-size: 30px;
 }
 
+.uploaded-img {
+  max-width: 60vw;
+}
+
 #members {
   margin-left: 32px;
 }

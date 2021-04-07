@@ -326,6 +326,7 @@ h2{
   padding: 50px;
   overflow-y: auto;
   max-height: 90vh;
+  max-width: 95vw;
   margin: 0;
   position: absolute;
   top: 50%;
@@ -336,6 +337,10 @@ h2{
 
 #members h3{
   font-size: 30px;
+}
+
+.uploaded-img {
+  max-width: 90vw;
 }
 
 #members {
