@@ -131,9 +131,37 @@
         };
       }
       document.getElementById('img-submit-popup-continue').onclick=()=>{
+        document.getElementById('img-submit-popup-continue').innerHTML="Processing request...";
+        document.getElementById('img-submit-popup-continue').style.opacity=0.5;
+        document.getElementById('img-submit-popup-continue').disabled=true;
+        document.getElementById('img-submit-popup-continue').onclick= function() {
+          return false;
+        };
+        var closePopupList = document.querySelectorAll(".close-popup");
+        for(var i = 0; i < closePopupList.length; i++) {
+          closePopupList[i].style.opacity=0.5;
+          closePopupList[i].disabled=true;
+          closePopupList[i].onclick = function() {
+            return false;
+          };
+        }
         document.getElementById('img-form').submit();
       };
       document.getElementById('txt-submit-popup-continue').onclick=()=>{
+        document.getElementById('txt-submit-popup-continue').innerHTML="Processing request...";
+        document.getElementById('txt-submit-popup-continue').style.opacity=0.5;
+        document.getElementById('txt-submit-popup-continue').disabled=true;
+        document.getElementById('txt-submit-popup-continue').onclick= function() {
+          return false;
+        };
+        var closePopupList = document.querySelectorAll(".close-popup");
+        for(var i = 0; i < closePopupList.length; i++) {
+          closePopupList[i].style.opacity=0.5;
+          closePopupList[i].disabled=true;
+          closePopupList[i].onclick = function() {
+            return false;
+          };
+        }
         document.getElementById('txt-form').submit();
       };
       var closePopupList = document.querySelectorAll(".close-popup");
@@ -219,6 +247,20 @@
     function saveChangesPopup(url) {
       document.getElementById('save-changes-popup').style.display="block";
       document.getElementById('save-changes-popup-continue').onclick=()=>{
+        document.getElementById('save-changes-popup-continue').innerHTML="Processing request...";
+        document.getElementById('save-changes-popup-continue').style.opacity=0.5;
+        document.getElementById('save-changes-popup-continue').disabled=true;
+        document.getElementById('save-changes-popup-continue').onclick= function() {
+          return false;
+        };
+        var closePopupList = document.querySelectorAll(".close-popup");
+        for(var i = 0; i < closePopupList.length; i++) {
+          closePopupList[i].style.opacity=0.5;
+          closePopupList[i].disabled=true;
+          closePopupList[i].onclick = function() {
+            return false;
+          };
+        }
         window.location=url;
       };
     }

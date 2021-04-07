@@ -218,7 +218,7 @@ def open_test(request, qnumber=None, message=""):
     now = timezone.now()
     test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 0, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 30, 0))})[0]).test_start
     team=request.user.team_set.first()
-    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 5)
     q_count= Question.objects.all().count();
     q_current = 1 if (qnumber is None) else int(qnumber);
     q=Question.objects.get(question_number=qnumber)
@@ -365,6 +365,8 @@ def get_answer(request, page_no, qnumber):
             af.delete()
 
         return JsonResponse({"image":image})
+    else:
+        raise Http404;
 
 @login_required(login_url='/')
 def del_answer(request, page_no, qnumber):
@@ -410,6 +412,8 @@ def del_answer(request, page_no, qnumber):
             return HttpResponse(status=201)
 
         return HttpResponse(status=404)
+    else:
+        raise Http404;
 
 
 @login_required(login_url='/')
@@ -495,6 +499,8 @@ def get_m_answers(request, qnumber):
             return JsonResponse({"answers":ast.literal_eval(a.answer_content)})
         except:
             return JsonResponse({"answers": []})
+    else:
+        raise Http404;
 
 
 @login_required(login_url='/')
@@ -515,6 +521,8 @@ def get_t_answers(request, qnumber):
                 return JsonResponse({"choice":l[0][0], "text": l[1]})
         except:
             return JsonResponse({"choice":-1, "images": [], "text": ""})
+    else:
+        raise Http404;
 
 
 @login_required(login_url='/')
@@ -541,6 +549,8 @@ def submit_MCQ(request):
             a.status='u'
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    else:
+        raise Http404;
 
 #This function is for saving the choice, not the explanation. The latter is handled by upload_answer/upload_text_answer
 @login_required(login_url='/')
@@ -564,6 +574,8 @@ def submit_TT(request):
         a.answer_content=str(answer)
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    else:
+        raise Http404;
 
 @login_required(login_url='/')
 def upload_text_answer(request):
@@ -592,6 +604,8 @@ def upload_text_answer(request):
             a.answer_content=[(ast.literal_eval(a.answer_content))[0], request.POST["answer_text"]]
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    else:
+        raise Http404;
 
 
 @login_required(login_url='/')
@@ -679,6 +693,8 @@ def upload_answer(request):
         af.save()
 
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    else:
+        raise Http404;
 
 
 
@@ -695,6 +711,8 @@ def mark_for_review(request, qnumber):
         a.status='r'
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    else:
+        raise Http404;
 
 @login_required(login_url='/')
 def mark_as_answered(request, qnumber):
@@ -711,6 +729,8 @@ def mark_as_answered(request, qnumber):
         a.status='a'
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    else:
+        raise Http404;
 
 @login_required(login_url='/')
 def mark_as_unanswered(request, qnumber):
@@ -731,6 +751,8 @@ def mark_as_unanswered(request, qnumber):
             a.status='u'
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    else:
+        raise Http404;
 
 
 @login_required(login_url='/')
@@ -750,6 +772,8 @@ def clear_t_options(request, qnumber):
             a.status='u';
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+    else:
+        raise Http404;
 
 
 
