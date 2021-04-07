@@ -159,7 +159,7 @@ h2{
   width: 0;
 }
 
-.close-popup {
+.close-popup-img {
   margin-left: 50%;
   transform: translate(-50%, 0px);
 }
@@ -326,7 +326,6 @@ h2{
   padding: 50px;
   overflow-y: auto;
   max-height: 90vh;
-  max-width: 95vw;
   margin: 0;
   position: absolute;
   top: 50%;
@@ -340,7 +339,7 @@ h2{
 }
 
 .uploaded-img {
-  max-width: 90vw;
+  max-width: 60vw;
 }
 
 #members {
