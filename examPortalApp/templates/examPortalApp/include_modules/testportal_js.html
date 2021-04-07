@@ -429,11 +429,21 @@
 //     redirect('{% url 'upload_answer' %}', 'post');
 //   }
 
+  function grayer(formId, yesNo) {
+    var f = document.getElementById(formId), s, opacity;
+    s = f.style;
+    opacity = yesNo? '40' : '100';
+    s.opacity = s.MozOpacity = s.KhtmlOpacity = opacity/100;
+    s.filter = 'alpha(opacity='+opacity+')';
+  }
+
   function imgFormSubmit(e) {
     e.preventDefault();
-    var d=document.createElement('DIV');
     {% if answer_text_empty %}
+    grayer('img-form', true);
     document.getElementById('img-form').submit();
+    document.getElementById('img-form-submit-btn').value='Processing';
+    document.getElementById('img-form-submit-btn').disabled=true;
     {% else %}
     openImgSubmitPopup();
     return false;
