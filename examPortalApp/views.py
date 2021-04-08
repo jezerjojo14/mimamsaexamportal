@@ -154,8 +154,8 @@ def change_password(request):
                         "message": "Email not registered"
                     })
                 reset_user.set_password(new_password)
-                user.passwordSet=True
-                user.save()
+                reset_user.passwordSet=True
+                reset_user.save()
             else:
                 return render(request, "examPortalApp/change_password.html", {
                     "message": "Your credentials don't match."
@@ -218,7 +218,7 @@ def open_test(request, qnumber=None, message=""):
     now = timezone.now()
     test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 0, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 30, 0))})[0]).test_start
     team=request.user.team_set.first()
-    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 5)
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
     q_count= Question.objects.all().count();
     q_current = 1 if (qnumber is None) else int(qnumber);
     q=Question.objects.get(question_number=qnumber)
@@ -373,7 +373,7 @@ def del_answer(request, page_no, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
-    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
 
@@ -529,7 +529,7 @@ def get_t_answers(request, qnumber):
 def submit_MCQ(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
-    test_end=GlobalVariables.objects.get(pk=1).test_end
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
     team=request.user.team_set.first()
 
     if now<test_end and now>test_start:
@@ -557,7 +557,7 @@ def submit_MCQ(request):
 def submit_TT(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
-    test_end=GlobalVariables.objects.get(pk=1).test_end
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
     team=request.user.team_set.first()
 
     if now<test_end and now>test_start:
@@ -581,7 +581,7 @@ def submit_TT(request):
 def upload_text_answer(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
-    test_end=GlobalVariables.objects.get(pk=1).test_end
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
     team=request.user.team_set.first()
 
     if now<test_end and now>test_start:
@@ -613,7 +613,7 @@ def upload_answer(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
-    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
         user=request.user
@@ -702,7 +702,7 @@ def upload_answer(request):
 def mark_for_review(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
-    test_end=GlobalVariables.objects.get(pk=1).test_end
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     if now<test_end and now>test_start:
         user=request.user
@@ -736,7 +736,7 @@ def mark_as_answered(request, qnumber):
 def mark_as_unanswered(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
-    test_end=GlobalVariables.objects.get(pk=1).test_end
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     if now<test_end and now>test_start:
         user=request.user
@@ -760,7 +760,7 @@ def clear_t_options(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
-    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
         user=request.user
