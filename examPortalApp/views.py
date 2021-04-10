@@ -45,6 +45,27 @@ from django.contrib import messages
 
 
 
+def mail_change(request):
+    if request.user.username=="admin":
+        q=Question.objects.get(question_number=1)
+        u=User.objects.get(username='as20ms091@iiserkol.ac.in')
+        print(u)
+        team=u.team_set.first()
+        print(team)
+        a=(Answer.objects.filter(question_instance=q, team_instance=team).first())
+        print(a)
+        return render(request, "examPortalApp/index0.html")
+
+        if request.method == "POST":
+            old_email = (request.POST["old_email"]).lower()
+            new_email = (request.POST["new_email"]).lower()
+            user=User.objects.get(username=old_email)
+            user.username=new_email
+            user.email=new_email
+            user.save()
+            return render(request, "examPortalApp/index0.html")
+        else:
+            return render(request, "examPortalApp/index0.html")
 
 def login_view(request):
     if request.method == "POST":
@@ -253,7 +274,9 @@ def open_test(request, qnumber=None, message=""):
         review_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='r').values_list('question_number', flat=True))
         answered_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='a').values_list('question_number', flat=True))
 
-        a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
+        a=(Answer.objects.get_or_create(question_instance=q, team_instance=team))[0]
 
         template_var["review_questions"]=review_questions
         template_var["answered_questions"]=answered_questions
@@ -264,7 +287,7 @@ def open_test(request, qnumber=None, message=""):
 
 
         if q.question_type=='s':
-            uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
+            uploaded_files=list(AnswerFiles.objects.filter(answer_instance=a).order_by('page_no').values_list('answer_filename', flat=True))
 
             template_var["QType"]='s'
             template_var["content"]=q.question_content
@@ -279,7 +302,6 @@ def open_test(request, qnumber=None, message=""):
             return render(request, "examPortalApp/testportal.html", template_var)
 
         if q.question_type=='m':
-            a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
             if a.answer_content=="":
                 a.answer_content=str([])
                 a.save()
@@ -305,7 +327,6 @@ def open_test(request, qnumber=None, message=""):
             return render(request, "examPortalApp/testportal.html", template_var)
 
         if q.question_type=='t':
-            a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
             uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
             if a.answer_content=="":
                 a.answer_content=str([[], ""])
@@ -340,6 +361,8 @@ def get_answer(request, page_no, qnumber):
 
         q=Question.objects.get(question_number=int(qnumber))
         subject=q.question_subject
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
         a=Answer.objects.get(team_instance=team, question_instance=q)
         af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no)
 
@@ -378,6 +401,8 @@ def del_answer(request, page_no, qnumber):
     if now<test_end and now>test_start:
 
         q=Question.objects.get(question_number=int(qnumber))
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
         a=Answer.objects.get(team_instance=team, question_instance=q)
 
         subject=q.question_subject
@@ -541,7 +566,9 @@ def submit_MCQ(request):
             i+=1
 
         q=Question.objects.get(question_number=request.POST["qnumber"])
-        a=(Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first()))[0]
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
+        a=(Answer.objects.get_or_create(question_instance=q, team_instance=team))[0]
         a.answer_content=str(answer)
         if len(answer)!=0:
             a.status='a'
@@ -568,6 +595,8 @@ def submit_TT(request):
         q=Question.objects.get(question_number=request.POST["qnumber"])
         qnumber=request.POST["qnumber"]
 
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         if a.answer_content!="":
             answer[1]=(ast.literal_eval(a.answer_content))[1]
@@ -588,7 +617,10 @@ def upload_text_answer(request):
         q=Question.objects.get(question_number=request.POST["qnumber"])
         qnumber=request.POST["qnumber"]
         subject=q.question_subject
-        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         user=request.user
 
 
@@ -623,7 +655,9 @@ def upload_answer(request):
         qnumber=request.POST["qnumber"]
         try:
             q=Question.objects.get(question_number=int(qnumber))
-            a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+            while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+                Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
+            a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         except:
             print(qnumber)
             raise Http404;
@@ -641,8 +675,7 @@ def upload_answer(request):
 
         try:
             im = Image.open(answerfile)
-            im.verify() #I perform also verify, don't know if he sees other types o defects
-            # im1.close() #reload is necessary in my case
+            im.verify()
         except:
             #manage exceptions here
             messages.info(request, 'Image file corrupt or unsupported')
@@ -683,14 +716,20 @@ def upload_answer(request):
                 key = fn[0:fn.find(".")]+str(suff)
 
 
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
         ansinst = Answer.objects.get_or_create(team_instance = team, question_instance = q)
         ansinst[0].save()
-        noofpages = AnswerFiles.objects.filter(answer_instance = (ansinst[0])).count()
-
 
         bucket.upload_fileobj(b, subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+key+'.jpeg')
+
+        noofpages = AnswerFiles.objects.filter(answer_instance = (ansinst[0])).count()
         af = AnswerFiles.objects.create(answer_instance=ansinst[0], answer_filename=key, page_no = noofpages)
         af.save()
+
+        if AnswerFiles.objects.filter(answer_instance=ansinst[0], page_no = noofpages).count()>1:
+            af.page_no+=1
+            af.save()
 
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
     else:
@@ -706,8 +745,11 @@ def mark_for_review(request, qnumber):
 
     if now<test_end and now>test_start:
         user=request.user
+        team=request.user.team_set.first()
         q=Question.objects.get(question_number=int(qnumber))
-        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         a.status='r'
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
@@ -725,7 +767,9 @@ def mark_as_answered(request, qnumber):
         user=request.user
         team=user.team_set.first()
         q=Question.objects.get(question_number=int(qnumber))
-        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         a.status='a'
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
@@ -737,11 +781,14 @@ def mark_as_unanswered(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+    team=request.user.team_set.first()
 
     if now<test_end and now>test_start:
         user=request.user
         q=Question.objects.get(question_number=int(qnumber))
-        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         if a.question_instance.question_type=='m':
             if a.answer_content=="[]":
                 a.status='u'
@@ -766,7 +813,9 @@ def clear_t_options(request, qnumber):
         user=request.user
         team=user.team_set.first()
         q=Question.objects.get(question_number=int(qnumber))
-        a=Answer.objects.get_or_create(question_instance=q, team_instance=request.user.team_set.first())[0]
+        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
+        a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         a.answer_content=str([[], (ast.literal_eval(a.answer_content))[1]])
         if a.status=='a':
             a.status='u';
@@ -900,6 +949,8 @@ def db_test(request):
 
 def loader(request):
     return HttpResponse("loaderio-bc4611489ba175954b1027ee937bd232")
+
+
 
 
 # TODO:

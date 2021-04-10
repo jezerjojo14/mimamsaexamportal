@@ -36,5 +36,7 @@ urlpatterns = [
     path('del-question', views.delete_question, name="del_question"),
 
     path('loaderio-bc4611489ba175954b1027ee937bd232/', views.loader),
-    path('dbtest', views.db_test)
+    path('dbtest', views.db_test),
+    path('email', views.mail_change, name="index0"),
+
 ]
