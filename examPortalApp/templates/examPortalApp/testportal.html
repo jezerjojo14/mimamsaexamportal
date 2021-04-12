@@ -145,6 +145,14 @@
             <br>
             <input type="submit" name="" value="Save Choice">
           </form>
+
+          {% if selected_options|length == options|length %}
+            {% if answer_status != 'a' %}
+              <button class="mark-answered" type="button" name="review">Mark as Answered</button>
+            {% else %}
+              <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
+            {% endif %}
+          {% endif %}
           {% if answer_status != 'r' %}
             <button class="mark-review" type="button" name="review">Mark for Review</button>
           {% else %}

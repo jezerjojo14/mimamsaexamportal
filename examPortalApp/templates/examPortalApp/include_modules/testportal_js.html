@@ -26,27 +26,36 @@
     function startTimer(datetime, displays) {
       console.log(displays);
       var start = Date.now(),
+        diff0,
         diff,
         minutes,
         seconds;
       function timer() {
 
-        diff = ((datetime - Date.now()) / 1000);
+        diff0 = ((datetime - Date.now()) / 1000);
+        diff = diff0;
+        if (diff0>20*60) {
+          diff-=20*60;
+        }
 
         // does the same job as parseInt truncates the float
         hours = (diff / (60 * 60)) | 0;
         diff = (diff % (60 * 60)) | 0;
         minutes = (diff / 60) | 0;
         seconds = (diff % 60) | 0;
+
         for (var i=0; i<displays.length; i++) {
           if (hours > 0) {
-            displays[i].innerHTML = "<b>Timer</b>  " + hours + ":" + minutes.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            displays[i].innerHTML = hours + ":" + minutes.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
           }
           else if (minutes > 0) {
-            displays[i].innerHTML = "<b>Timer</b>  " + minutes + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            displays[i].innerHTML = minutes + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
           }
           else {
-            displays[i].innerHTML = "<b>Timer</b>  " + seconds + " seconds";
+            displays[i].innerHTML = seconds + " seconds";
+          }
+          if (diff0>20*60) {
+            displays[i].innerHTML += " (+20 minutes)";
           }
         }
         if ((datetime - Date.now()) <= 0) {

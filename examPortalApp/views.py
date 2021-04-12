@@ -47,22 +47,25 @@ from django.contrib import messages
 
 def mail_change(request):
     if request.user.username=="admin":
-        q=Question.objects.get(question_number=1)
-        u=User.objects.get(username='as20ms091@iiserkol.ac.in')
-        print(u)
-        team=u.team_set.first()
-        print(team)
-        a=(Answer.objects.filter(question_instance=q, team_instance=team).first())
-        print(a)
-        return render(request, "examPortalApp/index0.html")
+        # q=Question.objects.get(question_number=1)
+        # u=User.objects.get(username='as20ms091@iiserkol.ac.in')
+        # print(u)
+        # team=u.team_set.first()
+        # print(team)
+        # a=(Answer.objects.filter(question_instance=q, team_instance=team).first())
+        # print(a)
+        # return render(request, "examPortalApp/index0.html")
 
         if request.method == "POST":
-            old_email = (request.POST["old_email"]).lower()
+            sequence = (request.POST["sequence"]).lower()
+            order_index = int(request.POST["order_index"])
             new_email = (request.POST["new_email"]).lower()
-            user=User.objects.get(username=old_email)
+            user=User.objects.get(team__sequence=sequence, ordering__order_index=order_index)
+            print(user)
             user.username=new_email
             user.email=new_email
             user.save()
+            print(user)
             return render(request, "examPortalApp/index0.html")
         else:
             return render(request, "examPortalApp/index0.html")
@@ -554,8 +557,8 @@ def get_t_answers(request, qnumber):
 def submit_MCQ(request):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
-    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
     team=request.user.team_set.first()
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
         qnumber=request.POST["qnumber"]
@@ -582,10 +585,10 @@ def submit_MCQ(request):
 #This function is for saving the choice, not the explanation. The latter is handled by upload_answer/upload_text_answer
 @login_required(login_url='/')
 def submit_TT(request):
+    team=request.user.team_set.first()
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
-    team=request.user.team_set.first()
 
     if now<test_end and now>test_start:
         i=1
@@ -609,9 +612,9 @@ def submit_TT(request):
 @login_required(login_url='/')
 def upload_text_answer(request):
     now = timezone.now()
+    team=request.user.team_set.first()
     test_start=GlobalVariables.objects.get(pk=1).test_start
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
-    team=request.user.team_set.first()
 
     if now<test_end and now>test_start:
         q=Question.objects.get(question_number=request.POST["qnumber"])
@@ -741,6 +744,7 @@ def upload_answer(request):
 def mark_for_review(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
+    team=request.user.team_set.first()
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     if now<test_end and now>test_start:
@@ -780,8 +784,8 @@ def mark_as_answered(request, qnumber):
 def mark_as_unanswered(request, qnumber):
     now = timezone.now()
     test_start=GlobalVariables.objects.get(pk=1).test_start
-    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
     team=request.user.team_set.first()
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     if now<test_end and now>test_start:
         user=request.user
@@ -789,13 +793,7 @@ def mark_as_unanswered(request, qnumber):
         while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
             Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
-        if a.question_instance.question_type=='m':
-            if a.answer_content=="[]":
-                a.status='u'
-            else:
-                a.status='a'
-        else:
-            a.status='u'
+        a.status='u'
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
     else:
