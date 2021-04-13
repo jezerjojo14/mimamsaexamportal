@@ -194,10 +194,12 @@
           {% endif %}
 
           {% if selected_options|length != 0 %}
-            {% if answer_status != 'a' %}
-              <button class="mark-answered" type="button" name="review">Mark as Answered</button>
-            {% else %}
-              <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
+            {% if answer_text != "" or uploaded_files|length!=0 %}
+              {% if answer_status != 'a' %}
+                <button class="mark-answered" type="button" name="review">Mark as Answered</button>
+              {% else %}
+                <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
+              {% endif %}
             {% endif %}
           {% endif %}
           {% if answer_status != 'r' %}
@@ -213,10 +215,12 @@
 
             <br><br>
 
-            {% if answer_status != 'a' %}
-              <button class="mark-answered" type="button" name="review">Mark as Answered</button>
-            {% else %}
-              <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
+            {% if answer_text != "" or uploaded_files|length!=0 %}
+              {% if answer_status != 'a' %}
+                <button class="mark-answered" type="button" name="review">Mark as Answered</button>
+              {% else %}
+                <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
+              {% endif %}
             {% endif %}
 
             {% if answer_status != 'r' %}

@@ -42,7 +42,11 @@
         <a href="{% url 'change_password' %}">Change Password</a>
         <br>
         {% if user.username == 'admin' %}
+        <a href="{% url 'mail_change' %}">Change user email ID</a>
+        <br>
         <a href="{% url 'update_accounts' %}">Update registrations</a>
+        <br>
+        <a href="{% url 'password_list' %}">List of unset passwords</a>
         <br>
         <a href="{% url 'questionportal' page=1 %}">Question Portal</a>
         <br>

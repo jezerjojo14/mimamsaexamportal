@@ -45,6 +45,14 @@ from django.contrib import messages
 
 
 
+def password_list(request):
+    if request.user.username=="admin":
+        users=User.objects.filter(passwordSet=False)
+        d={}
+        for user in users:
+            d[user.username]=user.generated_pass
+        return JsonResponse(d)
+
 def mail_change(request):
     if request.user.username=="admin":
         # q=Question.objects.get(question_number=1)
@@ -937,13 +945,6 @@ def edit_question(request):
         print("--------------")
         print(('{"content":"')+(q.question_content)+('", "subject":"'+q.question_subject+'"}'))
         return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
-
-def db_test(request):
-    users=User.objects.filter(passwordSet=False)
-    d={}
-    for user in users:
-        d[user.username]=user.generated_pass
-    return JsonResponse(d)
 
 def loader(request):
     return HttpResponse("loaderio-bc4611489ba175954b1027ee937bd232")
