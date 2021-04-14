@@ -90,6 +90,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'examPortal.urls'
 
+CSRF_FAILURE_VIEW = 'examPortalApp.views.csrf_failure'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

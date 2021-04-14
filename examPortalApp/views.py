@@ -43,7 +43,8 @@ from django.contrib import messages
 
 #  User account related views
 
-
+def csrf_failure(request, reason=""):
+    return render(request, "500.html")
 
 def password_list(request):
     if request.user.username=="admin":
@@ -55,15 +56,6 @@ def password_list(request):
 
 def mail_change(request):
     if request.user.username=="admin":
-        # q=Question.objects.get(question_number=1)
-        # u=User.objects.get(username='as20ms091@iiserkol.ac.in')
-        # print(u)
-        # team=u.team_set.first()
-        # print(team)
-        # a=(Answer.objects.filter(question_instance=q, team_instance=team).first())
-        # print(a)
-        # return render(request, "examPortalApp/index0.html")
-
         if request.method == "POST":
             sequence = (request.POST["sequence"]).lower()
             order_index = int(request.POST["order_index"])
@@ -84,7 +76,6 @@ def login_view(request):
         # Attempt to sign user in
         email = (request.POST["email"]).lower()
         password = request.POST["password"]
-        print(password)
         if User.objects.filter(username=email).exists():
             user=User.objects.get(username=email)
             if user.check_password(password):
@@ -251,14 +242,10 @@ def open_test(request, qnumber=None, message=""):
     test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 0, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 30, 0))})[0]).test_start
     team=request.user.team_set.first()
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
-    q_count= Question.objects.all().count();
-    q_current = 1 if (qnumber is None) else int(qnumber);
-    q=Question.objects.get(question_number=qnumber)
 
     #If test hasn't started yet, show the waiting page,
     #If it has started but hasn't ended, show the testportal
     #If it's ended show the "Test ended" page
-
 
     if now<test_start:
         template_var= {
@@ -271,6 +258,13 @@ def open_test(request, qnumber=None, message=""):
         }
         template_var["team"]=team
         return render(request, "examPortalApp/waitingroom.html", template_var)
+
+    q_count= Question.objects.all().count();
+    q_current = 1 if (qnumber is None) else int(qnumber);
+    try:
+        q=Question.objects.get(question_number=qnumber)
+    except:
+        raise Http404
 
     template_var= {
     "UTCDate": test_end.day,
@@ -445,6 +439,12 @@ def del_answer(request, page_no, qnumber):
                 af.page_no=page_no+i
                 af.save()
 
+            noofpages = AnswerFiles.objects.filter(answer_instance = a).count()
+
+            if noofpages==0 and a.status=='a':
+                a.status='u'
+                a.save()
+
             return HttpResponse(status=201)
 
         return HttpResponse(status=404)
@@ -460,15 +460,10 @@ def move_up(request):
     qnumber=post_data["qnumber"]
     page_no=int(post_data["page_no"])
 
-    print(page_no)
-    print(page_no-1)
-
     team=request.user.team_set.first()
 
     q=Question.objects.get(question_number=int(qnumber))
     a=Answer.objects.get(team_instance=team, question_instance=q)
-
-    print(a.pk)
 
     subject=q.question_subject
 
@@ -494,9 +489,6 @@ def move_down(request):
 
     qnumber=post_data["qnumber"]
     page_no=int(post_data["page_no"])
-
-    print(page_no)
-    print(page_no+1)
 
     team=request.user.team_set.first()
 
@@ -577,11 +569,11 @@ def submit_MCQ(request):
             i+=1
 
         q=Question.objects.get(question_number=request.POST["qnumber"])
+        a=(Answer.objects.get_or_create(question_instance=q, team_instance=team))[0]
         while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
             Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
-        a=(Answer.objects.get_or_create(question_instance=q, team_instance=team))[0]
         a.answer_content=str(answer)
-        if len(answer)!=0:
+        if len(answer)==len(ast.literal_eval(q.question_content))-1:
             a.status='a'
         elif a.status=='a':
             a.status='u'
@@ -611,6 +603,8 @@ def submit_TT(request):
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         if a.answer_content!="":
             answer[1]=(ast.literal_eval(a.answer_content))[1]
+        if len(answer[0])==0 and a.status=='a':
+            a.status='u'
         a.answer_content=str(answer)
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
@@ -632,8 +626,6 @@ def upload_text_answer(request):
         while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
             Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
-        user=request.user
-
 
         s3 = boto3.resource('s3')
         bucket = s3.Bucket('mimamsauploadedanswers')
@@ -641,10 +633,13 @@ def upload_text_answer(request):
 
         AnswerFiles.objects.filter(answer_instance = a).delete()
 
+        if request.POST["answer_text"].strip() == "" and a.status=='a':
+            a.status='u'
+
         if q.question_type=='s':
-            a.answer_content=request.POST["answer_text"]
+            a.answer_content=request.POST["answer_text"].strip()
         elif q.question_type=='t':
-            a.answer_content=[(ast.literal_eval(a.answer_content))[0], request.POST["answer_text"]]
+            a.answer_content=str([(ast.literal_eval(a.answer_content))[0], request.POST["answer_text"].strip()])
         a.save()
         return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
     else:
@@ -659,9 +654,6 @@ def upload_answer(request):
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
-        user=request.user
-        team=user.team_set.first()
-        print(request.POST)
         answerfile=request.FILES["file"]
         qnumber=request.POST["qnumber"]
         try:
@@ -854,13 +846,13 @@ def question_making_page(request, page=1):
 def post_question(request):
     if request.user.username=="admin":
         if request.POST["qtype"]=='s':
-            q=Question(question_content=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>"), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"], question_type='s', question_answers='')
+            q=Question(question_content=((request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")).strip(), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"], question_type='s', question_answers='')
             q.save()
             #Redirect to page 1 of the question making portal
             return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
         if request.POST["qtype"]=='m':
             answers=[]
-            content=[(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")]
+            content=[((request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")).strip()]
             i=1
             while "opt-"+str(i) in request.POST:
                 if (i-1)%4==0:
@@ -874,7 +866,7 @@ def post_question(request):
             return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
         if request.POST["qtype"]=='t':
             answers=[]
-            content=[(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>"), []]
+            content=[((request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")).strip(), []]
             i=1
             while "opt-"+str(i) in request.POST:
                 content[1]+=[request.POST["opt-"+str(i)]]
@@ -893,10 +885,8 @@ def post_question(request):
 @login_required(login_url='/')
 def delete_question(request):
     if request.user.username=="admin":
-        print(request.body)
         post_data = json.loads(request.body.decode("utf-8"))
         q=Question.objects.get(id=post_data["id"])
-        print(q.question_content)
         total=Question.objects.all().count()
         qnum=q.question_number
         q.delete()
@@ -904,17 +894,13 @@ def delete_question(request):
             m=Question.objects.get(question_number=qnum+(i+1))
             m.question_number-=1
             m.save()
-        print("--------------")
-        print(('{"content":"')+(q.question_content)+('", "subject":"'+q.question_subject+'"}'))
         return HttpResponse(status=201)
 
 @login_required(login_url='/')
 def edit_question(request):
     subjects=["Physics", "Biology", "Math", "Chemistry"]
     if request.user.username=="admin":
-        print(request.POST)
         q=Question.objects.get(id=int(request.POST["id"]))
-        print(q.question_content)
         q.question_content=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")
         if request.POST["subject"] in subjects:
             q.question_subject=request.POST["subject"]
@@ -942,8 +928,6 @@ def edit_question(request):
                 m.save()
             q.question_number=qnumber
         q.save()
-        print("--------------")
-        print(('{"content":"')+(q.question_content)+('", "subject":"'+q.question_subject+'"}'))
         return HttpResponseRedirect(reverse("questionportal", kwargs={'page':1}))
 
 def loader(request):

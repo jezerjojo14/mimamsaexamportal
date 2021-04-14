@@ -29,7 +29,7 @@
           newSubject.innerHTML = '<option value="Physics">Physics</option><option value="Math">Math</option><option value="Biology">Biology</option><option value="Chemistry">Chemistry</option>';
           newSubject.name = "subject";
           var newContent = document.createElement("textarea");
-          newContent.innerHTML = oldContent;
+          newContent.innerHTML = oldContent.trim();
           newContent.name = "content";
           newContent.classList.add('editFormText');
           newContent.style.marginTop = "10px";

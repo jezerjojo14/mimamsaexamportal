@@ -57,6 +57,9 @@
           if (diff0>20*60) {
             displays[i].innerHTML += " (+20 minutes)";
           }
+          else {
+            displays[i].innerHTML += " (Uploading Time)";
+          }
         }
         if ((datetime - Date.now()) <= 0) {
           clearInterval(intervalVar);

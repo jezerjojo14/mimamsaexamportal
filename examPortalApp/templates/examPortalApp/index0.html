@@ -1,15 +1,7 @@
 {% extends 'examPortalApp/body.html' %}
 
-{% block sidepane %}
-<ul class="list-group">
-  <li class=""><a href="http://mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
-</ul>
-{% endblock %}
-
 {% block content %}
 <br><br><br><br>
-<h1 style="text-align: center; color: #36b247;">Mimamsa Exam Portal</h1>
-<br><br>
   <div class="fluid-container" style="margin-top: 40px">
     <div class="login">
       <h2>Change email</h2>
@@ -19,7 +11,7 @@
         <p>{{ message }}</p>
       </div>
       {% endif %}
-      <form action="{% url 'index0' %}" method="post" style="width: 320px; margin-left: 50%; transform: translateX(-50%);">
+      <form action="{% url 'mail_change' %}" method="post" style="width: 320px; margin-left: 50%; transform: translateX(-50%);">
         {% csrf_token %}
         <div class="form-group">
           <input autofocus class="form-control" type="text" name="sequence" placeholder="Sequence">
