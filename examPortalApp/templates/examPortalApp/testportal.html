@@ -193,14 +193,14 @@
             <br><br>
           {% endif %}
 
-          {% if selected_options|length != 0 %}
-            {% if answer_text != "" or uploaded_files|length != 0 %}
-              {% if answer_status != 'a' %}
+          {% if answer_status != 'a' %}
+            {% if selected_options|length != 0 %}
+              {% if answer_text != "" or uploaded_files|length != 0 %}
                 <button class="mark-answered" type="button" name="review">Mark as Answered</button>
-              {% else %}
-                <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
               {% endif %}
             {% endif %}
+          {% else %}
+            <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
           {% endif %}
           {% if answer_status != 'r' %}
             <button class="mark-review" type="button" name="review">Mark for Review</button>
@@ -215,12 +215,12 @@
 
             <br><br>
 
-            {% if answer_text != "" or uploaded_files|length != 0 %}
-              {% if answer_status != 'a' %}
+            {% if answer_status != 'a' %}
+              {% if answer_text != "" or uploaded_files|length != 0 %}
                 <button class="mark-answered" type="button" name="review">Mark as Answered</button>
-              {% else %}
-                <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
               {% endif %}
+            {% else %}
+              <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
             {% endif %}
 
             {% if answer_status != 'r' %}
