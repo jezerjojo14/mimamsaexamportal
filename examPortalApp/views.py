@@ -61,12 +61,13 @@ def mail_change(request):
             order_index = int(request.POST["order_index"])
             new_email = (request.POST["new_email"]).lower()
             user=User.objects.get(team__sequence=sequence, ordering__order_index=order_index)
-            print(user)
+            old_email=user.username
             user.username=new_email
             user.email=new_email
             user.save()
-            print(user)
-            return render(request, "examPortalApp/index0.html")
+            return render(request, "examPortalApp/index0.html", {
+                "message": old_email+" to "+user.username
+            })
         else:
             return render(request, "examPortalApp/index0.html")
 

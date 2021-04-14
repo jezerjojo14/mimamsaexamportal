@@ -6,6 +6,11 @@
     <div class="login">
       <h2>Change email</h2>
 
+      {% if message %}
+      <div>
+        <p>{{ message }}</p>
+      </div>
+      {% endif %}
       <form action="{% url 'mail_change' %}" method="post" style="width: 320px; margin-left: 50%; transform: translateX(-50%);">
         {% csrf_token %}
         <div class="form-group">
