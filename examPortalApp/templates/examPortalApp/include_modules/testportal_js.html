@@ -55,7 +55,12 @@
             displays[i].innerHTML = seconds + " seconds";
           }
           if (diff0>20*60) {
-            displays[i].innerHTML += " (+20 minutes)";
+            if (hours > 0) {
+              displays[i].innerHTML += " + 00:20:00";
+            }
+            else {
+              displays[i].innerHTML += " + 20:00";
+            }
           }
           else {
             displays[i].innerHTML += " (Uploading Time)";

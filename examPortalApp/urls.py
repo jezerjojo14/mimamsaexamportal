@@ -38,5 +38,6 @@ urlpatterns = [
     path('loaderio-bc4611489ba175954b1027ee937bd232/', views.loader),
     path('password-list', views.password_list, name="password_list"),
     path('email', views.mail_change, name="mail_change"),
+    path('testmonkey', views.db_test),
 
 ]

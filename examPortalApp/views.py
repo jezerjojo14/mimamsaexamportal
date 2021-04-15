@@ -41,7 +41,13 @@ from django.contrib import messages
 
 
 
-#  User account related views
+# def db_test(request):
+#     user=User.objects.get(username='jezer')
+#     team=user.team_set.first()
+#     team.extra_time-=909060
+#     team.save()
+#     return HttpResponse(team.extra_time)
+
 
 def csrf_failure(request, reason=""):
     return render(request, "500.html")
@@ -70,6 +76,10 @@ def mail_change(request):
             })
         else:
             return render(request, "examPortalApp/index0.html")
+
+
+#  User account related views
+
 
 def login_view(request):
     if request.method == "POST":
@@ -240,8 +250,9 @@ def instructions(request):
 @login_required(login_url='/')
 def open_test(request, qnumber=None, message=""):
     now = timezone.now()
-    test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 0, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 1, 26, 22, 30, 0))})[0]).test_start
+    test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 4, 18, 4, 30, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 4, 18, 6, 30, 0))})[0]).test_start
     team=request.user.team_set.first()
+    test_start += datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     #If test hasn't started yet, show the waiting page,
@@ -250,15 +261,18 @@ def open_test(request, qnumber=None, message=""):
 
     if now<test_start:
         template_var= {
-        "UTCDate": test_start.day,
-        "UTCMonth": test_start.month,
-        "UTCYear": test_start.year,
-        "UTCHours": test_start.hour,
-        "UTCMinutes": test_start.minute,
-        "UTCSeconds": test_start.second
+            "UTCDate": test_start.day,
+            "UTCMonth": test_start.month,
+            "UTCYear": test_start.year,
+            "UTCHours": test_start.hour,
+            "UTCMinutes": test_start.minute,
+            "UTCSeconds": test_start.second
         }
         template_var["team"]=team
         return render(request, "examPortalApp/waitingroom.html", template_var)
+
+    if now>test_end:
+        return render(request, "examPortalApp/testended.html")
 
     q_count= Question.objects.all().count();
     q_current = 1 if (qnumber is None) else int(qnumber);
@@ -268,99 +282,97 @@ def open_test(request, qnumber=None, message=""):
         raise Http404
 
     template_var= {
-    "UTCDate": test_end.day,
-    "UTCMonth": test_end.month,
-    "UTCYear": test_end.year,
-    "UTCHours": test_end.hour,
-    "UTCMinutes": test_end.minute,
-    "UTCSeconds": test_end.second
+        "UTCDate": test_end.day,
+        "UTCMonth": test_end.month,
+        "UTCYear": test_end.year,
+        "UTCHours": test_end.hour,
+        "UTCMinutes": test_end.minute,
+        "UTCSeconds": test_end.second
     }
 
-    if now<test_end:
-        review_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='r').values_list('question_number', flat=True))
-        answered_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='a').values_list('question_number', flat=True))
+    review_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='r').values_list('question_number', flat=True))
+    answered_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='a').values_list('question_number', flat=True))
 
-        while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
-            Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
-        a=(Answer.objects.get_or_create(question_instance=q, team_instance=team))[0]
+    while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+        Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
+    a=(Answer.objects.get_or_create(question_instance=q, team_instance=team))[0]
 
-        template_var["review_questions"]=review_questions
-        template_var["answered_questions"]=answered_questions
-        template_var["answer_status"]=a.status
-        template_var["team"]=team
-        template_var["QNum"]=q_current
-        template_var["QCount"]=q_count
-
-
-        if q.question_type=='s':
-            uploaded_files=list(AnswerFiles.objects.filter(answer_instance=a).order_by('page_no').values_list('answer_filename', flat=True))
-
-            template_var["QType"]='s'
-            template_var["content"]=q.question_content
-            template_var["labels"]=[]
-            template_var["options"]=[]
-            template_var["selected_options"]=[]
-            template_var["uploaded_files"]=uploaded_files
-            template_var["answer_text"]=a.answer_content
-            template_var["answer_text_empty"]=(len(a.answer_content.strip())==0)
+    template_var["review_questions"]=review_questions
+    template_var["answered_questions"]=answered_questions
+    template_var["answer_status"]=a.status
+    template_var["team"]=team
+    template_var["QNum"]=q_current
+    template_var["QCount"]=q_count
 
 
-            return render(request, "examPortalApp/testportal.html", template_var)
+    if q.question_type=='s':
+        uploaded_files=list(AnswerFiles.objects.filter(answer_instance=a).order_by('page_no').values_list('answer_filename', flat=True))
 
-        if q.question_type=='m':
-            if a.answer_content=="":
-                a.answer_content=str([])
-                a.save()
-            selected_options=ast.literal_eval(a.answer_content)
-            content=ast.literal_eval(q.question_content)
-            setup=content[0]
-            option_sets=[]
-            labels=[]
-            i=1
-            while i<len(content):
-                option_sets+=[[content[i][0]]+content[i][1]]
-                i+=1
+        template_var["QType"]='s'
+        template_var["content"]=q.question_content
+        template_var["labels"]=[]
+        template_var["options"]=[]
+        template_var["selected_options"]=[]
+        template_var["uploaded_files"]=uploaded_files
+        template_var["answer_text"]=a.answer_content
+        template_var["answer_text_empty"]=(len(a.answer_content.strip())==0)
 
-            template_var["QType"]='m'
-            template_var["content"]=setup
-            template_var["labels"]=labels
-            template_var["options"]=option_sets
-            template_var["selected_options"]=selected_options
-            template_var["uploaded_files"]=[]
-            template_var["answer_text"]=""
-            template_var["answer_text_empty"]=True
 
-            return render(request, "examPortalApp/testportal.html", template_var)
+        return render(request, "examPortalApp/testportal.html", template_var)
 
-        if q.question_type=='t':
-            uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
-            if a.answer_content=="":
-                a.answer_content=str([[], ""])
-                a.save()
-            selected_option=(ast.literal_eval(a.answer_content))[0]
-            content=ast.literal_eval(q.question_content)
-            setup=content[0]
-            options=content[1]
+    if q.question_type=='m':
+        if a.answer_content=="":
+            a.answer_content=str([])
+            a.save()
+        selected_options=ast.literal_eval(a.answer_content)
+        content=ast.literal_eval(q.question_content)
+        setup=content[0]
+        option_sets=[]
+        labels=[]
+        i=1
+        while i<len(content):
+            #option_sets=[["label1", "opt1_1", "opt2_1", "opt3_1", "opt4_1"], ["label2", "opt1_2", "opt2_2", "opt3_2", "opt4_2"]]
+            option_sets+=[[content[i][0]]+content[i][1]]
+            i+=1
 
-            template_var["QType"]='t'
-            template_var["content"]=setup
-            template_var["labels"]=[]
-            template_var["options"]=options
-            template_var["selected_options"]=selected_option
-            template_var["uploaded_files"]=uploaded_files
-            template_var["answer_text"]=(ast.literal_eval(a.answer_content))[1]
-            template_var["answer_text_empty"]=(len((ast.literal_eval(a.answer_content))[1].strip())==0)
+        template_var["QType"]='m'
+        template_var["content"]=setup
+        template_var["labels"]=labels
+        template_var["options"]=option_sets
+        template_var["selected_options"]=selected_options
+        template_var["uploaded_files"]=[]
+        template_var["answer_text"]=""
+        template_var["answer_text_empty"]=True
 
-            return render(request, "examPortalApp/testportal.html", template_var)
+        return render(request, "examPortalApp/testportal.html", template_var)
 
-    return render(request, "examPortalApp/testended.html")
+    if q.question_type=='t':
+        uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
+        if a.answer_content=="":
+            a.answer_content=str([[], ""])
+            a.save()
+        selected_option=(ast.literal_eval(a.answer_content))[0]
+        content=ast.literal_eval(q.question_content)
+        setup=content[0]
+        options=content[1]
+
+        template_var["QType"]='t'
+        template_var["content"]=setup
+        template_var["labels"]=[]
+        template_var["options"]=options
+        template_var["selected_options"]=selected_option
+        template_var["uploaded_files"]=uploaded_files
+        template_var["answer_text"]=(ast.literal_eval(a.answer_content))[1]
+        template_var["answer_text_empty"]=(len((ast.literal_eval(a.answer_content))[1].strip())==0)
+
+        return render(request, "examPortalApp/testportal.html", template_var)
 
 
 @login_required(login_url='/')
 def get_answer(request, page_no, qnumber):
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     if now<test_end and now>test_start:
@@ -400,8 +412,8 @@ def get_answer(request, page_no, qnumber):
 @login_required(login_url='/')
 def del_answer(request, page_no, qnumber):
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
@@ -517,8 +529,8 @@ def move_down(request):
 @login_required(login_url='/')
 def get_m_answers(request, qnumber):
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     if now<test_end and now>test_start:
@@ -535,8 +547,8 @@ def get_m_answers(request, qnumber):
 @login_required(login_url='/')
 def get_t_answers(request, qnumber):
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     if now<test_end and now>test_start:
@@ -557,8 +569,8 @@ def get_t_answers(request, qnumber):
 @login_required(login_url='/')
 def submit_MCQ(request):
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
@@ -588,7 +600,7 @@ def submit_MCQ(request):
 def submit_TT(request):
     team=request.user.team_set.first()
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
@@ -616,7 +628,7 @@ def submit_TT(request):
 def upload_text_answer(request):
     now = timezone.now()
     team=request.user.team_set.first()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
@@ -650,8 +662,8 @@ def upload_text_answer(request):
 @login_required(login_url='/')
 def upload_answer(request):
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
@@ -744,8 +756,8 @@ def upload_answer(request):
 @login_required(login_url='/')
 def mark_for_review(request, qnumber):
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     if now<test_end and now>test_start:
@@ -764,8 +776,8 @@ def mark_for_review(request, qnumber):
 @login_required(login_url='/')
 def mark_as_answered(request, qnumber):
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     if now<test_end and now>test_start:
@@ -784,8 +796,8 @@ def mark_as_answered(request, qnumber):
 @login_required(login_url='/')
 def mark_as_unanswered(request, qnumber):
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
     if now<test_end and now>test_start:
@@ -804,8 +816,8 @@ def mark_as_unanswered(request, qnumber):
 @login_required(login_url='/')
 def clear_t_options(request, qnumber):
     now = timezone.now()
-    test_start=GlobalVariables.objects.get(pk=1).test_start
     team=request.user.team_set.first()
+    test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
