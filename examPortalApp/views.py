@@ -3,6 +3,7 @@
 import boto3
 from botocore.exceptions import ClientError
 import botocore
+from boto3.s3.transfer import TransferConfig
 
 
 
@@ -39,14 +40,17 @@ from threading import *
 
 from django.contrib import messages
 
-
+GB = 1024 ** 3
+config = TransferConfig(multipart_threshold=0.1*GB)
 
 # def db_test(request):
-#     user=User.objects.get(username='jezer')
+#     user=User.objects.get(username=('panghalprerna3@gmail.com'))
 #     team=user.team_set.first()
-#     team.extra_time-=909060
-#     team.save()
-#     return HttpResponse(team.extra_time)
+#     print(team)
+#     user_list=list(team.users.values_list('username', 'generated_pass'))
+#     for user in user_list:
+#         print(user)
+#     return HttpResponse("woop")
 
 
 def csrf_failure(request, reason=""):
@@ -100,9 +104,14 @@ def login_view(request):
                 user.session_key = request.session.session_key
                 user.save()
                 return HttpResponseRedirect(reverse("dashboard"))
-        return render(request, "examPortalApp/index.html", {
-            "message": "Invalid username and/or password."
-        })
+            else:
+                return render(request, "examPortalApp/index.html", {
+                    "message": "Incorrect password."
+                })
+        else:
+            return render(request, "examPortalApp/index.html", {
+                "message": "Username does not exist."
+            })
     else:
         if request.user.is_authenticated:
             return HttpResponseRedirect(reverse('dashboard'))
@@ -575,13 +584,15 @@ def submit_MCQ(request):
 
     if now<test_end and now>test_start:
         qnumber=request.POST["qnumber"]
-        i=1
+        q=Question.objects.get(question_number=qnumber)
+        countPlus1=len(ast.literal_eval(q.question_content))
         answer=[]
-        while "choice-"+str(i) in request.POST:
-            answer+=[int(request.POST["choice-"+str(i)])]
+        i=1
+        while i < countPlus1:
+            if "choice-"+str(i) in request.POST:
+                answer+=[int(request.POST["choice-"+str(i)])]
             i+=1
 
-        q=Question.objects.get(question_number=request.POST["qnumber"])
         a=(Answer.objects.get_or_create(question_instance=q, team_instance=team))[0]
         while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
             Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
@@ -737,7 +748,7 @@ def upload_answer(request):
         ansinst = Answer.objects.get_or_create(team_instance = team, question_instance = q)
         ansinst[0].save()
 
-        bucket.upload_fileobj(b, subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+key+'.jpeg')
+        bucket.upload_fileobj(b, subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+key+'.jpeg', Config=config)
 
         noofpages = AnswerFiles.objects.filter(answer_instance = (ansinst[0])).count()
         af = AnswerFiles.objects.create(answer_instance=ansinst[0], answer_filename=key, page_no = noofpages)
