@@ -131,7 +131,7 @@
             {% for option_set in options %}
               {% for option in option_set %}
                 {% if forloop.counter0 == 0 %}
-                  <h5>{{option}}</h5>
+                  <h5>{{option|safe}}</h5>
                 {% else %}
                   <br>
                   <input {% if forloop.parentloop.counter0|mul:4|add:forloop.counter0 in selected_options %}checked{% endif %} class="mcq-btn" id="mcq-btn-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}" type="radio" name="choice-{{forloop.parentloop.counter}}" value="{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">
@@ -172,7 +172,7 @@
               {% for option in options %}
                 <br>
                 <input {% if forloop.counter in selected_options %}checked{% endif %} class="tt-btn" id="tt-btn-{{forloop.counter}}" type="radio" name="choice" value="{{forloop.counter}}">
-                <label style="display: inline" for="opt-{{forloop.counter}}">{{option}}</label>
+                <label style="display: inline" for="opt-{{forloop.counter}}">{{option|safe}}</label>
                 <br>
               {% endfor %}
               <br><br>
