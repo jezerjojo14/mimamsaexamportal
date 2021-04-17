@@ -44,11 +44,11 @@ GB = 1024 ** 3
 config = TransferConfig(multipart_threshold=0.1*GB)
 
 # def db_test(request):
-#
-#     user=User.objects.get(username='endoleshubhangi2604@gmail.com')
-#     team=user.team_set.first()
-#     users=list(team.users.values_list('username', 'generated_pass'))
-#     print(users)
+#     for seq in ['10138', '10153', '10198', '10158', '10183', '10013', '10026', '10200', '10168', '10583', '10663', '10191']:
+#         team=Team.objects.get(sequence=seq)
+#         team.extra_time-=(3600+60*20)
+#         team.save()
+#         print(team, team.extra_time)
 #     return HttpResponse('yee')
 
 
@@ -93,7 +93,7 @@ def login_view(request):
         if User.objects.filter(username=email).exists():
             user=User.objects.get(username=email)
             if user.check_password(password):
-                if user.session_key and user.username!='admin': # check if user has session_key. This will be true for users logged in on another device
+                if user.session_key and user.username!='admin' and user.username!='jezer': # check if user has session_key. This will be true for users logged in on another device
                     try:
                         s = Session.objects.get(session_key=user.session_key)
                         s.delete()

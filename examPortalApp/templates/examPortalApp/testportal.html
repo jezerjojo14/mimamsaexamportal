@@ -54,6 +54,18 @@
       <div class="col-lg-12">
         <div id="nav-questions">
           {% for i in ''|center:QCount %}
+            {% if forloop.counter == 1 %}
+            <span style="font-size: 24px">Maths:</span>
+            {% endif %}
+            {% if forloop.counter == 6 %}
+            <span style="font-size: 24px">Physics:</span>
+            {% endif %}
+            {% if forloop.counter == 11 %}
+            <span style="font-size: 24px">Biology:</span>
+            {% endif %}
+            {% if forloop.counter == 16 %}
+            <span style="font-size: 24px">Chemistry:</span>
+            {% endif %}
             <button id="q-btn-{{forloop.counter}}" class='nav-btn btn {% if forloop.counter == QNum %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
           {% endfor %}
         </div>
