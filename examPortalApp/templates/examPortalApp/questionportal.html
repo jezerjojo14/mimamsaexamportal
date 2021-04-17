@@ -20,7 +20,7 @@
           f.setAttribute('method', "post");
           f.setAttribute('action', '{% url 'edit_question' %}');
           f.innerHTML = '{% csrf_token %}';
-          f.innerHTML += "<label for='qnumber'>Question number: </label>\n<input type='number' id='qnumber' name='qnumber' min='1' max='{{questions|length}}' value='" + qnumber.toString() + "'>";
+          f.innerHTML += "<label for='qnumber'>Question number: </label>\n<input type='number' id='qnumber' name='qnumber' min='1' max='{{QCount}}' value='" + qnumber.toString() + "'>";
           f.innerHTML += "<input type='hidden' name='id' value='" + id + "'>";
           f.id = ("editForm").concat(id);
           f.classList.add('editForm');

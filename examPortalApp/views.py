@@ -45,7 +45,7 @@ config = TransferConfig(multipart_threshold=0.1*GB)
 
 # def db_test(request):
 #
-#     user=User.objects.get(username='skkhansayantan33@gmail.com')
+#     user=User.objects.get(username='endoleshubhangi2604@gmail.com')
 #     team=user.team_set.first()
 #     users=list(team.users.values_list('username', 'generated_pass'))
 #     print(users)
@@ -857,9 +857,10 @@ def clear_t_options(request, qnumber):
 def question_making_page(request, page=1):
     if request.user.username=="admin":
         q=Paginator(Question.objects.all().order_by("question_number"), 10)
+        QCount=Question.objects.all().count()
         if page not in q.page_range:
             raise Http404
-        return render(request, "examPortalApp/questionportal.html", {"questions": q.page(page), "page": page, "pagecount": q.num_pages})
+        return render(request, "examPortalApp/questionportal.html", {"QCount": QCount, "questions": q.page(page), "page": page, "pagecount": q.num_pages})
     #If not logged in as admin, redirect to dashboard
     else:
         return HttpResponseRedirect(reverse("dashboard"))
