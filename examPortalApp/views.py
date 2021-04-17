@@ -44,13 +44,12 @@ GB = 1024 ** 3
 config = TransferConfig(multipart_threshold=0.1*GB)
 
 # def db_test(request):
-#     user=User.objects.get(username=('panghalprerna3@gmail.com'))
+#
+#     user=User.objects.get(username='skkhansayantan33@gmail.com')
 #     team=user.team_set.first()
-#     print(team)
-#     user_list=list(team.users.values_list('username', 'generated_pass'))
-#     for user in user_list:
-#         print(user)
-#     return HttpResponse("woop")
+#     users=list(team.users.values_list('username', 'generated_pass'))
+#     print(users)
+#     return HttpResponse('yee')
 
 
 def csrf_failure(request, reason=""):
