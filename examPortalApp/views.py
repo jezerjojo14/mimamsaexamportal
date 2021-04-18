@@ -44,11 +44,12 @@ GB = 1024 ** 3
 config = TransferConfig(multipart_threshold=0.1*GB)
 
 # def db_test(request):
-#     for seq in ['10138', '10153', '10198', '10158', '10183', '10013', '10026', '10200', '10168', '10583', '10663', '10191']:
-#         team=Team.objects.get(sequence=seq)
-#         team.extra_time-=(3600+60*20)
-#         team.save()
-#         print(team, team.extra_time)
+#     # user=User.objects.get(username='starforce30@gmail.com')
+#     # team=user.team_set.first()
+#     team=Team.objects.get(sequence="10584")
+#     l=list(team.users.values_list('username', 'generated_pass'))
+#     print(team)
+#     print(l)
 #     return HttpResponse('yee')
 
 

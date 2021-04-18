@@ -196,7 +196,7 @@
           {% else %}
             {% for option in options %}
               {% if forloop.counter in selected_options %}
-                <h5>Chosen option: {{option}}</h5>
+                <h5>Chosen option: {{option|safe}}</h5>
               {% endif %}
             {% endfor %}
             <a href="{% url 'clear_t_options' qnumber=QNum %}">Select a different option</a>
