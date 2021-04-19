@@ -1,0 +1,10 @@
+{% extends 'examPortalApp/body.html' %}
+
+{% block content %}
+<div class="fluid-container">
+  {{questions}}
+  {% for question in questions %}
+  <a href="{% url 'correction_team' question=question %}">{{question}}</a><br>
+  {% endfor %}
+</div>
+{% endblock %}

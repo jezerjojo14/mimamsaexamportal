@@ -37,20 +37,45 @@ import io
 
 import base64
 from threading import *
-
+from django.db.models.functions import Length
 from django.contrib import messages
 
 GB = 1024 ** 3
 config = TransferConfig(multipart_threshold=0.1*GB)
 
+
+
+def correction_subject(request):
+    if request.user.username=='admin':
+        return render(request, "examPortalApp/correction_subject.html")
+
+def correction_question(request, subject):
+    if request.user.username=='admin':
+        questions=list(Question.objects.filter(question_subject=subject).values_list('question_number', flat=True))
+        return render(request, "examPortalApp/correction_question.html", {"questions": questions})
+
+def correction_team(request, question):
+    if request.user.username=='admin':
+        teams=Team.objects.annotate(text_len=Length('answer__answer_content')).filter(text_len__gt=8, answer__question_instance__question_number=question).distinct().order_by('sequence')
+        teams_uncorrected=teams.filter(answer)
+        return render(request, "examPortalApp/correction_team.html", {"question": question, "teams": teams})
+
+def correction(request, question, sequence):
+    if request.user.username=='admin':
+        answer=Question.objects.get(question_number=question).answer_set.get(team_instance=Team.objects.get(sequence=sequence))
+        return render(request, "examPortalApp/correction.html", {"answer": answer})
+
+
+
 # def db_test(request):
-#     # user=User.objects.get(username='starforce30@gmail.com')
+#     # user=User.objects.get(username='aminamuthali@gmail.com')
 #     # team=user.team_set.first()
-#     team=Team.objects.get(sequence="10584")
-#     l=list(team.users.values_list('username', 'generated_pass'))
-#     print(team)
-#     print(l)
-#     return HttpResponse('yee')
+#     # team.extra_time=60*20
+#     # team.save()
+#     team=Team.objects.annotate(text_len=Length('answer__answer_content')).filter(text_len__gt=8).distinct()
+#
+#     # team=Team.objects.all()
+#     return HttpResponse(str((list(team.values_list('team_id', flat=True)))))
 
 
 def csrf_failure(request, reason=""):

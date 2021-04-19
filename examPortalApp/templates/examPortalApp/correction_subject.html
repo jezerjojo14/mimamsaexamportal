@@ -1,0 +1,10 @@
+{% extends 'examPortalApp/body.html' %}
+
+{% block content %}
+<div class="fluid-container">
+  <a href="{% url 'correction_question' subject='Physics' %}">Physics</a><br>
+  <a href="{% url 'correction_question' subject='Biology' %}">Biology</a><br>
+  <a href="{% url 'correction_question' subject='Chemistry' %}">Chemistry</a><br>
+  <a href="{% url 'correction_question' subject='Math' %}">Math</a><br>
+</div>
+{% endblock %}

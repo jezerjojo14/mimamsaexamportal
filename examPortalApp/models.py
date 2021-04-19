@@ -44,6 +44,7 @@ class Question(models.Model):
     #s=subjective, m=mcq, t=train of thought
     question_type = models.CharField(max_length=2, default='s')
     question_answers = models.CharField(max_length=100, default="", blank=True)
+    max_marks = models.IntegerField(default=2)
 
 class Answer(models.Model):
     team_instance = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -51,6 +52,7 @@ class Answer(models.Model):
     answer_content = models.TextField(default="", blank=True)
     #u=unanswered, a=answered, r=marked for review
     status = models.CharField(max_length=2, default='u')
+    marks = models.IntegerField(default=-1)
 
 
 class AnswerFiles(models.Model):
