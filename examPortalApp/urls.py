@@ -43,7 +43,8 @@ urlpatterns = [
 
     path('correction', views.correction_subject, name="correction_subject"),
     path('correction/<str:subject>', views.correction_question, name="correction_question"),
-    path('correction/q/<int:question>', views.correction_team, name="correction_team"),
+    path('correction/q/<int:question>/p/<int:page>', views.correction_team, name="correction_team"),
     path('correction/q/<int:question>/<str:sequence>', views.correction, name="correction"),
+    # path('auto-correction', views.automated_correction, name="automated_correction"),
 
 ]

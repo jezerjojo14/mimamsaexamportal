@@ -52,7 +52,7 @@ class Answer(models.Model):
     answer_content = models.TextField(default="", blank=True)
     #u=unanswered, a=answered, r=marked for review
     status = models.CharField(max_length=2, default='u')
-    marks = models.IntegerField(default=-1)
+    marks = models.FloatField(default=-1)
 
 
 class AnswerFiles(models.Model):

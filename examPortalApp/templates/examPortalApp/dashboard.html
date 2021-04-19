@@ -42,6 +42,8 @@
         <a href="{% url 'change_password' %}">Change Password</a>
         <br>
         {% if user.username == 'admin' %}
+        <a href="{% url 'correction_subject' %}">Correction Portal</a>
+        <br>
         <a href="{% url 'mail_change' %}">Change user email ID</a>
         <br>
         <a href="{% url 'update_accounts' %}">Update registrations</a>

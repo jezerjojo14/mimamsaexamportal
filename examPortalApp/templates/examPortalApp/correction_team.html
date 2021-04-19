@@ -1,9 +1,36 @@
 {% extends 'examPortalApp/body.html' %}
+{% load mathfilters %}
 
 {% block content %}
 <div class="fluid-container">
-  {% for team in teams %}
-  <a href="{% url 'correction' question=question sequence=team.sequence %}">{{team}}</a><br>
+  <div class="question">
+    <h2>Question details:</h2>
+    <div class="question_content">
+      {{ question.question_content|safe }}
+    </div>
+    <div class="question_answers">
+      {{ question.question_answers }}
+    </div>
+    <div class="max_marks">
+      Max marks: {{ question.max_marks }}
+    </div>
+  </div>
+  <br><br>
+  {% for answer in answers %}
+    <a {% if answer.marks == -1 %} style="color: #FFAA00"{% endif %} href="{% url 'correction' question=question.question_number sequence=answer.team_instance.sequence %}">{{answer.team_instance}}</a>
+    <br>
+    {% if answer.marks != -1 %}
+    Marks: {{ answer.marks }}
+    <br>
+    {% endif %}
+    <br>
   {% endfor %}
+  <br><br><br>
+  {% if page != 1 %}
+  <a href="{% url 'correction_team' question=question.question_number page=page|add:-1 %}">Previous</a>
+  {% endif %}
+  {% if page|mul:15 < a_count %}
+  <a href="{% url 'correction_team' question=question.question_number page=page|add:1 %}">Next</a>
+  {% endif %}
 </div>
 {% endblock %}

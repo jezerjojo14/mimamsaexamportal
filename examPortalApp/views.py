@@ -38,6 +38,7 @@ import io
 import base64
 from threading import *
 from django.db.models.functions import Length
+from django.db.models import Count, Sum, Case, When, IntegerField
 from django.contrib import messages
 
 GB = 1024 ** 3
@@ -51,31 +52,142 @@ def correction_subject(request):
 
 def correction_question(request, subject):
     if request.user.username=='admin':
-        questions=list(Question.objects.filter(question_subject=subject).values_list('question_number', flat=True))
+        questions=list(Question.objects.filter(question_subject=subject).annotate(num_marked_teams=Count(Case(When(answer__marks__gt=-1, then=1), output_field=IntegerField())), num_teams=Count('answer')).values_list('question_number', 'num_marked_teams', 'num_teams'))
         return render(request, "examPortalApp/correction_question.html", {"questions": questions})
 
-def correction_team(request, question):
+def correction_team(request, question, page=1):
     if request.user.username=='admin':
-        teams=Team.objects.annotate(text_len=Length('answer__answer_content')).filter(text_len__gt=8, answer__question_instance__question_number=question).distinct().order_by('sequence')
-        teams_uncorrected=teams.filter(answer)
-        return render(request, "examPortalApp/correction_team.html", {"question": question, "teams": teams})
+        q=Question.objects.get(question_number=question)
+        answers=Answer.objects.annotate(main_ordering=Case(When(marks=-1, then=0), default=1, output_field=IntegerField())).filter(question_instance=q).order_by('main_ordering', 'team_instance__sequence').distinct()
+        # corrected_answers=Answer.objects.filter(marks__gt=-1).order_by('team_instance__sequence')
+
+        return render(request, "examPortalApp/correction_team.html", {"question": q, "page": page, "answers": Paginator(answers, 15).page(page), "a_count": answers.count()})
+
+def automated_correction(request):
+    # questions=Question.objects.filter()
+    Answer.objects.all().update(marks=-1)
+    for q_num in range(20):
+        q=Question.objects.get(question_number=q_num+1)
+        print(q.question_number)
+        if q.question_number==1:
+            Answer.objects.annotate(text_len=Length('answer_content'), answerfiles__count=Count('answerfiles')).filter(text_len=0, answerfiles__count=0, question_instance=q).distinct().update(marks=0)
+            Answer.objects.filter(question_instance=q, answer_content='1').update(marks=1)
+        elif q.question_type=='s':
+            Answer.objects.annotate(text_len=Length('answer_content'), answerfiles__count=Count('answerfiles')).filter(text_len=0, answerfiles__count=0, question_instance=q).distinct().update(marks=0)
+        elif q.question_type=='m':
+            Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__lte=2, question_instance=q).update(marks=0)
+            nonempty_answers=Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__gt=2, question_instance=q)
+            for answer in nonempty_answers:
+                try:
+                    user_answers=ast.literal_eval(answer.answer_content)
+                    actual_answers=ast.literal_eval(q.question_answers)
+                    answer.marks=0
+                    for user_answer in user_answers:
+                        if user_answer in actual_answers:
+                            answer.marks+=float(q.max_marks)/float(len(actual_answers))
+                    answer.save()
+                except:
+                    answer.marks=0
+                    answer.save()
+        elif q.question_type=='t':
+            Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__lte=8, question_instance=q).update(marks=0)
+            nonempty_answers=Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__gt=8, question_instance=q)
+            for answer in nonempty_answers:
+                try:
+                    if ast.literal_eval(answer.answer_content)[0][0] not in ast.literal_eval(q.question_answers):
+                        answer.marks=0
+                        answer.save()
+                except:
+                    answer.marks=0
+                    answer.save()
+    return HttpResponse("Done")
 
 def correction(request, question, sequence):
     if request.user.username=='admin':
-        answer=Question.objects.get(question_number=question).answer_set.get(team_instance=Team.objects.get(sequence=sequence))
-        return render(request, "examPortalApp/correction.html", {"answer": answer})
+        if request.method=='GET':
+            answer=Question.objects.get(question_number=question).answer_set.get(team_instance=Team.objects.get(sequence=sequence))
+            answerfiles=answer.answerfiles_set
+            team=Team.objects.get(sequence=sequence)
+            q=Question.objects.get(question_number=question)
+            subject=q.question_subject
+            images=[]
+            for af in answerfiles.iterator():
+                s3 = boto3.client("s3")
+                response = s3.list_objects_v2(
+                        Bucket='mimamsauploadedanswers',
+                        Prefix =subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg',
+                        MaxKeys=100 )
 
+                if "Contents" in response:
+                    fh = io.BytesIO()
+
+                    # Initialise a downloader object to download the file
+                    s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg', fh)
+                    fh.seek(0)
+
+                    prefix = 'data:image/jpeg;base64,'
+                    contents=fh.read()
+                    image = prefix + str((base64.b64encode(contents)).decode('ascii'))
+                    images+=[image]
+            return render(request, "examPortalApp/correction.html", {"question":q, "sequence":sequence, "answerobj": answer, "answer": answer.answer_content.replace('\\n', '\n').replace('\\r', '\r'), "images": images})
+        else:
+            answer=Question.objects.get(question_number=question).answer_set.get(team_instance=Team.objects.get(sequence=sequence))
+            answer.marks=int(request.POST["marks"])
+            answer.save()
+            print(answer.marks)
+            return HttpResponseRedirect(reverse('correction', kwargs={"question":question, "sequence":sequence}))
 
 
 # def db_test(request):
-#     # user=User.objects.get(username='aminamuthali@gmail.com')
-#     # team=user.team_set.first()
-#     # team.extra_time=60*20
-#     # team.save()
-#     team=Team.objects.annotate(text_len=Length('answer__answer_content')).filter(text_len__gt=8).distinct()
+#     answers=Answer.objects.all()
+#     attempted_s_ans=Answer.objects.filter(question_instance__question_type='s').annotate(text_len=Length('answer_content'), answerfiles__count=Count('answerfiles')).exclude(text_len=0, answerfiles__count=0).distinct()
+#     attempted_m_ans=Answer.objects.filter(question_instance__question_type='m').annotate(text_len=Length('answer_content')).exclude(text_len__lte=2).distinct()
+#     attempted_t_ans=Answer.objects.filter(question_instance__question_type='t').annotate(text_len=Length('answer_content')).exclude(text_len__lte=8).distinct()
+#     stronk_team_count=Team.objects.filter(answer__in=attempted_s_ans).filter(answer__in=attempted_m_ans).filter(answer__in=attempted_t_ans).distinct().count()
+#     medium_team_count_1=Team.objects.filter(answer__in=attempted_s_ans).filter(answer__in=attempted_m_ans).distinct().count()
+#     medium_team_count_2=Team.objects.filter(answer__in=attempted_s_ans).filter(answer__in=attempted_t_ans).distinct().count()
+#     medium_team_count_3=Team.objects.filter(answer__in=attempted_t_ans).filter(answer__in=attempted_m_ans).distinct().count()
+#     weak_team_count_1=Team.objects.filter(answer__in=attempted_s_ans).distinct().count()
+#     weak_team_count_2=Team.objects.filter(answer__in=attempted_m_ans).distinct().count()
+#     weak_team_count_3=Team.objects.filter(answer__in=attempted_t_ans).distinct().count()
 #
+#     weak_team_1=Team.objects.filter(answer__in=attempted_s_ans).distinct()
+#     weak_team_2=Team.objects.filter(answer__in=attempted_m_ans).distinct()
+#     weak_team_3=Team.objects.filter(answer__in=attempted_t_ans).distinct()
+#
+#     teams=weak_team_1.union(weak_team_2, weak_team_3).values_list('team_id', flat=True)
+#
+#     visited_m_ans=Answer.objects.filter(question_instance__question_type='m').annotate(text_len=Length('answer_content')).filter(text_len__gte=2).distinct()
+#     visited_t_ans=Answer.objects.filter(question_instance__question_type='t').annotate(text_len=Length('answer_content')).filter(text_len__gte=8).distinct()
+#
+#     team_visit_m=Team.objects.filter(answer__in=visited_m_ans).distinct()
+#     team_visit_t=Team.objects.filter(answer__in=visited_t_ans).distinct()
+#
+#     print(team_visit_m.count())
+#     print(team_visit_t.count())
+#
+#     teams=teams.union(team_visit_m, team_visit_t)
+#     print(teams.count())
+#     try:
+#         weak_team_1.get(team_id="BOI69420")
+#         print("s")
+#         weak_team_2.get(team_id="BOI69420")
+#         print("m")
+#         weak_team_3.get(team_id="BOI69420")
+#         print("t")
+#     except:
+#         pass
 #     # team=Team.objects.all()
-#     return HttpResponse(str((list(team.values_list('team_id', flat=True)))))
+#     print(stronk_team_count)
+#     print(medium_team_count_1)
+#     print(medium_team_count_2)
+#     print(medium_team_count_3)
+#     print(weak_team_count_1)
+#     print(weak_team_count_2)
+#     print(weak_team_count_3)
+#     print("Count: "+str(stronk_team_count-medium_team_count_1-medium_team_count_2-medium_team_count_3+weak_team_count_1+weak_team_count_2+weak_team_count_3))
+#     return HttpResponse(str(list(teams)))
+
 
 
 def csrf_failure(request, reason=""):

@@ -2,9 +2,8 @@
 
 {% block content %}
 <div class="fluid-container">
-  {{questions}}
   {% for question in questions %}
-  <a href="{% url 'correction_team' question=question %}">{{question}}</a><br>
+  <a {% if question.1 != question.2 %} style="color: #FFAA00" {% endif %} href="{% url 'correction_team' question=question.0 page=1 %}">{{question.0}}</a> {{question.1}}/{{question.2}}<br>
   {% endfor %}
 </div>
 {% endblock %}
