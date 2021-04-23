@@ -117,7 +117,7 @@ def correction(request, question, sequence):
             return render(request, "examPortalApp/correction.html", {"options": options, "answer_text": answer_text, "selected_options": selected_options, "question":q, "sequence":sequence, "answerobj": answer, "answer": answer.answer_content.replace('\\n', '\n').replace('\\r', '\r'), "images": images})
         else:
             answer=Question.objects.get(question_number=question).answer_set.get(team_instance=Team.objects.get(sequence=sequence))
-            answer.marks=int(request.POST["marks"])
+            answer.marks=float(request.POST["marks"])
             answer.save()
             print(answer.marks)
             return HttpResponseRedirect(reverse('correction', kwargs={"question":question, "sequence":sequence}))
