@@ -53,6 +53,7 @@ class Answer(models.Model):
     #u=unanswered, a=answered, r=marked for review
     status = models.CharField(max_length=2, default='u')
     marks = models.FloatField(default=-1)
+    graded = models.BooleanField(default=False)
 
 
 class AnswerFiles(models.Model):

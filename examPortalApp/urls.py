@@ -45,6 +45,7 @@ urlpatterns = [
     path('correction/<str:subject>', views.correction_question, name="correction_question"),
     path('correction/q/<int:question>/p/<int:page>', views.correction_team, name="correction_team"),
     path('correction/q/<int:question>/<str:sequence>', views.correction, name="correction"),
+    path('toggle-graded-confirm', views.toggle_graded_confirm, name='toggle_graded_confirm'),
     # path('auto-correction', views.automated_correction, name="automated_correction"),
 
 ]

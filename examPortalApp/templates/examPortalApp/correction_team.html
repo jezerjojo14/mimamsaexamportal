@@ -1,36 +1,142 @@
 {% extends 'examPortalApp/body.html' %}
 {% load mathfilters %}
 
+{% block script %}
+
+<script type="text/javascript">
+
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  async function toggleConfirmGraded(ele) {
+    console.log(ele);
+    var gradedStatus = ele.dataset.graded;
+    var team = ele.dataset.team;
+    var question = {{question.question_number}};
+    let csrftoken = getCookie('csrftoken');
+    let response= await fetch("{% url 'toggle_graded_confirm' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        "X-CSRFToken": csrftoken
+      },
+      body: JSON.stringify({"gradedStatus":gradedStatus, "team": team, "question": question})
+    })
+    console.log("server responded");
+    if (ele.dataset.graded==1) {
+      ele.innerHTML="Confirm?";
+      ele.dataset.graded=0;
+      document.getElementById('team-'+team+'-link').style.color="#ffaa00";
+    }
+    else {
+      ele.innerHTML="Confirmed";
+      ele.dataset.graded=1;
+      document.getElementById('team-'+team+'-link').style.color="#29a53a";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", ()=>{
+    var confirmGradedLinks=document.querySelectorAll(".confirm-graded-link")
+    for(var i = 0; i < confirmGradedLinks.length; i++) {
+      confirmGradedLinks[i].onclick= toggleConfirmGraded.bind(this, confirmGradedLinks[i]);
+    }
+  });
+</script>
+
+{% endblock %}
+
 {% block content %}
 <div class="fluid-container">
+  Path: <a href="{% url "correction_subject" %}">Home</a>/<a href="{% url "correction_question" subject=question.question_subject %}">{{question.question_subject}}</a>/{{question.question_number}}
   <div class="question">
     <h2>Question details:</h2>
     <div class="question_content">
-      {{ question.question_content|safe }}
+      {{ question_body|safe }}
+      <br><br>
     </div>
-    <div class="question_answers">
-      {{ question.question_answers }}
+    <div class="options">
+      {% if question.question_type == 't' %}
+      <br>
+        <h5>Trains of thought</h5>
+        {% for option in options.0 %}
+          <br>
+          <span style="display: inline{% if forloop.counter in correct_answers %}; color: #29a53a{% endif %}">{{option}}</span>
+        {% endfor %}
+        <br><br>
+      {% elif question.question_type == 'm' %}
+        {% for option_set in options %}
+          <h5>{{option_set.0|safe}}</h5>
+          {% for option in option_set.1 %}
+            <br>
+            <span style="display: inline{% if forloop.parentloop.counter0|mul:4|add:forloop.counter in correct_answers %}; color: #29a53a{% endif %}">{{option|safe}}</span>
+          {% endfor %}
+          <br>
+          <br>
+        {% endfor %}
+      {% endif %}
     </div>
     <div class="max_marks">
-      Max marks: {{ question.max_marks }}
+      <b>Max marks: {{ question.max_marks }}</b>
     </div>
   </div>
   <br><br>
-  {% for answer in answers %}
-    <a {% if answer.marks == -1 %} style="color: #FFAA00"{% endif %} href="{% url 'correction' question=question.question_number sequence=answer.team_instance.sequence %}">{{answer.team_instance}}</a>
-    <br>
-    {% if answer.marks != -1 %}
-    Marks: {{ answer.marks }}
-    <br>
-    {% endif %}
-    <br>
-  {% endfor %}
+  <h2>Teams</h2>
+  <table class="table">
+    <tr>
+      <th>Team ID</th>
+      <th>Marks</th>
+      <th>Confirm graded</th>
+    </tr>
+    {% for answer in answers %}
+    <tr>
+      <td>
+        <a id="team-{{answer.team_instance.sequence}}-link" {% if answer.marks == -1 %} style="color: #cc0000" {% elif answer.graded %} {% else %} style="color: #ffaa00" {% endif %} href="{% url 'correction' question=question.question_number sequence=answer.team_instance.sequence %}">{{answer.team_instance.team_id}}</a>
+      </td>
+      <td>
+        {% if answer.marks != -1 %}
+        {{ answer.marks }}
+        {% else %}
+        Unmarked
+        {% endif %}
+      </td>
+      <td>
+        {% if answer.marks != -1 %}
+        <a class="confirm-graded-link" data-graded="{% if answer.graded %}1{% else %}0{% endif %}" data-team="{{answer.team_instance.sequence}}" href="javascript:;">{% if answer.graded %}Confirmed{% else %}Confirm?{% endif %}</a>
+        {% else %}
+        -
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
   <br><br><br>
-  {% if page != 1 %}
-  <a href="{% url 'correction_team' question=question.question_number page=page|add:-1 %}">Previous</a>
-  {% endif %}
-  {% if page|mul:15 < a_count %}
-  <a href="{% url 'correction_team' question=question.question_number page=page|add:1 %}">Next</a>
-  {% endif %}
+
+  <nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center flex-wrap">
+    <li class="page-item{% if page == 1 %} disabled{% endif %}">
+      <a class="page-link" href="{% if page == 1 %}#{% else %}{% url 'correction_team' question=question.question_number page=page|add:-1 %}{% endif %}" tabindex="-1">Previous</a>
+    </li>
+    {% for i in ''|center:pagecount %}
+    <li class="page-item {% if forloop.counter == page %}active{% endif %}"><a class="page-link" href="{% if forloop.counter == page %}#{% else %}{% url 'correction_team' question=question.question_number page=forloop.counter %}{% endif %}">{{forloop.counter}}</a></li>
+    {% endfor %}
+    <li class="page-item{% if page|mul:50 >= a_count %} disabled{% endif %}">
+      <a class="page-link" href="{% if page|mul:50 >= a_count %}#{% else %}{% url 'correction_team' question=question.question_number page=page|add:1 %}{% endif %}">Next</a>
+    </li>
+  </ul>
+</nav>
+
 </div>
 {% endblock %}

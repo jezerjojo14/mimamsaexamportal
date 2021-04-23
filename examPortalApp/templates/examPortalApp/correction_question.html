@@ -2,8 +2,23 @@
 
 {% block content %}
 <div class="fluid-container">
-  {% for question in questions %}
-  <a {% if question.1 != question.2 %} style="color: #FFAA00" {% endif %} href="{% url 'correction_team' question=question.0 page=1 %}">{{question.0}}</a> {{question.1}}/{{question.2}}<br>
-  {% endfor %}
+  Path: <a href="{% url "correction_subject" %}">Home</a>/{{subject}}
+  <h2>{{subject}} questions</h2>
+  <table class="table" style="max-width: 700px; margin: auto; font-size: 22px">
+    <tr>
+      <th>Question Number</th>
+      <th>Progress</th>
+    </tr>
+    {% for question in questions %}
+    <tr>
+      <td>
+        <a {% if question.1 != question.2 %} style="color: #FFAA00" {% endif %} href="{% url 'correction_team' question=question.0 page=1 %}">{{question.0}}</a>
+      </td>
+      <td>
+        {{question.1}}/{{question.2}}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
 </div>
 {% endblock %}

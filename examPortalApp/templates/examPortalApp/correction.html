@@ -1,14 +1,48 @@
 {% extends 'examPortalApp/body.html' %}
+{% load mathfilters %}
 
 {% block content %}
 <div class="fluid-container">
-  {{answer|linebreaks}}
-  {% for image in images %}
-  <img src="{{image}}">
-  {% endfor %}
+  Path: <a href="{% url "correction_subject" %}">Home</a>/<a href="{% url "correction_question" subject=question.question_subject %}">{{question.question_subject}}</a>/<a href="{% url "correction_team" question=question.question_number page=1 %}">{{question.question_number}}</a>/{{sequence}}
+  <h2>Team {{sequence}}'s answer to Q{{question.question_number}} (Status: {% if answerobj.marks == -1 %}<span style="color: #cc0000">Unchecked</span>{% elif answerobj.graded %}<span style="color: #29a53a">Graded confirmed</span>{% else %}<span style="color: #FFAA00">Graded</span>{% endif %})</h2>
+  <br><br>
+  {% if question.question_type != 's' %}
+    <h5>Selected Option(s):</h5>
+    {% if question.question_type == 'm' %}
+      {% for option_set in options %}
+        {% for option in option_set.1 %}
+          {% if forloop.parentloop.counter0|mul:4|add:forloop.counter in selected_options %}
+            {{forloop.counter}}) {{option|safe}}<br>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    {% elif question.question_type == 't' %}
+      {% for option in options.0 %}
+        {% if forloop.counter in selected_options %}
+          {{forloop.counter}}) {{option|safe}}<br>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    <br><br>
+  {% endif %}
+  {% if answer_text|length > 0 %}
+    <h5>Answer Text:</h5>
+    {{answer_text|linebreaks}}
+    <br>
+  {% endif %}
+  {% if images|length > 0 %}
+    <h5>Uploaded image(s):</h5>
+      {% for image in images %}
+      <img src="{{image}}">
+      {% endfor %}
+      <br><br>
+  {% endif %}
+  <br><br>
+  <h5>Marking:</h5>
   <form action="{% url 'correction' question=question.question_number sequence=sequence %}" method="post">
     {% csrf_token %}
     <input type="number" step="0.01" min="0" max="{{question.max_marks}}" name="marks" value="{% if answerobj.marks == -1 %}0{% else %}{{answerobj.marks}}{% endif %}">
+    <br>
     <input type="submit" name="submit" value="Set marks">
   </form>
 </div>

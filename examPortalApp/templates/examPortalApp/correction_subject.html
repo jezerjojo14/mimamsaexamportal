@@ -1,10 +1,21 @@
 {% extends 'examPortalApp/body.html' %}
 
 {% block content %}
-<div class="fluid-container">
-  <a href="{% url 'correction_question' subject='Physics' %}">Physics</a><br>
-  <a href="{% url 'correction_question' subject='Biology' %}">Biology</a><br>
-  <a href="{% url 'correction_question' subject='Chemistry' %}">Chemistry</a><br>
-  <a href="{% url 'correction_question' subject='Math' %}">Math</a><br>
+<div class="fluid-container" style="max-width: 700px; margin-left:auto; margin-right:auto; text-align: center; font-size: 27px">
+  <h2>Subjects</h2>
+  <div class="" style="display: flex; justify-content: space-around; flex-wrap: wrap">
+    <div class="main-btn">
+      <a style="width: 100%; height: 100%; display: inline-block; padding: 40px" href="{% url 'correction_question' subject='Physics' %}">Physics</a>
+    </div>
+    <div class="main-btn">
+      <a style="width: 100%; height: 100%; display: inline-block; padding: 40px" href="{% url 'correction_question' subject='Biology' %}">Biology</a>
+    </div>
+    <div class="main-btn">
+      <a style="width: 100%; height: 100%; display: inline-block; padding: 40px" href="{% url 'correction_question' subject='Chemistry' %}">Chemistry</a>
+    </div>
+    <div class="main-btn">
+      <a style="width: 100%; height: 100%; display: inline-block; padding: 40px" href="{% url 'correction_question' subject='Math' %}">Math</a>
+    </div>
+  </div>
 </div>
 {% endblock %}

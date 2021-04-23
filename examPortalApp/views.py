@@ -52,55 +52,24 @@ def correction_subject(request):
 
 def correction_question(request, subject):
     if request.user.username=='admin':
-        questions=list(Question.objects.filter(question_subject=subject).annotate(num_marked_teams=Count(Case(When(answer__marks__gt=-1, then=1), output_field=IntegerField())), num_teams=Count('answer')).values_list('question_number', 'num_marked_teams', 'num_teams'))
-        return render(request, "examPortalApp/correction_question.html", {"questions": questions})
+        questions=list(Question.objects.filter(question_subject=subject).annotate(num_marked_teams=Count(Case(When(answer__marks__gt=-1, then=1), output_field=IntegerField())), num_teams=Count('answer')).order_by('question_number').values_list('question_number', 'num_marked_teams', 'num_teams'))
+        return render(request, "examPortalApp/correction_question.html", {"questions": questions, "subject": subject})
 
 def correction_team(request, question, page=1):
     if request.user.username=='admin':
         q=Question.objects.get(question_number=question)
-        answers=Answer.objects.annotate(main_ordering=Case(When(marks=-1, then=0), default=1, output_field=IntegerField())).filter(question_instance=q).order_by('main_ordering', 'team_instance__sequence').distinct()
+        answers=Answer.objects.annotate(main_ordering=Case(When(marks=-1, then=0), default=1, output_field=IntegerField())).filter(question_instance=q).exclude(team_instance__team_id="BOI69420").order_by('graded', 'main_ordering', 'team_instance__sequence').distinct()
         # corrected_answers=Answer.objects.filter(marks__gt=-1).order_by('team_instance__sequence')
+        if q.question_type=='s':
+            question_body=q.question_content
+            options=[]
+            correct_answers=[]
+        else:
+            question_body=ast.literal_eval(q.question_content)[0]
+            options=ast.literal_eval(q.question_content)[1:]
+            correct_answers=ast.literal_eval(q.question_answers)
 
-        return render(request, "examPortalApp/correction_team.html", {"question": q, "page": page, "answers": Paginator(answers, 15).page(page), "a_count": answers.count()})
-
-def automated_correction(request):
-    # questions=Question.objects.filter()
-    Answer.objects.all().update(marks=-1)
-    for q_num in range(20):
-        q=Question.objects.get(question_number=q_num+1)
-        print(q.question_number)
-        if q.question_number==1:
-            Answer.objects.annotate(text_len=Length('answer_content'), answerfiles__count=Count('answerfiles')).filter(text_len=0, answerfiles__count=0, question_instance=q).distinct().update(marks=0)
-            Answer.objects.filter(question_instance=q, answer_content='1').update(marks=1)
-        elif q.question_type=='s':
-            Answer.objects.annotate(text_len=Length('answer_content'), answerfiles__count=Count('answerfiles')).filter(text_len=0, answerfiles__count=0, question_instance=q).distinct().update(marks=0)
-        elif q.question_type=='m':
-            Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__lte=2, question_instance=q).update(marks=0)
-            nonempty_answers=Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__gt=2, question_instance=q)
-            for answer in nonempty_answers:
-                try:
-                    user_answers=ast.literal_eval(answer.answer_content)
-                    actual_answers=ast.literal_eval(q.question_answers)
-                    answer.marks=0
-                    for user_answer in user_answers:
-                        if user_answer in actual_answers:
-                            answer.marks+=float(q.max_marks)/float(len(actual_answers))
-                    answer.save()
-                except:
-                    answer.marks=0
-                    answer.save()
-        elif q.question_type=='t':
-            Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__lte=8, question_instance=q).update(marks=0)
-            nonempty_answers=Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__gt=8, question_instance=q)
-            for answer in nonempty_answers:
-                try:
-                    if ast.literal_eval(answer.answer_content)[0][0] not in ast.literal_eval(q.question_answers):
-                        answer.marks=0
-                        answer.save()
-                except:
-                    answer.marks=0
-                    answer.save()
-    return HttpResponse("Done")
+        return render(request, "examPortalApp/correction_team.html", {"pagecount": int(answers.count()/50)+int(answers.count()%50!=0), "question": q, "question_body": question_body, "options": options, "correct_answers": correct_answers, "page": page, "answers": Paginator(answers, 50).page(page), "a_count": answers.count()})
 
 def correction(request, question, sequence):
     if request.user.username=='admin':
@@ -111,6 +80,22 @@ def correction(request, question, sequence):
             q=Question.objects.get(question_number=question)
             subject=q.question_subject
             images=[]
+            if q.question_type=='s':
+                answer_text=answer.answer_content
+                selected_options=[]
+                options=[]
+                correct_answers=[]
+            elif q.question_type=='m':
+                answer_text=""
+                selected_options=ast.literal_eval(answer.answer_content)
+                options=ast.literal_eval(q.question_content)[1:]
+                correct_answers=ast.literal_eval(q.question_answers)
+            else:
+                answer_text=ast.literal_eval(answer.answer_content)[1]
+                selected_options=ast.literal_eval(answer.answer_content)[0]
+                options=ast.literal_eval(q.question_content)[1:]
+                correct_answers=ast.literal_eval(q.question_answers)
+
             for af in answerfiles.iterator():
                 s3 = boto3.client("s3")
                 response = s3.list_objects_v2(
@@ -129,13 +114,65 @@ def correction(request, question, sequence):
                     contents=fh.read()
                     image = prefix + str((base64.b64encode(contents)).decode('ascii'))
                     images+=[image]
-            return render(request, "examPortalApp/correction.html", {"question":q, "sequence":sequence, "answerobj": answer, "answer": answer.answer_content.replace('\\n', '\n').replace('\\r', '\r'), "images": images})
+            return render(request, "examPortalApp/correction.html", {"options": options, "answer_text": answer_text, "selected_options": selected_options, "question":q, "sequence":sequence, "answerobj": answer, "answer": answer.answer_content.replace('\\n', '\n').replace('\\r', '\r'), "images": images})
         else:
             answer=Question.objects.get(question_number=question).answer_set.get(team_instance=Team.objects.get(sequence=sequence))
             answer.marks=int(request.POST["marks"])
             answer.save()
             print(answer.marks)
             return HttpResponseRedirect(reverse('correction', kwargs={"question":question, "sequence":sequence}))
+
+def toggle_graded_confirm(request):
+
+    post_data = json.loads(request.body.decode("utf-8"))
+    graded = int(post_data["gradedStatus"])
+    seq = post_data["team"]
+    qnumber = post_data["question"]
+
+    a=Answer.objects.get(team_instance__sequence=seq, question_instance__question_number=qnumber)
+    a.graded=(graded==0)
+    a.save()
+
+    return HttpResponse(status="201")
+
+# def automated_correction(request):
+#     # questions=Question.objects.filter()
+#     Answer.objects.all().update(marks=-1)
+#     for q_num in range(20):
+#         q=Question.objects.get(question_number=q_num+1)
+#         print(q.question_number)
+#         if q.question_number==1:
+#             Answer.objects.annotate(text_len=Length('answer_content'), answerfiles__count=Count('answerfiles')).filter(text_len=0, answerfiles__count=0, question_instance=q).distinct().update(marks=0)
+#             Answer.objects.filter(question_instance=q, answer_content='1').update(marks=1)
+#         elif q.question_type=='s':
+#             Answer.objects.annotate(text_len=Length('answer_content'), answerfiles__count=Count('answerfiles')).filter(text_len=0, answerfiles__count=0, question_instance=q).distinct().update(marks=0)
+#         elif q.question_type=='m':
+#             Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__lte=2, question_instance=q).update(marks=0)
+#             nonempty_answers=Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__gt=2, question_instance=q)
+#             for answer in nonempty_answers:
+#                 try:
+#                     user_answers=ast.literal_eval(answer.answer_content)
+#                     actual_answers=ast.literal_eval(q.question_answers)
+#                     answer.marks=0
+#                     for user_answer in user_answers:
+#                         if user_answer in actual_answers:
+#                             answer.marks+=float(q.max_marks)/float(len(actual_answers))
+#                     answer.save()
+#                 except:
+#                     answer.marks=0
+#                     answer.save()
+#         elif q.question_type=='t':
+#             Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__lte=8, question_instance=q).update(marks=0)
+#             nonempty_answers=Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__gt=8, question_instance=q)
+#             for answer in nonempty_answers:
+#                 try:
+#                     if ast.literal_eval(answer.answer_content)[0][0] not in ast.literal_eval(q.question_answers):
+#                         answer.marks=0
+#                         answer.save()
+#                 except:
+#                     answer.marks=0
+#                     answer.save()
+#     return HttpResponse("Done")
 
 
 # def db_test(request):
@@ -188,7 +225,15 @@ def correction(request, question, sequence):
 #     print("Count: "+str(stronk_team_count-medium_team_count_1-medium_team_count_2-medium_team_count_3+weak_team_count_1+weak_team_count_2+weak_team_count_3))
 #     return HttpResponse(str(list(teams)))
 
-
+def db_test(request):
+    tot_ans=Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__gt=8, question_instance__question_type='t', marks=0)
+    for a in tot_ans:
+        print(a.answer_content)
+        if len(ast.literal_eval(a.answer_content)[0])==0:
+            a.marks=-1
+            a.save()
+            print("yeah")
+    return HttpResponse("yee")
 
 def csrf_failure(request, reason=""):
     return render(request, "500.html")
