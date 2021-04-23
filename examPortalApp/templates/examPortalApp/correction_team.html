@@ -99,6 +99,9 @@
       <th>Team ID</th>
       <th>Marks</th>
       <th>Confirm graded</th>
+      {% if question.question_number == 1 %}
+      <th>Answer</th>
+      {% endif %}
     </tr>
     {% for answer in answers %}
     <tr>
@@ -119,6 +122,9 @@
         -
         {% endif %}
       </td>
+      {% if question.question_number == 1 %}
+      <td>{{answer.answer_content|safe}}</td>
+      {% endif %}
     </tr>
     {% endfor %}
   </table>

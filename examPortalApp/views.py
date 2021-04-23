@@ -226,14 +226,10 @@ def toggle_graded_confirm(request):
 #     return HttpResponse(str(list(teams)))
 
 def db_test(request):
-    tot_ans=Answer.objects.annotate(text_len=Length('answer_content')).filter(text_len__gt=8, question_instance__question_type='t', marks=0)
-    for a in tot_ans:
-        print(a.answer_content)
-        if len(ast.literal_eval(a.answer_content)[0])==0:
-            a.marks=-1
-            a.save()
-            print("yeah")
-    return HttpResponse("yee")
+    t=Team.objects.get(sequence="10013")
+    a=Answer.objects.filter(team_instance=t, question_instance__question_subject="Biology").aggregate(total_marks=Sum('marks'))['total_marks']
+    print(len(Answer.objects.filter(team_instance=t, question_instance__question_subject="Biology")))
+    return HttpResponse(str(a))
 
 def csrf_failure(request, reason=""):
     return render(request, "500.html")
