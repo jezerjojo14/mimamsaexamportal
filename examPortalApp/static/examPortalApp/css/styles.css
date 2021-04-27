@@ -223,7 +223,8 @@ h2{
   overflow-x: auto;
   white-space: nowrap;
   display: inline-block;
-  max-width: calc(100% - 70px);
+  /* max-width: calc(100% - 70px); */
+  max-width: 100%;
 }
 
 #nav-questions button{

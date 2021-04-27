@@ -28,12 +28,12 @@
   </div>
 </div>
 <br><hr><br>
-<ul class="list-group">
-  <!-- <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
+<!-- <ul class="list-group">
+  <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
   <li><a href="{% url 'instructions' %}" target="_blank">How to use the portal</a></li>
-  <li class=""><a href="{% url 'logout' %}">Log Out</a></li> -->
+  <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
 </ul>
-<br><hr><br>
+<br><hr><br> -->
 <div style="color: #777; padding: 20px; font-size: 14px">
   The making of this portal was led by Jezer Jojo with the immense support of Parth Gupte and Samarth Pardhi, along with contributions from Venkata Sai Sreyas Adury and Ipsa Bezbarua
 </div>
@@ -70,14 +70,14 @@
             <button id="q-btn-{{forloop.counter}}" class='nav-btn btn {% if forloop.counter == QNum %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
           {% endfor %}
         </div>
-        <div class="sync-container">
+        <!-- <div class="sync-container">
           <a class="sync-btn" href="#">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
               <path class="sync-btn" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
             </svg>
           </a>
-        </div>
-        <div id="q-content">{{content|safe}}</div>
+        </div> -->
+        <div id="q-content"></div>
 
         <!-- Popups -->
         <div id="loading-overlay" class="popup" style="background-color: #FFFFFFEC">
@@ -144,127 +144,6 @@
         <!-- End popups -->
 
         <div class="answer-section">
-
-
-
-          {% if QType == 'm' %}
-
-
-          <form action="{% url 'save_m_answer' %}" method="post">
-            {% csrf_token %}
-            {% for option_set in options %}
-              {% for option in option_set %}
-                {% if forloop.counter0 == 0 %}
-                  <h5>{{option|safe}}</h5>
-                {% else %}
-                  <br>
-                  <input {% if forloop.parentloop.counter0|mul:4|add:forloop.counter0 in selected_options %}checked{% endif %} class="mcq-btn" id="mcq-btn-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}" type="radio" name="choice-{{forloop.parentloop.counter}}" value="{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">
-                  <label style="display: inline" for="opt-{{forloop.parentloop.counter0|mul:4|add:forloop.counter0}}">{{option}}</label>
-                  <br>
-                {% endif %}
-              {% endfor %}
-              <br>
-            {% endfor %}
-            <br><br>
-            <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-            <input id="clear-response-btn" type="reset" value="Clear Response">
-            <br>
-            <input type="submit" name="" value="Save Choice">
-          </form>
-
-          {% if selected_options|length == options|length %}
-            {% if answer_status != 'a' %}
-              <button class="mark-answered" type="button" name="review">Mark as Answered</button>
-            {% else %}
-              <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
-            {% endif %}
-          {% endif %}
-          {% if answer_status != 'r' %}
-            <button class="mark-review" type="button" name="review">Mark for Review</button>
-          {% else %}
-            <button class="mark-review marked" type="button" name="review">Marked for Review</button>
-          {% endif %}
-
-
-          {% elif QType == 't' %}
-
-
-          {% if selected_options|length == 0 %}
-            <h5>1) Choose option:</h5>
-            <form action="{% url 'save_t_answer' %}" method="post">
-              {% csrf_token %}
-              {% for option in options %}
-                <br>
-                <input {% if forloop.counter in selected_options %}checked{% endif %} class="tt-btn" id="tt-btn-{{forloop.counter}}" type="radio" name="choice" value="{{forloop.counter}}">
-                <label style="display: inline" for="opt-{{forloop.counter}}">{{option|safe}}</label>
-                <br>
-              {% endfor %}
-              <br><br>
-              <input id="qnumber" type="hidden" name="qnumber" value="{{QNum}}">
-              <input id="clear-response-btn" type="reset" value="Clear Response">
-              <br>
-              <input type="submit" name="" value="Save Choice">
-            </form>
-          {% else %}
-            {% for option in options %}
-              {% if forloop.counter in selected_options %}
-                <h5>Chosen option: {{option|safe}}</h5>
-              {% endif %}
-            {% endfor %}
-            <a href="{% url 'clear_t_options' qnumber=QNum %}">Select a different option</a>
-            <br><br>
-            <h5>2) Upload/Type explanation:</h5>
-
-            {% include 'examPortalApp/include_modules/forms_card.html' %}
-
-            <br><br>
-          {% endif %}
-
-          {% if answer_status != 'a' %}
-            {% if selected_options|length != 0 %}
-              {% if answer_text != "" or uploaded_files|length != 0 %}
-                <button class="mark-answered" type="button" name="review">Mark as Answered</button>
-              {% endif %}
-            {% endif %}
-          {% else %}
-            <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
-          {% endif %}
-          {% if answer_status != 'r' %}
-            <button class="mark-review" type="button" name="review">Mark for Review</button>
-          {% else %}
-          <button class="mark-review marked" type="button" name="review">Marked for Review</button>
-          {% endif %}
-
-
-          {% elif QType == 's' %}
-
-            {% include 'examPortalApp/include_modules/forms_card.html' %}
-
-            <br><br>
-
-            {% if answer_status != 'a' %}
-              {% if answer_text != "" or uploaded_files|length != 0 %}
-                <button class="mark-answered" type="button" name="review">Mark as Answered</button>
-              {% endif %}
-            {% else %}
-              <button class="mark-answered marked" type="button" name="review">Marked as Answered</button>
-            {% endif %}
-
-            {% if answer_status != 'r' %}
-              <button class="mark-review" type="button" name="review">Mark for Review</button>
-            {% else %}
-              <button class="mark-review marked" type="button" name="review">Marked for Review</button>
-            {% endif %}
-
-          {% endif %}
-
-          <div class="sync-container">
-            <a class="sync-btn" href="#">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
-                <path class="sync-btn" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-              </svg>
-            </a>
-          </div>
         </div>
         <div id="nav_buttons">
           <button id="prev" type="button">Previous</button>

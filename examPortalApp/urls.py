@@ -25,11 +25,11 @@ urlpatterns = [
     path('move-up', views.move_up, name="move_up"),
     path('m-answers/<int:qnumber>', views.get_m_answers, name="get_m_answers"),
     path('t-answers/<int:qnumber>', views.get_t_answers, name="get_t_answers"),
-    path('clear-t-options/<int:qnumber>', views.clear_t_options, name="clear_t_options"),
+    path('clear-t-options', views.clear_t_options, name="clear_t_options"),
     path('del-question', views.delete_question, name="del_question"),
-    path('review/<int:qnumber>', views.mark_for_review, name="review"),
-    path('answered/<int:qnumber>', views.mark_as_answered, name="answered"),
-    path('unanswered/<int:qnumber>', views.mark_as_unanswered, name="unanswered"),
+    path('review', views.mark_for_review, name="review"),
+    path('answered', views.mark_as_answered, name="answered"),
+    path('unanswered', views.mark_as_unanswered, name="unanswered"),
 
 
     path('question-portal/<int:page>', views.question_making_page, name="questionportal"),

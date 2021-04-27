@@ -454,7 +454,13 @@ def open_test(request):
             "UTCYear": test_start.year,
             "UTCHours": test_start.hour,
             "UTCMinutes": test_start.minute,
-            "UTCSeconds": test_start.second
+            "UTCSeconds": test_start.second,
+            "UTCDateNow": now.day,
+            "UTCMonthNow": now.month,
+            "UTCYearNow": now.year,
+            "UTCHoursNow": now.hour,
+            "UTCMinutesNow": now.minute,
+            "UTCSecondsNow": now.second
         }
         template_var["team"]=team
         return render(request, "examPortalApp/waitingroom.html", template_var)
@@ -475,7 +481,13 @@ def open_test(request):
         "UTCYear": test_end.year,
         "UTCHours": test_end.hour,
         "UTCMinutes": test_end.minute,
-        "UTCSeconds": test_end.second
+        "UTCSeconds": test_end.second,
+        "UTCDateNow": now.day,
+        "UTCMonthNow": now.month,
+        "UTCYearNow": now.year,
+        "UTCHoursNow": now.hour,
+        "UTCMinutesNow": now.minute,
+        "UTCSecondsNow": now.second
     }
 
     review_questions=list(Question.objects.filter(answer__team_instance=team, answer__status='r').values_list('question_number', flat=True))
@@ -1030,11 +1042,12 @@ def upload_answer(request):
 
 
 @login_required(login_url='/')
-def mark_for_review(request, qnumber):
+def mark_for_review(request):
     now = timezone.now()
     team=request.user.team_set.first()
     test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+    qnumber = json.loads(request.body.decode("utf-8"))["qnumber"]
 
     if now<test_end and now>test_start:
         user=request.user
@@ -1045,16 +1058,17 @@ def mark_for_review(request, qnumber):
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         a.status='r'
         a.save()
-        return HttpResponseRedirect(reverse("test_no"))
+        return HttpResponse(status=201)
     else:
         raise Http404;
 
 @login_required(login_url='/')
-def mark_as_answered(request, qnumber):
+def mark_as_answered(request):
     now = timezone.now()
     team=request.user.team_set.first()
     test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+    qnumber = json.loads(request.body.decode("utf-8"))["qnumber"]
 
     if now<test_end and now>test_start:
         user=request.user
@@ -1065,16 +1079,17 @@ def mark_as_answered(request, qnumber):
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         a.status='a'
         a.save()
-        return HttpResponseRedirect(reverse("test_no"))
+        return HttpResponse(status=201)
     else:
         raise Http404;
 
 @login_required(login_url='/')
-def mark_as_unanswered(request, qnumber):
+def mark_as_unanswered(request):
     now = timezone.now()
     team=request.user.team_set.first()
     test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+    qnumber = json.loads(request.body.decode("utf-8"))["qnumber"]
 
     if now<test_end and now>test_start:
         user=request.user
@@ -1084,17 +1099,18 @@ def mark_as_unanswered(request, qnumber):
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         a.status='u'
         a.save()
-        return HttpResponseRedirect(reverse("test_no"))
+        return HttpResponse(status=201)
     else:
         raise Http404;
 
 
 @login_required(login_url='/')
-def clear_t_options(request, qnumber):
+def clear_t_options(request):
     now = timezone.now()
     team=request.user.team_set.first()
     test_start=GlobalVariables.objects.get(pk=1).test_start + datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
+    qnumber = json.loads(request.body.decode("utf-8"))["qnumber"]
 
     if now<test_end and now>test_start:
         user=request.user
@@ -1107,7 +1123,7 @@ def clear_t_options(request, qnumber):
         if a.status=='a':
             a.status='u';
         a.save()
-        return HttpResponseRedirect(reverse("test_no"))
+        return HttpResponse(status=201)
     else:
         raise Http404;
 

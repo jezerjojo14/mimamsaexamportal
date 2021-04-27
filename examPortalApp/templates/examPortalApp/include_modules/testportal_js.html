@@ -25,8 +25,7 @@
 
     function startTimer(datetime, displays) {
       console.log(displays);
-      var start = Date.now(),
-        diff0,
+      var diff0,
         diff,
         minutes,
         seconds;
@@ -79,12 +78,14 @@
 
     window.onload = function () {
       var d = new Date();
-      d.setUTCDate({{ UTCDate }});
-      d.setUTCMonth({{ UTCMonth }}-1);
-      d.setUTCFullYear({{ UTCYear }});
-      d.setUTCHours({{ UTCHours }});
-      d.setUTCMinutes({{ UTCMinutes }});
-      d.setUTCSeconds({{ UTCSeconds }});
+      var now = new Date(Date.now());
+      console.log(now);
+      d.setUTCDate({{ UTCDate }}+(now.getUTCDate()-{{UTCDateNow}}));
+      d.setUTCMonth({{ UTCMonth }}-1+(now.getUTCMonth()-{{UTCMonthNow}}));
+      d.setUTCFullYear({{ UTCYear }}+(now.getUTCFullYear()-{{UTCYearNow}}));
+      d.setUTCHours({{ UTCHours }}+(now.getUTCHours()-{{UTCHoursNow}}));
+      d.setUTCMinutes({{ UTCMinutes }}+(now.getUTCMinutes()-{{UTCMinutesNow}}));
+      d.setUTCSeconds({{ UTCSeconds }}+(now.getUTCSeconds()-{{UTCSecondsNow}}));
       console.log(d);
       var timer_display = document.querySelectorAll('.time');
       startTimer(d.getTime(), timer_display);
@@ -107,7 +108,10 @@
           },
           body: JSON.stringify({"qnumber":questionNumber})
         })
-        .then(response => response.json())
+        .then((response) => {
+          console.log(response);
+          return response.json()
+        })
         .then((data) => {
           document.getElementById('q-content').innerHTML=data["question"];
           document.querySelector('.answer-section').innerHTML=data["answer"];
@@ -244,6 +248,11 @@
         clearResponseBtn.onclick = resetForm.bind(this, clearResponseBtn.form);
       }
 
+      var clearToTOptionBtn=document.getElementById('clear-tot-opt-btn');
+      if (clearToTOptionBtn) {
+        clearToTOptionBtn.onclick=clearToTOption;
+      }
+
       var markReviewBtn = document.querySelector(".mark-review");
       if (markReviewBtn) {
         markReviewBtn.onclick = markReview;
@@ -303,9 +312,9 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      currentQNo={{QNum}};
+      currentQNo=1;
       initQuestionJS();
-
+      getQuestion(1);
     });
 
     function saveChangesPopup(foo) {
@@ -337,10 +346,49 @@
       ele.closest('.popup').style.display="none";
     }
 
+    function clearToTOption() {
+      if (!unsaved)
+      {
+        document.getElementById('loading-overlay').style.display="block";
+        let csrftoken = getCookie('csrftoken');
+        fetch("{% url 'clear_t_options' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": csrftoken
+          },
+          body: JSON.stringify({"qnumber":currentQNo})
+        })
+        .then(() => {
+          getQuestion(currentQNo);
+        })
+      }
+      else {
+        saveChangesPopup(()=>{
+          unsaved=false;
+          markAnswered();
+        });
+      }
+    }
+
     function markAnswered() {
       if (!unsaved)
       {
-        window.location=(("{% url 'answered' qnumber=1 %}").substring(0, ("{% url 'answered' qnumber=1 %}").length - 1) + currentQNo);
+        document.getElementById('loading-overlay').style.display="block";
+        let csrftoken = getCookie('csrftoken');
+        fetch("{% url 'answered' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": csrftoken
+          },
+          body: JSON.stringify({"qnumber":currentQNo})
+        })
+        .then(() => {
+          document.getElementById('q-btn-'+currentQNo).classList.remove("btn-review");
+          document.getElementById('q-btn-'+currentQNo).classList.add("btn-answered");
+          getQuestion(currentQNo);
+        })
       }
       else {
         saveChangesPopup(()=>{
@@ -353,8 +401,21 @@
     function markReview() {
 
       if (!unsaved) {
-        console.log(currentQNo);
-        window.location=(("{% url 'review' qnumber=1 %}").substring(0, ("{% url 'review' qnumber=1 %}").length - 1) + currentQNo);
+        document.getElementById('loading-overlay').style.display="block";
+        let csrftoken = getCookie('csrftoken');
+        fetch("{% url 'review' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": csrftoken
+          },
+          body: JSON.stringify({"qnumber":currentQNo})
+        })
+        .then(() => {
+          document.getElementById('q-btn-'+currentQNo).classList.remove("btn-answered");
+          document.getElementById('q-btn-'+currentQNo).classList.add("btn-review");
+          getQuestion(currentQNo);
+        })
       }
       else {
         saveChangesPopup(()=>{
@@ -366,7 +427,21 @@
 
     function markUnanswered() {
       if (!unsaved) {
-        window.location=(("{% url 'unanswered' qnumber=1 %}").substring(0, ("{% url 'unanswered' qnumber=1 %}").length - 1) + currentQNo);
+        document.getElementById('loading-overlay').style.display="block";
+        let csrftoken = getCookie('csrftoken');
+        fetch("{% url 'unanswered' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": csrftoken
+          },
+          body: JSON.stringify({"qnumber":currentQNo})
+        })
+        .then(() => {
+          document.getElementById('q-btn-'+currentQNo).classList.remove("btn-answered");
+          document.getElementById('q-btn-'+currentQNo).classList.remove("btn-review");
+          getQuestion(currentQNo);
+        })
       }
       else {
         saveChangesPopup(()=>{
@@ -574,7 +649,17 @@
   function txtFormSubmit(e) {
     e.preventDefault();
     if ({{uploaded_files|length}}==0) {
-      document.getElementById('txt-form').submit();
+      document.getElementById('loading-overlay').style.display="block";
+      let form=document.getElementById('txt-form');
+      fetch(form.action, {
+        method: form.method,
+        body: new FormData(form),
+      })
+      .then(()=>{
+        unsaved=false;
+        document.getElementById('loading-overlay').style.display="none";
+        getQuestion(currentQNo);
+      });
     }
     else {
       openTxtSubmitPopup();
@@ -589,6 +674,25 @@
   function openTxtSubmitPopup() {
     document.getElementById('txt-submit-popup').style.display="block";
   }
+
+  document.addEventListener("submit", (e) => {
+    // Store reference to form to make later code easier to read
+    const form = e.target;
+    document.getElementById('loading-overlay').style.display="block";
+    // Post data using the Fetch API
+    fetch(form.action, {
+      method: form.method,
+      body: new FormData(form),
+    })
+    .then(()=>{
+      unsaved=false;
+      document.getElementById('loading-overlay').style.display="none";
+      getQuestion(currentQNo);
+    });
+
+    // Prevent the default form submit
+    e.preventDefault();
+  });
 
 
 </script>

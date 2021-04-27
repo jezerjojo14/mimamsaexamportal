@@ -43,15 +43,16 @@
 
     window.onload = function () {
       var d = new Date();
-      d.setUTCDate({{ UTCDate }});
-    d.setUTCMonth({{ UTCMonth }}-1);
-    d.setUTCFullYear({{ UTCYear }});
-    d.setUTCHours({{ UTCHours }});
-    d.setUTCMinutes({{ UTCMinutes }});
-    d.setUTCSeconds({{ UTCSeconds }});
-    console.log(d);
-    var display = document.querySelector('#time');
-    startTimer(d.getTime(), display);
+      var now = Date.now();
+      d.setUTCDate({{ UTCDate }}+(now.getUTCDate()-{{UTCDateNow}}));
+      d.setUTCMonth({{ UTCMonth }}-1+(now.getUTCMonth()-{{UTCMonthNow}}));
+      d.setUTCFullYear({{ UTCYear }}+(now.getUTCFullYear()-{{UTCYearNow}}));
+      d.setUTCHours({{ UTCHours }}+(now.getUTCHours()-{{UTCHourseNow}}));
+      d.setUTCMinutes({{ UTCMinutes }}+(now.getUTCMinutes()-{{UTCMinutesNow}}));
+      d.setUTCSeconds({{ UTCSeconds }}+(now.getUTCSeconds()-{{UTCSecondsNow}}));
+      console.log(d);
+      var display = document.querySelector('#time');
+      startTimer(d.getTime(), display);
     };
   </script>
 {% endblock %}
