@@ -14,8 +14,8 @@
   var username="{{user.username}}";
   function sendLogLeft(log) {
     // No need to edit anything in this function
-    document.getElementById('proctor-warning-message').style.display="block";
-    document.getElementById('proctor-warning-message').innerHTML+="\n"+log;
+    document.getElementById('proctor-warning').style.display="block";
+    document.getElementById('proctor-warning-message').innerHTML+="\n"+JSON.stringify(log);
     console.log(log);
   }
 
