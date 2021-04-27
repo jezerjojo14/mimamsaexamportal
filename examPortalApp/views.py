@@ -14,6 +14,7 @@ from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django import forms
 from django.views.decorators.csrf import csrf_exempt
@@ -272,12 +273,12 @@ def login_view(request):
         if User.objects.filter(username=email).exists():
             user=User.objects.get(username=email)
             if user.check_password(password):
-                if user.session_key and user.username!='admin' and user.username!='jezer': # check if user has session_key. This will be true for users logged in on another device
-                    try:
-                        s = Session.objects.get(session_key=user.session_key)
-                        s.delete()
-                    except Session.DoesNotExist:
-                        pass
+                # if user.session_key and user.username!='admin' and user.username!='jezer': # check if user has session_key. This will be true for users logged in on another device
+                #     try:
+                #         s = Session.objects.get(session_key=user.session_key)
+                #         s.delete()
+                #     except Session.DoesNotExist:
+                #         pass
                 login(request, user)
                 user.session_key = request.session.session_key
                 user.save()
@@ -435,7 +436,7 @@ def instructions(request):
 
 
 @login_required(login_url='/')
-def open_test(request, qnumber=None, message=""):
+def open_test(request):
     now = timezone.now()
     test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 4, 18, 4, 30, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 4, 18, 6, 30, 0))})[0]).test_start
     team=request.user.team_set.first()
@@ -462,7 +463,7 @@ def open_test(request, qnumber=None, message=""):
         return render(request, "examPortalApp/testended.html")
 
     q_count= Question.objects.all().count();
-    q_current = 1 if (qnumber is None) else int(qnumber);
+    qnumber = 1;
     try:
         q=Question.objects.get(question_number=qnumber)
     except:
@@ -488,7 +489,7 @@ def open_test(request, qnumber=None, message=""):
     template_var["answered_questions"]=answered_questions
     template_var["answer_status"]=a.status
     template_var["team"]=team
-    template_var["QNum"]=q_current
+    template_var["QNum"]=qnumber
     template_var["QCount"]=q_count
 
 
@@ -553,6 +554,92 @@ def open_test(request, qnumber=None, message=""):
         template_var["answer_text_empty"]=(len((ast.literal_eval(a.answer_content))[1].strip())==0)
 
         return render(request, "examPortalApp/testportal.html", template_var)
+
+
+@login_required(login_url='/')
+def get_question(request):
+    now = timezone.now()
+    test_start=(GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 4, 18, 4, 30, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 4, 18, 6, 30, 0))})[0]).test_start
+    team=request.user.team_set.first()
+    test_start += datetime.timedelta(seconds=team.extra_time)
+    test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
+    qnumber = json.loads(request.body.decode("utf-8"))["qnumber"]
+    q_count = Question.objects.all().count();
+    q_current = 1 if (qnumber is None) else int(qnumber);
+    try:
+        q=Question.objects.get(question_number=qnumber)
+    except:
+        raise Http404
+
+    j= {}
+
+    while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
+        Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
+    a=(Answer.objects.get_or_create(question_instance=q, team_instance=team))[0]
+
+    j["answer_status"]=a.status
+    j["QNum"]=q_current
+
+
+    if q.question_type=='s':
+        uploaded_files=list(AnswerFiles.objects.filter(answer_instance=a).order_by('page_no').values_list('answer_filename', flat=True))
+
+        j["QType"]='s'
+        j["content"]=q.question_content
+        j["options"]=[]
+        j["selected_options"]=[]
+        j["uploaded_files"]=uploaded_files
+        j["answer_text"]=a.answer_content
+
+        answerHTML=render_to_string("examPortalApp/include_modules/answer_section.html", j)
+        print({"question":j["content"], "answer":answerHTML})
+        print(JsonResponse({"question":j["content"], "answer":answerHTML}))
+        return JsonResponse({"question":j["content"], "answer":answerHTML})
+
+    if q.question_type=='m':
+        if a.answer_content=="":
+            a.answer_content=str([])
+            a.save()
+        selected_options=ast.literal_eval(a.answer_content)
+        content=ast.literal_eval(q.question_content)
+        setup=content[0]
+        option_sets=[]
+        labels=[]
+        i=1
+        while i<len(content):
+            #option_sets=[["label1", "opt1_1", "opt2_1", "opt3_1", "opt4_1"], ["label2", "opt1_2", "opt2_2", "opt3_2", "opt4_2"]]
+            option_sets+=[[content[i][0]]+content[i][1]]
+            i+=1
+
+        j["QType"]='m'
+        j["content"]=setup
+        j["options"]=option_sets
+        j["selected_options"]=selected_options
+        j["uploaded_files"]=[]
+        j["answer_text"]=""
+
+        answerHTML=render_to_string("examPortalApp/include_modules/answer_section.html", j)
+        return JsonResponse({"question":j["content"], "answer":answerHTML})
+
+    if q.question_type=='t':
+        uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
+        if a.answer_content=="":
+            a.answer_content=str([[], ""])
+            a.save()
+        selected_option=(ast.literal_eval(a.answer_content))[0]
+        content=ast.literal_eval(q.question_content)
+        setup=content[0]
+        options=content[1]
+
+        j["QType"]='t'
+        j["content"]=setup
+        j["options"]=options
+        j["selected_options"]=selected_option
+        j["uploaded_files"]=uploaded_files
+        j["answer_text"]=(ast.literal_eval(a.answer_content))[1]
+
+        answerHTML=render_to_string("examPortalApp/include_modules/answer_section.html", j)
+        return JsonResponse({"question":j["content"], "answer":answerHTML})
 
 
 @login_required(login_url='/')
@@ -780,7 +867,7 @@ def submit_MCQ(request):
         elif a.status=='a':
             a.status='u'
         a.save()
-        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        return HttpResponseRedirect(reverse("test_no"))
     else:
         raise Http404;
 
@@ -809,7 +896,7 @@ def submit_TT(request):
             a.status='u'
         a.answer_content=str(answer)
         a.save()
-        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        return HttpResponseRedirect(reverse("test_no"))
     else:
         raise Http404;
 
@@ -843,7 +930,7 @@ def upload_text_answer(request):
         elif q.question_type=='t':
             a.answer_content=str([(ast.literal_eval(a.answer_content))[0], request.POST["answer_text"].strip()])
         a.save()
-        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        return HttpResponseRedirect(reverse("test_no"))
     else:
         raise Http404;
 
@@ -875,7 +962,7 @@ def upload_answer(request):
         a.save()
 
         if team is None:
-            return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+            return HttpResponseRedirect(reverse("test_no"))
         #Resize and compress uploaded image
 
         try:
@@ -884,7 +971,7 @@ def upload_answer(request):
         except:
             #manage exceptions here
             messages.info(request, 'Image file corrupt or unsupported')
-            return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+            return HttpResponseRedirect(reverse("test_no"))
         # im.seek(0)
         im = Image.open(answerfile)
         w, h = im.size
@@ -936,7 +1023,7 @@ def upload_answer(request):
             af.page_no+=1
             af.save()
 
-        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        return HttpResponseRedirect(reverse("test_no"))
     else:
         raise Http404;
 
@@ -958,7 +1045,7 @@ def mark_for_review(request, qnumber):
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         a.status='r'
         a.save()
-        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        return HttpResponseRedirect(reverse("test_no"))
     else:
         raise Http404;
 
@@ -978,7 +1065,7 @@ def mark_as_answered(request, qnumber):
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         a.status='a'
         a.save()
-        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        return HttpResponseRedirect(reverse("test_no"))
     else:
         raise Http404;
 
@@ -997,7 +1084,7 @@ def mark_as_unanswered(request, qnumber):
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
         a.status='u'
         a.save()
-        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        return HttpResponseRedirect(reverse("test_no"))
     else:
         raise Http404;
 
@@ -1020,7 +1107,7 @@ def clear_t_options(request, qnumber):
         if a.status=='a':
             a.status='u';
         a.save()
-        return HttpResponseRedirect(reverse("test_no", kwargs={"qnumber":str(qnumber)}))
+        return HttpResponseRedirect(reverse("test_no"))
     else:
         raise Http404;
 

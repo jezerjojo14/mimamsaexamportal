@@ -13,7 +13,8 @@ urlpatterns = [
     path('dashboard', views.dashboard, name="dashboard"),
     path('instructions', views.instructions, name="instructions"),
 
-    path('test/<int:qnumber>', views.open_test, name="test_no"),
+    path('test', views.open_test, name="test_no"),
+    path('get-question', views.get_question, name="get_question"),
     path('upload-answer', views.upload_answer, name="upload_answer"),
     path('upload-text-answer', views.upload_text_answer, name="upload_text_answer"),
     path('save-mcq', views.submit_MCQ, name="save_m_answer"),

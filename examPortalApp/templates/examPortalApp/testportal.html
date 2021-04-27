@@ -4,6 +4,7 @@
 
 {% block script %}
   {% include 'examPortalApp/include_modules/testportal_js.html' %}
+  {% include 'examPortalApp/include_modules/proctoring_js.html' %}
 {% endblock %}
 
 {% block header_center %}
@@ -28,9 +29,9 @@
 </div>
 <br><hr><br>
 <ul class="list-group">
-  <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
+  <!-- <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
   <li><a href="{% url 'instructions' %}" target="_blank">How to use the portal</a></li>
-  <li class=""><a href="{% url 'logout' %}">Log Out</a></li>
+  <li class=""><a href="{% url 'logout' %}">Log Out</a></li> -->
 </ul>
 <br><hr><br>
 <div style="color: #777; padding: 20px; font-size: 14px">
@@ -79,7 +80,17 @@
         <div id="q-content">{{content|safe}}</div>
 
         <!-- Popups -->
-
+        <div id="loading-overlay" class="popup" style="background-color: #FFFFFFEC">
+          <div class="popup-message" style="background-color: #0000">
+            <h2>Loading...</h2>
+          </div>
+        </div>
+        <div id="proctor-warning" class="popup">
+          <div id="proctor-warning-message" class="popup-message">
+            <p>You left the portal</p>
+            <button id="proctor-warning-close">Close</button>
+          </div>
+        </div>
         <div id="img-submit-popup" class="popup">
           <div class="popup-message">
             <p>
@@ -133,6 +144,7 @@
         <!-- End popups -->
 
         <div class="answer-section">
+
 
 
           {% if QType == 'm' %}

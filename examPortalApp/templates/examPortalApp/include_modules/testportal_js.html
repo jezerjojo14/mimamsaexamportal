@@ -96,42 +96,76 @@
 
 
     function getQuestion(questionNumber) {
-      if (!unsaved)
-      {
-        window.location=(("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'test_no' qnumber=1 %}").length - 1) + questionNumber);
+      if (!unsaved) {
+        document.getElementById('loading-overlay').style.display="block";
+        let csrftoken = getCookie('csrftoken');
+        fetch("{% url 'get_question' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": csrftoken
+          },
+          body: JSON.stringify({"qnumber":questionNumber})
+        })
+        .then(response => response.json())
+        .then((data) => {
+          document.getElementById('q-content').innerHTML=data["question"];
+          document.querySelector('.answer-section').innerHTML=data["answer"];
+          document.getElementById("q-btn-"+currentQNo).classList.remove('active');
+          document.getElementById("q-btn-"+currentQNo).classList.remove('visited');
+          currentQNo=questionNumber;
+          document.getElementById("q-btn-"+currentQNo).classList.add('active');
+          document.getElementById("q-btn-"+currentQNo).classList.add('visited');
+          console.log(currentQNo);
+          let forms=document.querySelectorAll(".answer-section-form");
+          for (var i = 0; i < forms.length; i++) {
+            forms[i].innerHTML='<input type="hidden" name="csrfmiddlewaretoken" value="'+"{{csrf_token}}"+'">'+forms[i].innerHTML;
+          }
+          initQuestionJS();
+          document.getElementById('loading-overlay').style.display="none";
+        })
       }
       else {
-        saveChangesPopup(("{% url 'test_no' qnumber=1 %}").substring(0, ("{% url 'test_no' qnumber=1 %}").length - 1) + questionNumber);
+        saveChangesPopup(()=>{
+          unsaved=false;
+          getQuestion(questionNumber);
+        })
       }
+
     }
 
     function nextQuestion() {
       if (currentQNo < {{ QCount }})
       {
-        currentQNo += 1;
-        getQuestion(currentQNo);
+        getQuestion(currentQNo+1);
         // Qactive(currentQNo);
       }
     }
 
     function prevQuestion() {
       if (currentQNo > 1) {
-        currentQNo -= 1;
-        getQuestion(currentQNo);
+        getQuestion(currentQNo-1);
         // Qactive(currentQNo);
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      currentQNo = {{ QNum }};
+    function initQuestionJS() {
       if (currentQNo == 1) {
         document.getElementById('prev').setAttribute("disabled", "disabled");
         document.getElementById('prev').style.opacity=0.5;
+      }
+      else {
+        document.getElementById('prev').removeAttribute("disabled");
+        document.getElementById('prev').style.opacity=1;
       }
       if (currentQNo == {{ QCount }})
       {
         document.getElementById('next').setAttribute("disabled", "disabled");
         document.getElementById('next').style.opacity=0.5;
+      }
+      else {
+        document.getElementById('next').removeAttribute("disabled");
+        document.getElementById('next').style.opacity=1;
       }
 
       // testportal
@@ -140,7 +174,9 @@
       for(var i = 0; i < syncBtnList.length; i++) {
         syncBtnList[i].onclick= ()=>{
           if (unsaved) {
-            saveChangesPopup(window.location.href)
+            saveChangesPopup(()=>{
+              location.reload();
+            });
           }
           else {
             location.reload();
@@ -183,7 +219,13 @@
       };
       var closePopupList = document.querySelectorAll(".close-popup");
       for(var i = 0; i < closePopupList.length; i++) {
+        closePopupList[i].style.opacity=1;
+        closePopupList[i].disabled=false;
         closePopupList[i].onclick = closePopup.bind(this, closePopupList[i]);
+      }
+      var popupList = document.querySelectorAll(".popup");
+      for(var i = 0; i < popupList.length; i++) {
+        popupList[i].style.display="none";
       }
       var navBtnList = document.querySelectorAll(".nav-btn");
       for(var i = 0; i < navBtnList.length; i++) {
@@ -258,10 +300,15 @@
             };
         };
       }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      currentQNo={{QNum}};
+      initQuestionJS();
 
     });
 
-    function saveChangesPopup(url) {
+    function saveChangesPopup(foo) {
       document.getElementById('save-changes-popup').style.display="block";
       document.getElementById('save-changes-popup-continue').onclick=()=>{
         document.getElementById('save-changes-popup-continue').innerHTML="Processing request...";
@@ -278,7 +325,11 @@
             return false;
           };
         }
-        window.location=url;
+        initQuestionJS();
+        document.getElementById('save-changes-popup-continue').innerHTML="Continue";
+        document.getElementById('save-changes-popup-continue').style.opacity=1;
+        document.getElementById('save-changes-popup-continue').disabled=false;
+        foo();
       };
     }
 
@@ -292,16 +343,24 @@
         window.location=(("{% url 'answered' qnumber=1 %}").substring(0, ("{% url 'answered' qnumber=1 %}").length - 1) + currentQNo);
       }
       else {
-        saveChangesPopup(("{% url 'answered' qnumber=1 %}").substring(0, ("{% url 'answered' qnumber=1 %}").length - 1) + currentQNo);
+        saveChangesPopup(()=>{
+          unsaved=false;
+          markAnswered();
+        });
       }
     }
 
     function markReview() {
+
       if (!unsaved) {
+        console.log(currentQNo);
         window.location=(("{% url 'review' qnumber=1 %}").substring(0, ("{% url 'review' qnumber=1 %}").length - 1) + currentQNo);
       }
       else {
-        saveChangesPopup(("{% url 'review' qnumber=1 %}").substring(0, ("{% url 'review' qnumber=1 %}").length - 1) + currentQNo);
+        saveChangesPopup(()=>{
+          unsaved=false;
+          markReview();
+        });
       }
     }
 
@@ -310,7 +369,10 @@
         window.location=(("{% url 'unanswered' qnumber=1 %}").substring(0, ("{% url 'unanswered' qnumber=1 %}").length - 1) + currentQNo);
       }
       else {
-        saveChangesPopup(("{% url 'unanswered' qnumber=1 %}").substring(0, ("{% url 'unanswered' qnumber=1 %}").length - 1) + currentQNo);
+        saveChangesPopup(()=>{
+          unsaved=false;
+          markUnanswered();
+        });
       }
     }
 
@@ -522,7 +584,6 @@
 
   function openImgSubmitPopup() {
     document.getElementById('img-submit-popup').style.display="block";
-
   }
 
   function openTxtSubmitPopup() {
