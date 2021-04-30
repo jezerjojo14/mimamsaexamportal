@@ -75,7 +75,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mathfilters'
+    'mathfilters',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -110,6 +111,7 @@ TEMPLATES = [
 
 
 WSGI_APPLICATION = 'examPortal.wsgi.application'
+ASGI_APPLICATION = "examPortal.routing.application"
 
 
 # Database

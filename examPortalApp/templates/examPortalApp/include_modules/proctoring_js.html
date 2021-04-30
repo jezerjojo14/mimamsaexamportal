@@ -32,6 +32,15 @@
 
   function sendLogReturned(log) {
     // No need to edit anything in this function
+    let csrftoken = getCookie('csrftoken');
+    fetch("{% url 'log_view' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        "X-CSRFToken": csrftoken
+      },
+      body: JSON.stringify(log)
+    });
   }
 
   //Fullscreen on click
@@ -89,8 +98,8 @@
     var testTime=total_time-(seconds);
     log["time"]=testTime;
     log["actionCommited"]="rightClick";
-    log["windowOuterHeigh"]=window.outerHeight;
-    log["windowInnerHeigh"]=window.innerHeight;
+    log["windowOuterHeight"]=window.outerHeight;
+    log["windowInnerHeight"]=window.innerHeight;
     sendLogLeft(log);
     e.preventDefault();
   }, false);
@@ -107,8 +116,8 @@
       var testTime=total_time-(seconds);
       log["time"]=testTime;
       log["actionCommited"]="exitFullscreen";
-      log["windowOuterHeigh"]=window.outerHeight;
-      log["windowInnerHeigh"]=window.innerHeight;
+      log["windowOuterHeight"]=window.outerHeight;
+      log["windowInnerHeight"]=window.innerHeight;
       sendLogLeft(log);
     }
     else {
@@ -130,8 +139,8 @@
       var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
       var testTime=total_time-(seconds);
       var log = {"username": username, "time": testTime};
-      log["windowOuterHeigh"]=window.outerHeight;
-      log["windowInnerHeigh"]=window.innerHeight;
+      log["windowOuterHeight"]=window.outerHeight;
+      log["windowInnerHeight"]=window.innerHeight;
       // Add keys to variable 'log' - "username" and "time"
       sendLogReturned(log);
     };
@@ -197,8 +206,8 @@ function getBrowserPrefix() {
     var testTime=total_time-(seconds);
     log["time"]=testTime;
     log["actionCommited"]="leftPortal";
-    log["windowOuterHeigh"]=window.outerHeight;
-    log["windowInnerHeigh"]=window.innerHeight;
+    log["windowOuterHeight"]=window.outerHeight;
+    log["windowInnerHeight"]=window.innerHeight;
     sendLogLeft(log);
   }
 
@@ -252,8 +261,8 @@ function getBrowserPrefix() {
         var testTime=total_time-(seconds);
         log["time"]=testTime;
         log["actionCommited"]="inspectElement";
-        log["windowOuterHeigh"]=window.outerHeight;
-        log["windowInnerHeigh"]=window.innerHeight;
+        log["windowOuterHeight"]=window.outerHeight;
+        log["windowInnerHeight"]=window.innerHeight;
         sendLogLeft(log);
       }
     }
