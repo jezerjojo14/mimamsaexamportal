@@ -567,6 +567,13 @@ def open_test(request):
 
         return render(request, "examPortalApp/testportal.html", template_var)
 
+@login_required
+def log_view(request):
+    post_data = json.loads(request.body.decode("utf-8"))
+    print(post_data)
+
+    return HttpResponse(status=201)
+
 
 @login_required(login_url='/')
 def get_question(request):
@@ -1238,21 +1245,3 @@ def edit_question(request):
 
 def loader(request):
     return HttpResponse("loaderio-bc4611489ba175954b1027ee937bd232")
-
-
-
-
-# TODO:
-@login_required
-def media_view(request):
-    pass
-
-# TODO:
-@login_required
-def upload_media(request):
-    pass
-
-# TODO:
-@login_required
-def delete_media(request):
-    pass

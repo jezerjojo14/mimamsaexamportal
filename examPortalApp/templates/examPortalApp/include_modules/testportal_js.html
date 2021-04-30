@@ -229,7 +229,9 @@
       }
       var popupList = document.querySelectorAll(".popup");
       for(var i = 0; i < popupList.length; i++) {
-        popupList[i].style.display="none";
+        if (popupList[i].id!="start-screen") {
+          popupList[i].style.display="none";
+        }
       }
       var navBtnList = document.querySelectorAll(".nav-btn");
       for(var i = 0; i < navBtnList.length; i++) {

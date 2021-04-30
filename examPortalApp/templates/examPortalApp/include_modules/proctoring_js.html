@@ -12,25 +12,251 @@
 
 
   var username="{{user.username}}";
+  let total_time=1020*3600;
+
   function sendLogLeft(log) {
     // No need to edit anything in this function
-    document.getElementById('proctor-warning').style.display="block";
-    document.getElementById('proctor-warning-message').innerHTML+="\n"+JSON.stringify(log);
-    console.log(log);
+    if (log["actionCommited"]!="rightClick") {
+      document.getElementById('proctor-warning').style.display="block";
+    }
+    let csrftoken = getCookie('csrftoken');
+    fetch("{% url 'log_view' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        "X-CSRFToken": csrftoken
+      },
+      body: JSON.stringify(log)
+    });
   }
 
   function sendLogReturned(log) {
     // No need to edit anything in this function
-    console.log(log);
   }
+
+  //Fullscreen on click
+  function fullScreen(){
+    addEventListener("click", function() {
+      var el = document.documentElement;
+      var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
+      rfs.call(el);
+    });
+  };
+
+  var log = {};
+  //If the user leaves the tab
+  // document.addEventListener("visibilitychange",function(){
+  //   sendLogLeft(log);
+  //   if (document.visibilityState=="hidden"){
+  //     log["username"] = username;
+  //     log["time"]=testTime;
+  //     log["actionCommited"]="leftPortal";
+  //     sendLogLeft(log);
+  //   }
+  // }, false);
+
+  document.onkeypress = function (event) {
+  event = (event || window.event);
+  if (event.keyCode == 123) {
+    return false;
+  }
+  }
+  document.onmousedown = function (event) {
+    event = (event || window.event);
+    if (event.keyCode == 123) {
+      return false;
+    }
+  }
+  document.onkeydown = function (event) {
+    event = (event || window.event);
+    if (event.keyCode == 123) {
+      return false;
+    }
+    else if ((event.ctrlKey && event.shiftKey && event.keyCode == 73) || (event.ctrlKey && event.shiftKey && event.keyCode == 74)) {
+      return false;
+    }
+  }
+
+  //Disable right clicks
+  document.addEventListener('contextmenu', function(e) {
+    log={};
+    log["username"] = username;
+    var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
+    var a = hms.split(':'); // split it at the colons
+
+    // minutes are worth 60 seconds. Hours are worth 60 minutes.
+    var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+    var testTime=total_time-(seconds);
+    log["time"]=testTime;
+    log["actionCommited"]="rightClick";
+    log["windowOuterHeigh"]=window.outerHeight;
+    log["windowInnerHeigh"]=window.innerHeight;
+    sendLogLeft(log);
+    e.preventDefault();
+  }, false);
+
+  //If user exits the fullscreen
+  function onFullScreenChange() {
+    if (document.fullscreenElement==null && document.mozFullScreenElement==null && document.webkitFullscreenElement==null) {
+      log["username"] = username;
+      var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
+      var a = hms.split(':'); // split it at the colons
+
+      // minutes are worth 60 seconds. Hours are worth 60 minutes.
+      var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+      var testTime=total_time-(seconds);
+      log["time"]=testTime;
+      log["actionCommited"]="exitFullscreen";
+      log["windowOuterHeigh"]=window.outerHeight;
+      log["windowInnerHeigh"]=window.innerHeight;
+      sendLogLeft(log);
+    }
+    else {
+      document.getElementById('start-screen').style.display="none";
+    }
+  };
+
+  document.addEventListener("fullscreenchange", onFullScreenChange, false);
+  document.addEventListener("webkitfullscreenchange", onFullScreenChange, false);
+  document.addEventListener("mozfullscreenchange", onFullScreenChange, false);
 
   document.addEventListener("DOMContentLoaded", ()=>{
     document.getElementById('proctor-warning-close').onclick=()=>{
       document.getElementById('proctor-warning-close').closest('.popup').style.display="none";
-      var log = {};
+      var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
+      var a = hms.split(':'); // split it at the colons
+
+      // minutes are worth 60 seconds. Hours are worth 60 minutes.
+      var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+      var testTime=total_time-(seconds);
+      var log = {"username": username, "time": testTime};
+      log["windowOuterHeigh"]=window.outerHeight;
+      log["windowInnerHeigh"]=window.innerHeight;
       // Add keys to variable 'log' - "username" and "time"
       sendLogReturned(log);
-    }
+    };
+    document.getElementById('start-screen').style.display="block";
+    fullScreen();
   });
+
+  var browserPrefixes = ['moz', 'ms', 'o', 'webkit'],
+    isVisible = true; // internal flag, defaults to true
+
+// get the correct attribute name
+function getHiddenPropertyName(prefix) {
+  return (prefix ? prefix + 'Hidden' : 'hidden');
+}
+
+// get the correct event name
+function getVisibilityEvent(prefix) {
+  return (prefix ? prefix : '') + 'visibilitychange';
+}
+
+// get current browser vendor prefix
+function getBrowserPrefix() {
+  for (var i = 0; i < browserPrefixes.length; i++) {
+    if(getHiddenPropertyName(browserPrefixes[i]) in document) {
+      // return vendor prefix
+      return browserPrefixes[i];
+    }
+  }
+
+  // no vendor prefix needed
+  return null;
+}
+
+// bind and handle events
+  var browserPrefix = getBrowserPrefix(),
+      hiddenPropertyName = getHiddenPropertyName(browserPrefix),
+      visibilityEventName = getVisibilityEvent(browserPrefix);
+
+  function onVisible() {
+    // prevent double execution
+    if(isVisible) {
+      return;
+    }
+
+    // change flag value
+    isVisible = true;
+  }
+
+  function onHidden() {
+    // prevent double execution
+    if(!isVisible) {
+      return;
+    }
+
+    // change flag value
+    isVisible = false;
+    log["username"] = username;
+    var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
+    var a = hms.split(':'); // split it at the colons
+
+    // minutes are worth 60 seconds. Hours are worth 60 minutes.
+    var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+    var testTime=total_time-(seconds);
+    log["time"]=testTime;
+    log["actionCommited"]="leftPortal";
+    log["windowOuterHeigh"]=window.outerHeight;
+    log["windowInnerHeigh"]=window.innerHeight;
+    sendLogLeft(log);
+  }
+
+  function handleVisibilityChange(forcedFlag) {
+    // forcedFlag is a boolean when this event handler is triggered by a
+    // focus or blur eventotherwise it's an Event object
+    if(typeof forcedFlag === "boolean") {
+      if(forcedFlag) {
+        return onVisible();
+      }
+
+      return onHidden();
+    }
+
+    if(document[hiddenPropertyName]) {
+      return onHidden();
+    }
+
+    return onVisible();
+  }
+
+  document.addEventListener(visibilityEventName, handleVisibilityChange, false);
+
+  // extra event listeners for better behaviour
+  document.addEventListener('focus', function() {
+    handleVisibilityChange(true);
+  }, false);
+
+  document.addEventListener('blur', function() {
+    handleVisibilityChange(false);
+  }, false);
+
+  window.addEventListener('focus', function() {
+      handleVisibilityChange(true);
+  }, false);
+
+  window.addEventListener('blur', function() {
+    handleVisibilityChange(false);
+  }, false);
+
+
+  window.onresize = function() {
+    if ((window.outerHeight - window.innerHeight) > 100) {
+      if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement) {
+        log["username"] = username;
+        var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
+        var a = hms.split(':'); // split it at the colons
+
+        // minutes are worth 60 seconds. Hours are worth 60 minutes.
+        var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+        var testTime=total_time-(seconds);
+        log["time"]=testTime;
+        log["actionCommited"]="inspectElement";
+        log["windowOuterHeigh"]=window.outerHeight;
+        log["windowInnerHeigh"]=window.innerHeight;
+        sendLogLeft(log);
+      }
+    }
+  }
 
 </script>

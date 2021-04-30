@@ -31,6 +31,7 @@ urlpatterns = [
     path('answered', views.mark_as_answered, name="answered"),
     path('unanswered', views.mark_as_unanswered, name="unanswered"),
 
+    path('log', views.log_view, name="log_view"),
 
     path('question-portal/<int:page>', views.question_making_page, name="questionportal"),
     path('post-question', views.post_question, name="post_question"),
