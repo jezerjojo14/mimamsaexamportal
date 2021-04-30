@@ -60,3 +60,9 @@ class AnswerFiles(models.Model):
     answer_instance = models.ForeignKey(Answer, on_delete=models.CASCADE)
     answer_filename = models.TextField()
     page_no = models.IntegerField()
+
+class Fishylog(models.Model):
+    user_name = models.ForeignKey(User.username, on_delete=models.CASCADE)
+    popup_opentime = models.datetime()
+    actionCommited = models.TextField()
+    popup_closetime = models.datetime(default = null)
