@@ -31,7 +31,7 @@ from django.utils import timezone
 import datetime
 import pytz
 
-from .models import User, Team, Ordering, GlobalVariables, Question, Answer, AnswerFiles
+from .models import User, Team, Ordering, GlobalVariables, Question, Answer, AnswerFiles, Fishylog
 
 from PIL import Image
 import io
@@ -570,7 +570,19 @@ def open_test(request):
 @login_required
 def log_view(request):
     post_data = json.loads(request.body.decode("utf-8"))
-    print(post_data)
+    #{'username': 'parth', 'time': 690533, 'actionCommited': 'leftPortal', 'windowOuterHeight': 850, 'windowInnerHeight': 864}
+    time = post_data['time']
+    timechange = datetime.timedelta(seconds=time)
+    teststart = datetime.now() #to be replaced with start datetime of test
+    savetime = teststart + timechange
+    if "actionCommited" in post_data:
+        b = Fishylog(username = post_data['username'],popup_opentime = savetime, actionCommited=post_data['actionCommited'])
+        b.save()
+    else:
+        n = Fishylog.objects.count()
+        lastentry = Fishylog.objects.get(id=n)
+        lastentry.popup_closetime = savetime
+        lastentry.save()
 
     return HttpResponse(status=201)
 
