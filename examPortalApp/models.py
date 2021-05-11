@@ -63,7 +63,7 @@ class AnswerFiles(models.Model):
     page_no = models.IntegerField()
 
 class Fishylog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    username = models.TextField()
     popup_opentime = models.DateTimeField()
     actionCommited = models.TextField()
     popup_closetime = models.DateTimeField(null=True, default=None)
