@@ -1,6 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&display=swap');
 
 
+#videos-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.video-container {
+  width: 300px;
+  height: 200px;
+  background-color: black;
+  margin: 20px;
+}
+
+video {
+  max-width: 100%;
+}
+
 .main-btn {
   /* padding: 30px; */
   border: 1px solid #777;
@@ -8,6 +25,22 @@
   flex-grow: 1;
   flex-basis: 1px;
   margin: 30px;
+}
+
+
+#chat-area {
+  margin-left: 32px;
+  width: 90%;
+}
+
+#chat-log {
+  overflow-y: auto;
+  height: 200px;
+  white-space: pre-wrap;      /* CSS3 */
+  white-space: -moz-pre-wrap; /* Firefox */
+  white-space: -pre-wrap;     /* Opera <7 */
+  white-space: -o-pre-wrap;   /* Opera 7 */
+  word-wrap: break-word;      /* IE */
 }
 
 
@@ -168,8 +201,12 @@ h2{
   border:1px solid #aaa;
 }
 
+.sidenav > * {
+  width: 70vw;
+}
+
 .opened {
- width: calc(10% + 260px);
+ width: 70vw;
 }
 
 .closed {
@@ -205,13 +242,17 @@ h2{
 
 @media screen and (max-width: 600px) {
   .opened {
-    width: 70%
+    width: 100vw;
   }
   .s-header {
     height: 80px;
   }
   #logo img {
     height: 60px;
+  }
+
+  .sidenav > * {
+    width: 100vw;
   }
 
   /* header-menu */
@@ -222,6 +263,10 @@ h2{
   .header-center {
     display: none;
   }
+}
+
+.closebtn {
+  width: initial;
 }
 
 /* Question navigation  */
@@ -288,7 +333,7 @@ h2{
   font-size: 24px;
 }
 
-.sidenav .time {
+.sidepane-timer {
   padding: 8px 8px 8px 32px;
 }
 

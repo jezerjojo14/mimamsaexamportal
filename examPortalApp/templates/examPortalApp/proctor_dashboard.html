@@ -1,0 +1,148 @@
+{% extends 'examPortalApp/body.html' %}
+{% block script %}
+<script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+<script type="text/javascript">
+  var peer = new Peer(id="{{user.username}}");
+  var teams = [{% for team in teams %}{% if forloop.counter0 != 0 %},{% endif %}"{{team.team_id}}"{% endfor %}]
+  var userOrderList = {{others_peer_id|safe}};
+  console.log(userOrderList);
+  peer.on('call', function(call) {
+    console.log("received call");
+    navigator.mediaDevices.getUserMedia({video: false, audio: false})
+      .then(function(stream) {
+        console.log("call.peer: "+call.peer);
+        for (var i = 0; i < teams.length; i++) {
+          if (call.peer.includes(teams[i])) {
+            console.log("decided to answer call");
+            call.answer(null); // Answer the call with an A/V stream.
+            call.on('stream', function(remoteStream) {
+              // Show stream in some video/canvas element.
+              document.getElementById('video-'+call.peer).srcObject=remoteStream;
+            });
+          }
+        }
+      })
+      .catch(function(err) {
+        console.log('Failed to get local stream' ,err);
+      });
+  });
+
+  {% for team in teams %}
+    {% for ordering in team.ordering_set %}
+      order_index={{ordering.order_index}};
+      console.log("Calling user "+order_index);
+      navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: false,
+        width: { max: 640 },
+        height: { max: 400 },
+        frameRate: { max: 30 },
+      })
+        .then(function(stream) {
+          console.log("Passing function to getUserMedia");
+          var call = peer.call("{{team.team_id}}-"+order_index, stream);
+          console.log("yeah");
+          call.on('stream', function(remoteStream) {
+            // Show stream in some video/canvas element.
+            console.log("got stream response");
+            document.getElementById('video-{{team.team_id}}-'+order_index).srcObject=remoteStream;
+          });
+          console.log("huh?");
+          stream.getTracks().forEach(track => track.stop());
+        })
+        .catch(function(err) {
+          console.log('Failed to get local stream' ,err);
+        });
+    {% endfor %}
+  {% endfor %}
+</script>
+<script type="text/javascript">
+
+function makeid(length) {
+  var result = [];
+  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
+  }
+  return result.join('');
+}
+function submitChatInput(e) {
+  if (e.keyCode === 13) {  // enter, return
+    document.querySelector('#chatbox-{{team.team_id}}-submit').click();
+  }
+}
+
+  {% for team in teams %}
+  const chatSocket{{team.sequence}} = new WebSocket(
+    'ws://'
+    + window.location.host
+    + '/ws/chat/{{team.sequence}}/'
+  );
+
+  var sentTexts{{team.sequence}} =[]
+
+  document.querySelector('.chatbox-{{team.team_id}}-logs').lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
+
+  chatSocket{{team.sequence}}.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    console.log(data);
+    if (sentTexts{{team.sequence}}.includes(data.code)) {
+      document.querySelector('.'+data.code).style.color="black";
+      const index = sentTexts{{team.sequence}}.indexOf(data.code);
+      sentTexts{{team.sequence}}.splice(index, 1);
+    }
+    else {
+      document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML += ('<div class="'+data.code+'"><b>'+data.username+'</b>: '+ data.message + '</div>');
+      document.querySelector('.'+data.code).scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  };
+
+  chatSocket{{team.sequence}}.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+  };
+
+  var chatInput{{team.sequence}}=document.querySelector('#chatbox-{{team.team_id}}-input');
+  chatInput{{team.sequence}}.addEventListener("keyup", submitChatInput);
+
+  document.querySelector('#chatbox-{{team.team_id}}-submit').onclick = function(e) {
+    const message = messageInputDom.value;
+    console.log(message);
+    if (message.trim()) {
+      code=makeid(8);
+      document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML += ('<div class="'+code+'" style="color: #888"><b>{{user.username}}</b>: '+ message.trim() + '</div>');
+      document.querySelector('.'+code).scrollIntoView();
+      chatSocket{{team.sequence}}.send(JSON.stringify({
+        "message": message.trim(),
+        "username":"{{user.username}}",
+        "code": code
+      }));
+    }
+    chatInput{{team.sequence}}.value = '';
+    sentTexts{{team.sequence}}.push(code);
+  };
+  {% endfor %}
+</script>
+
+{% endblock %}
+
+{% block content %}
+  {% for team in teams %}
+    <h2>{{team.team_id}}</h2>
+    <div class="{{team.team_id}}">
+      {% for ordering in team.ordering_set %}
+      <div class="video-container-{{team.team_id}}-{{ordering.order_index}}">
+        <video autoplay id="video-{{team.team_id}}-{{ordering.order_index}}">
+        </video>
+        <br>{{ordering.user_instance.username}}<br><br>
+      </div>
+      {% endfor %}
+      <div class="chatbox-{{team.team_id}}">
+        <div class="chatbox-{{team.team_id}}-logs">
+        </div>
+        <input id="chatbox-{{team.team_id}}-input" type="text" name="" value=""><br>
+        <input id="chatbox-{{team.team_id}}-submit" type="button" value="Send">
+      </div>
+    </div>
+  {% endfor %}
+{% endblock %}

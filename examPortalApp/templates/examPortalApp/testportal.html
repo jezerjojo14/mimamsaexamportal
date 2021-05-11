@@ -4,7 +4,7 @@
 
 {% block script %}
   {% include 'examPortalApp/include_modules/testportal_js.html' %}
-  {% include 'examPortalApp/include_modules/proctoring_js.html' %}
+  <!-- {% include 'examPortalApp/include_modules/proctoring_js.html' %} -->
 {% endblock %}
 
 {% block header_center %}
@@ -13,21 +13,45 @@
 
 {% block sidepane %}
 <div class="sidepane-timer">
+  <h3>Timer:</h3>
   <div class="time"></div>
   <br><hr><br>
 </div>
 <div id="members">
-  <h3>Team id:</h3>
+  <h3>Team ID:</h3>
   <h4>{{team.team_id}}</h4>
-  <br>
+  <!-- <br>
   <h3>Team members:</h3>
   <div class="members">
     {% for member in team.users.all %}
     {{member}}<br>
     {% endfor %}
-  </div>
+  </div> -->
+  <br><hr><br>
 </div>
-<br><hr><br>
+<div id="video-call-area" style="text-align: center;">
+  <h3>Video Call</h3>
+  <br>
+  <div id="videos-container" class="video">
+    {% for member in team.users.all %}
+    {% if forloop.counter == 3 %}
+    <hr style="border-color: #fff0; flex-basis: 100%; margin: 0">
+    {% endif %}
+    <div class="video-container" id="video-container{{team.team_id}}-{{forloop.counter}}">
+      <video autoplay id="video-{{team.team_id}}-{{forloop.counter}}">
+      </video>
+    </div>
+    {% endfor %}
+  </div>
+  <br><hr><br>
+</div>
+<div id="chat-area">
+  <h3>Chat:</h3>
+  <div id="chat-log"></div><br>
+  <input id="chat-message-input" type="text" maxlength="200"><br>
+  <input id="chat-message-submit" type="button" value="Send">
+  <br><hr><br>
+</div>
 <!-- <ul class="list-group">
   <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
   <li><a href="{% url 'instructions' %}" target="_blank">How to use the portal</a></li>
@@ -36,8 +60,8 @@
 <br><hr><br> -->
 <div style="color: #777; padding: 20px; font-size: 14px">
   The making of this portal was led by Jezer Jojo with the immense support of Parth Gupte and Samarth Pardhi, along with contributions from Venkata Sai Sreyas Adury and Ipsa Bezbarua
+  <br><br><br>
 </div>
-<br><br><br>
 {% endblock %}
 
 {% block content %}
@@ -67,7 +91,7 @@
             {% if forloop.counter == 16 %}
             <span style="font-size: 24px">Chemistry:</span>
             {% endif %}
-            <button id="q-btn-{{forloop.counter}}" class='nav-btn btn {% if forloop.counter == QNum %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
+            <button id="q-btn-{{forloop.counter}}" class='nav-btn btn {% if forloop.counter == 1 %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>
           {% endfor %}
         </div>
         <!-- <div class="sync-container">
@@ -162,11 +186,14 @@
     </div>
   </div>
 
-  <!-- {% if QType == 's' %}
+  {% include  'examPortalApp/include_modules/chat_js.html'  %}
+  {% include  'examPortalApp/include_modules/video_js.html'  %}
+
+  <!-- { if QType == 's' }
   <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
-  {% elif QType == 't' %}
-    {% if selected_options|length != 0 %}
+  { elif QType == 't' }
+    { if selected_options|length != 0 }
     <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
-    {% endif %}
-  {% endif %} -->
+    { endif }
+  { endif } -->
 {% endblock %}

@@ -31,7 +31,7 @@ from django.utils import timezone
 import datetime
 import pytz
 
-from .models import User, Team, Ordering, GlobalVariables, Question, Answer, AnswerFiles
+from .models import *
 
 from PIL import Image
 import io
@@ -41,11 +41,10 @@ from threading import *
 from django.db.models.functions import Length
 from django.db.models import Count, Sum, Case, When, IntegerField
 from django.contrib import messages
-
+import os
+from django.conf import settings
 GB = 1024 ** 3
 config = TransferConfig(multipart_threshold=0.1*GB)
-
-
 
 def correction_subject(request):
     if request.user.username=='admin':
@@ -227,10 +226,11 @@ def toggle_graded_confirm(request):
 #     return HttpResponse(str(list(teams)))
 
 def db_test(request):
-    t=Team.objects.get(sequence="10013")
-    a=Answer.objects.filter(team_instance=t, question_instance__question_subject="Biology").aggregate(total_marks=Sum('marks'))['total_marks']
+    t=Team.objects.get(sequence="10276")
+    a=Answer.objects.get(team_instance=t, question_instance__question_number=7)
+    # a=Answer.objects.filter(team_instance=t, question_instance__question_subject="Biology").aggregate(total_marks=Sum('marks'))['total_marks']
     print(len(Answer.objects.filter(team_instance=t, question_instance__question_subject="Biology")))
-    return HttpResponse(str(a))
+    return HttpResponse(str(a.answer_content)+"\n"+str(AnswerFiles.objects.filter(answer_instance=a).count()))
 
 def csrf_failure(request, reason=""):
     return render(request, "500.html")
@@ -443,9 +443,12 @@ def open_test(request):
     test_start += datetime.timedelta(seconds=team.extra_time)
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time)
 
+    if request.user.user_type!="participant":
+        return HttpResponseRedirect(reverse("dashboard"))
+
     #If test hasn't started yet, show the waiting page,
-    #If it has started but hasn't ended, show the testportal
     #If it's ended show the "Test ended" page
+    #If it has started but hasn't ended, show the testportal
 
     if now<test_start:
         template_var= {
@@ -499,73 +502,31 @@ def open_test(request):
 
     template_var["review_questions"]=review_questions
     template_var["answered_questions"]=answered_questions
-    template_var["answer_status"]=a.status
     template_var["team"]=team
     template_var["QNum"]=qnumber
     template_var["QCount"]=q_count
 
+    room_model=ChatRoom.objects.get_or_create(team_instance=team, defaults={'chatlog_start': 0})[0]
+    chatlog_start=room_model.chatlog_start
+    chat_logs=list(ChatLog.objects.filter(chatroom_instance=room_model).order_by('log_number').values_list('user_instance__username', 'message'))
+    chat_logs=chat_logs[chatlog_start:]+chat_logs[0:chatlog_start]
 
-    if q.question_type=='s':
-        uploaded_files=list(AnswerFiles.objects.filter(answer_instance=a).order_by('page_no').values_list('answer_filename', flat=True))
+    template_var["chat_logs"]=chat_logs
 
-        template_var["QType"]='s'
-        template_var["content"]=q.question_content
-        template_var["labels"]=[]
-        template_var["options"]=[]
-        template_var["selected_options"]=[]
-        template_var["uploaded_files"]=uploaded_files
-        template_var["answer_text"]=a.answer_content
-        template_var["answer_text_empty"]=(len(a.answer_content.strip())==0)
+    peer_order=list(Ordering.objects.filter(team_instance=team).exclude(user_instance=request.user).order_by('order_index').values_list('order_index', flat=True))
+
+    template_var["self_peer_id"]=Ordering.objects.get(user_instance=request.user).order_index
+    template_var["others_peer_id"]=peer_order
+
+    return render(request, "examPortalApp/testportal.html", template_var)
 
 
-        return render(request, "examPortalApp/testportal.html", template_var)
-
-    if q.question_type=='m':
-        if a.answer_content=="":
-            a.answer_content=str([])
-            a.save()
-        selected_options=ast.literal_eval(a.answer_content)
-        content=ast.literal_eval(q.question_content)
-        setup=content[0]
-        option_sets=[]
-        labels=[]
-        i=1
-        while i<len(content):
-            #option_sets=[["label1", "opt1_1", "opt2_1", "opt3_1", "opt4_1"], ["label2", "opt1_2", "opt2_2", "opt3_2", "opt4_2"]]
-            option_sets+=[[content[i][0]]+content[i][1]]
-            i+=1
-
-        template_var["QType"]='m'
-        template_var["content"]=setup
-        template_var["labels"]=labels
-        template_var["options"]=option_sets
-        template_var["selected_options"]=selected_options
-        template_var["uploaded_files"]=[]
-        template_var["answer_text"]=""
-        template_var["answer_text_empty"]=True
-
-        return render(request, "examPortalApp/testportal.html", template_var)
-
-    if q.question_type=='t':
-        uploaded_files=list(AnswerFiles.objects.filter(answer_instance = a).order_by('page_no').values_list('answer_filename', flat=True))
-        if a.answer_content=="":
-            a.answer_content=str([[], ""])
-            a.save()
-        selected_option=(ast.literal_eval(a.answer_content))[0]
-        content=ast.literal_eval(q.question_content)
-        setup=content[0]
-        options=content[1]
-
-        template_var["QType"]='t'
-        template_var["content"]=setup
-        template_var["labels"]=[]
-        template_var["options"]=options
-        template_var["selected_options"]=selected_option
-        template_var["uploaded_files"]=uploaded_files
-        template_var["answer_text"]=(ast.literal_eval(a.answer_content))[1]
-        template_var["answer_text_empty"]=(len((ast.literal_eval(a.answer_content))[1].strip())==0)
-
-        return render(request, "examPortalApp/testportal.html", template_var)
+@login_required
+def proctor_view(request):
+    if request.user.user_type!="proctor":
+        return HttpResponseRedirect(reverse("dashboard"))
+    teams=request.user.proctored_teams
+    return render(request, "examPortalApp/proctor_dashboard.html", {"teams": teams})
 
 @login_required
 def log_view(request):
@@ -611,8 +572,6 @@ def get_question(request):
         j["answer_text"]=a.answer_content
 
         answerHTML=render_to_string("examPortalApp/include_modules/answer_section.html", j)
-        print({"question":j["content"], "answer":answerHTML})
-        print(JsonResponse({"question":j["content"], "answer":answerHTML}))
         return JsonResponse({"question":j["content"], "answer":answerHTML})
 
     if q.question_type=='m':

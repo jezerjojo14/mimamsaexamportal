@@ -24,7 +24,6 @@
     }
 
     function startTimer(datetime, displays) {
-      console.log(displays);
       var diff0,
         diff,
         minutes,
@@ -79,14 +78,12 @@
     window.onload = function () {
       var d = new Date();
       var now = new Date(Date.now());
-      console.log(now);
       d.setUTCDate({{ UTCDate }}+(now.getUTCDate()-{{UTCDateNow}}));
       d.setUTCMonth({{ UTCMonth }}-1+(now.getUTCMonth()-{{UTCMonthNow}}));
       d.setUTCFullYear({{ UTCYear }}+(now.getUTCFullYear()-{{UTCYearNow}}));
       d.setUTCHours({{ UTCHours }}+(now.getUTCHours()-{{UTCHoursNow}}));
       d.setUTCMinutes({{ UTCMinutes }}+(now.getUTCMinutes()-{{UTCMinutesNow}}));
       d.setUTCSeconds({{ UTCSeconds }}+(now.getUTCSeconds()-{{UTCSecondsNow}}));
-      console.log(d);
       var timer_display = document.querySelectorAll('.time');
       startTimer(d.getTime(), timer_display);
       // var que_display = document.querySelector('#nav-questions')
@@ -94,7 +91,7 @@
     };
 
     var currentQNo;
-
+    var answer_text="";
 
     function getQuestion(questionNumber) {
       if (!unsaved) {
@@ -109,22 +106,32 @@
           body: JSON.stringify({"qnumber":questionNumber})
         })
         .then((response) => {
-          console.log(response);
           return response.json()
         })
         .then((data) => {
+
           document.getElementById('q-content').innerHTML=data["question"];
           document.querySelector('.answer-section').innerHTML=data["answer"];
+          if (document.getElementById('answer-textarea')) {
+            answer_text=document.getElementById('answer-textarea').value;
+          }
+          else {
+            answer_text="";
+          }
           document.getElementById("q-btn-"+currentQNo).classList.remove('active');
           document.getElementById("q-btn-"+currentQNo).classList.remove('visited');
           currentQNo=questionNumber;
           document.getElementById("q-btn-"+currentQNo).classList.add('active');
           document.getElementById("q-btn-"+currentQNo).classList.add('visited');
-          console.log(currentQNo);
           let forms=document.querySelectorAll(".answer-section-form");
           for (var i = 0; i < forms.length; i++) {
             forms[i].innerHTML='<input type="hidden" name="csrfmiddlewaretoken" value="'+"{{csrf_token}}"+'">'+forms[i].innerHTML;
           }
+          // markQuestion.send(JSON.stringify({
+          //   "qnumber": currentQNo,
+          //   "status" : "visit",
+          //   "username" : "{{user.username}}",
+          // }));
           initQuestionJS();
           document.getElementById('loading-overlay').style.display="none";
         })
@@ -152,6 +159,8 @@
         // Qactive(currentQNo);
       }
     }
+
+
 
     function initQuestionJS() {
       if (currentQNo == 1) {
@@ -187,6 +196,7 @@
           }
         };
       }
+
       document.getElementById('img-submit-popup-continue').onclick=()=>{
         document.getElementById('img-submit-popup-continue').innerHTML="Processing request...";
         document.getElementById('img-submit-popup-continue').style.opacity=0.5;
@@ -316,6 +326,10 @@
     document.addEventListener("DOMContentLoaded", () => {
       currentQNo=1;
       initQuestionJS();
+      document.getElementById('chat-log').innerHTML="";
+      {% for log in chat_logs %}
+      document.getElementById('chat-log').innerHTML+="<b>{{log.0}}:</b>"+" {{log.1}}"+"<br>";
+      {% endfor %}
       getQuestion(1);
     });
 
@@ -373,9 +387,69 @@
       }
     }
 
+    const roomName='{{team.sequence}}';
+    const markQuestion = new WebSocket(
+      'ws://'
+      + window.location.host
+      + '/ws/mark-question/'
+      + roomName
+      + '/'
+    );
+
+    markQuestion.onmessage = function(e) {
+      console.log("received data from server");
+      const data = JSON.parse(e.data);
+      console.log(data);
+      if (data.status=="answered") {
+        document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-review");
+        document.getElementById('q-btn-'+data.qnumber).classList.add("btn-answered");
+        if (currentQNo==data.qnumber) {
+          if (document.querySelector('.mark-answered')) {
+            document.querySelector('.mark-answered').classList.add("marked");
+            document.querySelector('.mark-answered').innerHTML="Marked as Answered";
+          }
+          document.querySelector('.mark-review').classList.remove("marked");
+          document.querySelector('.mark-review').innerHTML="Mark for Review";
+          initQuestionJS();
+        }
+      }
+      else if (data.status=="review") {
+        document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-answered");
+        document.getElementById('q-btn-'+data.qnumber).classList.add("btn-review");
+        if (currentQNo==data.qnumber) {
+          if (document.querySelector('.mark-answered')) {
+            document.querySelector('.mark-answered').classList.remove("marked");
+            document.querySelector('.mark-answered').innerHTML="Mark as Answered";
+          }
+          document.querySelector('.mark-review').classList.add("marked");
+          document.querySelector('.mark-review').innerHTML="Marked for Review";
+          initQuestionJS();
+        }
+      }
+      else if (data.status=="unanswered") {
+        document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-answered");
+        document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-review");
+        if (currentQNo==data.qnumber) {
+          if (document.querySelector('.mark-answered')) {
+            document.querySelector('.mark-answered').classList.remove("marked");
+            document.querySelector('.mark-answered').innerHTML="Mark as Answered";
+          }
+          document.querySelector('.mark-review').classList.remove("marked");
+          document.querySelector('.mark-review').innerHTML="Mark for Review";
+          initQuestionJS();
+        }
+      }
+
+    };
+
+    markQuestion.onclose = function(e) {
+      console.error('Test socket closed unexpectedly');
+    };
+
     function markAnswered() {
       if (!unsaved)
       {
+
         document.getElementById('loading-overlay').style.display="block";
         let csrftoken = getCookie('csrftoken');
         fetch("{% url 'answered' %}", {
@@ -390,6 +464,12 @@
           document.getElementById('q-btn-'+currentQNo).classList.remove("btn-review");
           document.getElementById('q-btn-'+currentQNo).classList.add("btn-answered");
           getQuestion(currentQNo);
+          markQuestion.send(JSON.stringify({
+            "qnumber": currentQNo,
+            "status" : "answered",
+            "username" : "{{user.username}}",
+          }));
+          console.log("sent data from browser to server");
         })
       }
       else {
@@ -417,6 +497,11 @@
           document.getElementById('q-btn-'+currentQNo).classList.remove("btn-answered");
           document.getElementById('q-btn-'+currentQNo).classList.add("btn-review");
           getQuestion(currentQNo);
+          markQuestion.send(JSON.stringify({
+            "qnumber": currentQNo,
+            "status" : "review",
+            "username" : "{{user.username}}",
+          }));
         })
       }
       else {
@@ -443,6 +528,11 @@
           document.getElementById('q-btn-'+currentQNo).classList.remove("btn-answered");
           document.getElementById('q-btn-'+currentQNo).classList.remove("btn-review");
           getQuestion(currentQNo);
+          markQuestion.send(JSON.stringify({
+            "qnumber": currentQNo,
+            "status" : "unanswered",
+            "username" : "{{user.username}}",
+          }));
         })
       }
       else {
@@ -454,8 +544,6 @@
     }
 
     function viewImage(ele) {
-      console.log(ele);
-      console.log(ele.parentElement);
       document.getElementById('view-img-popup').style.display = "block";
       document.getElementById('answer-img-container').innerHTML = "Loading... <br>";
       page_no=ele.parentElement.dataset.pageno;
@@ -613,7 +701,7 @@
 //       var input1 = document.createElement('input');
 //       input1.type = 'hidden';
 //       input1.name = "qnumber";
-//       input1.value = "{{ QNum }}";
+//       input1.value = "{ QNum }";
 //       form.appendChild(input1);
 //       var input2 = document.createElement('input');
 //       input2.type = 'file';
@@ -637,20 +725,22 @@
 
   function imgFormSubmit(e) {
     e.preventDefault();
-    {% if answer_text_empty %}
-    grayer('img-form', true);
-    document.getElementById('img-form').submit();
-    document.getElementById('img-form-submit-btn').value='Processing';
-    document.getElementById('img-form-submit-btn').disabled=true;
-    {% else %}
-    openImgSubmitPopup();
-    return false;
-    {% endif %}
+    if (answer_text=="") {
+      grayer('img-form', true);
+      document.getElementById('img-form').submit();
+      document.getElementById('img-form-submit-btn').value='Processing';
+      document.getElementById('img-form-submit-btn').disabled=true;
+    }
+    else {
+      openImgSubmitPopup();
+      return false;
+    }
   }
+
 
   function txtFormSubmit(e) {
     e.preventDefault();
-    if ({{uploaded_files|length}}==0) {
+    if (!document.getElementById('file1')) {
       document.getElementById('loading-overlay').style.display="block";
       let form=document.getElementById('txt-form');
       fetch(form.action, {

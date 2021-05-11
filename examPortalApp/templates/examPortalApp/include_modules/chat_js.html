@@ -1,0 +1,68 @@
+<script type="text/javascript">
+  const roomName='{{team.sequence}}';
+  const chatSocket = new WebSocket(
+    'ws://'
+    + window.location.host
+    + '/ws/chat/'
+    + roomName
+    + '/'
+  );
+
+  var sentTexts =[]
+
+  document.querySelector('#chat-log').lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
+
+  chatSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    console.log(data);
+    if (sentTexts.includes(data.code)) {
+      document.querySelector('.'+data.code).style.color="black";
+      const index = sentTexts.indexOf(data.code);
+      sentTexts.splice(index, 1);
+    }
+    else {
+      document.querySelector('#chat-log').innerHTML += ('<div class="'+data.code+'"><b>'+data.username+'</b>: '+ data.message + '</div>');
+      document.querySelector('.'+data.code).scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  };
+
+  chatSocket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+  };
+
+  var chatInput=document.querySelector('#chat-message-input');
+  function submitChatInput(e) {
+    if (e.keyCode === 13) {  // enter, return
+      document.querySelector('#chat-message-submit').click();
+    }
+  }
+  chatInput.addEventListener("keyup", submitChatInput);
+
+  function makeid(length) {
+    var result = [];
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
+    }
+    return result.join('');
+  }
+
+  document.querySelector('#chat-message-submit').onclick = function(e) {
+    const messageInputDom = document.querySelector('#chat-message-input');
+    const message = messageInputDom.value;
+    console.log(message);
+    if (message.trim()) {
+      code=makeid(8);
+      document.querySelector('#chat-log').innerHTML += ('<div class="'+code+'" style="color: #888"><b>{{user.username}}</b>: '+ message.trim() + '</div>');
+      document.querySelector('.'+code).scrollIntoView();
+      chatSocket.send(JSON.stringify({
+        "message": message.trim(),
+        "username":"{{user.username}}",
+        "code": code
+      }));
+    }
+    messageInputDom.value = '';
+    sentTexts.push(code);
+  };
+</script>

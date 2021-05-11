@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <th>College</th>
+        <th>Team Code</th>
+        <th>Participant 1</th>
+        <th>Participant 2</th>
+        <th>Participant 3</th>
+        <th>Participant 4</th>
+      </tr>
+      {% for row in l %}
+      <tr>
+        {% for d in row %}
+        <td>{{d}}{% if d|length == 0 %}-{% endif %}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>

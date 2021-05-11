@@ -1,0 +1,60 @@
+<script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+<script type="text/javascript">
+  var peer = new Peer(id="{{team.team_id}}-{{self_peer_id}}");
+  var userOrderList = {{others_peer_id|safe}};
+  console.log(userOrderList);
+  peer.on('call', function(call) {
+    console.log("received call");
+    navigator.mediaDevices.getUserMedia({video: true, audio: true})
+      .then(function(stream) {
+        console.log("call.peer: "+call.peer);
+        if (call.peer.includes("{{team.team_id}}-")) {
+          console.log("decided to answer call");
+          call.answer(stream); // Answer the call with an A/V stream.
+          call.on('stream', function(remoteStream) {
+            // Show stream in some video/canvas element.
+            document.getElementById('video-'+call.peer).srcObject=remoteStream;
+          });
+        }
+      })
+      .catch(function(err) {
+        console.log('Failed to get local stream' ,err);
+      });
+  });
+
+  navigator.mediaDevices.getUserMedia({video: true, audio: true})
+    .then(function(stream) {
+      // Show stream in some video/canvas element.
+      document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').srcObject=stream;
+    })
+    .catch(function(err) {
+      console.log('Failed to get local stream' ,err);
+    });
+
+  for (var i = 0; i < userOrderList.length; i++) {
+    order_index=userOrderList[i]
+    console.log("Calling user "+order_index);
+    navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+      width: { max: 640 },
+      height: { max: 400 },
+      frameRate: { max: 30 },
+      facingMode: { exact: "user" }
+    })
+      .then(function(stream) {
+        console.log("Passing function to getUserMedia");
+        var call = peer.call("{{team.team_id}}-"+order_index, stream);
+        console.log("yeah");
+        call.on('stream', function(remoteStream) {
+          // Show stream in some video/canvas element.
+          console.log("got stream response");
+          document.getElementById('video-{{team.team_id}}-'+order_index).srcObject=remoteStream;
+        });
+        console.log("huh?");
+      })
+      .catch(function(err) {
+        console.log('Failed to get local stream' ,err);
+      });
+  }
+</script>

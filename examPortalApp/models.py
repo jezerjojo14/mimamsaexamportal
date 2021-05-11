@@ -11,6 +11,8 @@ class User(AbstractUser):
     passwordSet = models.BooleanField(default=False)
     #Session key of each user is stored. If a user tries to login again in another device (start another session), they get logged out from the former device (original session is deleted)
     session_key = models.CharField(max_length=100, null=True)
+    # user types: participant, proctor, admin
+    user_type = models.CharField(max_length=30, default='participant')
 
 #The following two databases update when registration sheets are inputted
 class Team(models.Model):
@@ -21,6 +23,7 @@ class Team(models.Model):
     college = models.CharField(max_length=200)
     zone = models.CharField(max_length=5)
     extra_time = models.IntegerField(default=0)
+    proctor_user = models.ForeignKey(User, null=True, default=None, on_delete=models.SET_NULL, related_name="proctored_teams")
 
 #This database adds an extra datum to each connection between a group and its members expressing the ordering of the users in their teams
 class Ordering(models.Model):
@@ -34,7 +37,6 @@ class Ordering(models.Model):
 class GlobalVariables(models.Model):
     test_start = models.DateTimeField()
     test_end = models.DateTimeField()
-
 
 class Question(models.Model):
     question_number = models.IntegerField(unique=True, null=False)
@@ -55,7 +57,6 @@ class Answer(models.Model):
     marks = models.FloatField(default=-1)
     graded = models.BooleanField(default=False)
 
-
 class AnswerFiles(models.Model):
     answer_instance = models.ForeignKey(Answer, on_delete=models.CASCADE)
     answer_filename = models.TextField()
@@ -66,3 +67,13 @@ class Fishylog(models.Model):
     popup_opentime = models.DateTimeField()
     actionCommited = models.TextField()
     popup_closetime = models.DateTimeField(null=True, default=None)
+
+class ChatRoom(models.Model):
+    team_instance = models.ForeignKey(Team, on_delete = models.CASCADE)
+    chatlog_start = models.IntegerField(default=0)
+
+class ChatLog(models.Model):
+    log_number = models.IntegerField()
+    chatroom_instance = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    user_instance = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.CharField(max_length=200)
