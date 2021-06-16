@@ -91,11 +91,15 @@
 
   // window.addEventListener('load', startup, false);
   document.addEventListener('DOMContentLoaded', ()=>{
-    document.getElementById('open-cam-btn').onclick = ()=>{
-      camStartup();
-    };
-    document.getElementById('upload-photo-btn').onclick = ()=>{
-      uploadWebcamPicture();
-    };
+    if (document.getElementById('open-cam-btn')) {
+      document.getElementById('open-cam-btn').onclick = ()=>{
+        camStartup();
+      };
+    }
+    if (document.getElementById('upload-photo-btn')) {
+      document.getElementById('upload-photo-btn').onclick = ()=>{
+        uploadWebcamPicture();
+      };
+    }
   })
 })();
