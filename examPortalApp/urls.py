@@ -48,6 +48,9 @@ urlpatterns = [
     path('correction/q/<int:question>/p/<int:page>', views.correction_team, name="correction_team"),
     path('correction/q/<int:question>/<str:sequence>', views.correction, name="correction"),
     path('toggle-graded-confirm', views.toggle_graded_confirm, name='toggle_graded_confirm'),
+    path('end-test', views.end_test, name='end_test'),
+
+    path('proctor-dashboard', views.proctor_view, name='proctor_view'),
     # path('auto-correction', views.automated_correction, name="automated_correction"),
 
 ]

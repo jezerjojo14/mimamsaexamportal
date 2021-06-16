@@ -27,6 +27,34 @@ class TestConsumer(WebsocketConsumer):
             self.channel_name
         )
 
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        action = text_data_json['action']
+        # Send message to room group
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': action+'_message'
+            }
+        )
+
+    # Receive message from room group
+    def start_message(self, event):
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({"message": "start"}))
+        user = self.scope["user"]
+        user.started_test=True
+        user.save()
+
+    def end_message(self, event):
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({"message": "end"}))
+        user = self.scope["user"]
+        user.entered_test=False
+        user.started_test=False
+        user.ended_test=True
+        user.save()
+
 
 class LogsConsumer(WebsocketConsumer):
     def connect(self):
@@ -39,6 +67,10 @@ class LogsConsumer(WebsocketConsumer):
             self.channel_name
         )
 
+        user = self.scope["user"]
+        user.entered_test=True
+        user.save()
+
         self.accept()
 
     def disconnect(self, close_code):
@@ -47,6 +79,11 @@ class LogsConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+
+        user = self.scope["user"]
+        user.entered_test=False
+        user.started_test=False
+        user.save()
 
     def receive(self, text_data):
         # Send message to room group

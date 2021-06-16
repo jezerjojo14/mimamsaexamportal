@@ -13,6 +13,10 @@ class User(AbstractUser):
     session_key = models.CharField(max_length=100, null=True)
     # user types: participant, proctor, admin
     user_type = models.CharField(max_length=30, default='participant')
+    active_question = models.IntegerField(default=0)
+    entered_test = models.BooleanField(default=False)
+    started_test = models.BooleanField(default=False)
+    ended_test = models.BooleanField(default=False)
 
 #The following two databases update when registration sheets are inputted
 class Team(models.Model):

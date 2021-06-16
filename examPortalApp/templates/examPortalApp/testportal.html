@@ -4,7 +4,7 @@
 
 {% block script %}
   {% include 'examPortalApp/include_modules/testportal_js.html' %}
-  <!-- {% include 'examPortalApp/include_modules/proctoring_js.html' %} -->
+  {% include 'examPortalApp/include_modules/proctoring_js.html' %}
 {% endblock %}
 
 {% block header_center %}
@@ -31,8 +31,8 @@
 </div>
 <div id="video-call-area" style="text-align: center;">
   <h3>Video Call</h3>
-  <br>
-  <div id="videos-container" class="video">
+  <br id="videos-container-prev-ele">
+  <!-- <div id="videos-container" class="video">
     {% for member in team.users.all %}
     {% if forloop.counter == 3 %}
     <hr style="border-color: #fff0; flex-basis: 100%; margin: 0">
@@ -42,16 +42,10 @@
       </video>
     </div>
     {% endfor %}
-  </div>
+  </div> -->
   <br><hr><br>
 </div>
-<div id="chat-area">
-  <h3>Chat:</h3>
-  <div id="chat-log"></div><br>
-  <input id="chat-message-input" type="text" maxlength="200"><br>
-  <input id="chat-message-submit" type="button" value="Send">
-  <br><hr><br>
-</div>
+
 <!-- <ul class="list-group">
   <li class=""><a href="{% url 'index' %}">Dashboard</a></li>
   <li><a href="{% url 'instructions' %}" target="_blank">How to use the portal</a></li>
@@ -74,7 +68,34 @@
     </ul>
   {% endif %}
 
-  <div class="fluid-container" oncopy="return false" oncut="return false" onpaste="return false">
+  <div id="start-screen" class="popup" style="background-color: #FFFFFF; z-index: 100;">
+    <div class="popup-message" style="width: 80vw">
+      <p>Your proctor will allow you to join the exam once all the members of your team have joined the video call</p>
+      <button id="join-call-btn" style="margin: auto" type="button" onclick="joinCall()">Join Call</button>
+      <div class="start-screen-flex">
+        <div id="videos-container" class="video" style="display: none">
+          {% for member in team.users.all %}
+          {% if forloop.counter == 3 %}
+          <hr style="border-color: #fff0; flex-basis: 100%; margin: 0">
+          {% endif %}
+          <div class="video-container" id="video-container{{team.team_id}}-{{forloop.counter}}">
+            <video autoplay id="video-{{team.team_id}}-{{forloop.counter}}">
+            </video>
+          </div>
+          {% endfor %}
+        </div>
+        <div id="chat-area">
+          <h3>Chat:</h3>
+          <div id="chat-log"></div><br>
+          <input id="chat-message-input" type="text" maxlength="200"><br>
+          <input id="chat-message-submit" type="button" value="Send">
+          <br><hr><br>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="main-content" class="fluid-container" oncopy="return false" oncut="return false" onpaste="return false">
     <div class="row">
       <div class="col-lg-12">
         <div id="nav-questions">
@@ -109,15 +130,16 @@
             <h2>Loading...</h2>
           </div>
         </div>
+        <div id="end-test-display" class="popup" style="background-color: #FFFFFFEC">
+          <div class="popup-message" style="background-color: #0000">
+            <h2>You've voted to end the test. The test will end once all the participants do the same and you'll be redirected. To take back your vote, click below.</h2>
+          </div>
+          <button class="close-popup">Go back and continue writing</button>
+        </div>
         <div id="proctor-warning" class="popup">
           <div id="proctor-warning-message" class="popup-message">
             <p>You've left the portal. Click the button below to confirm when you're back.</p>
             <button id="proctor-warning-close">Click here</button>
-          </div>
-        </div>
-        <div id="start-screen" class="popup" style="background-color: #FFFFFF; z-index: 100;">
-          <div class="popup-message">
-            <p>Click anywhere to enter the exam</p>
           </div>
         </div>
         <div id="img-submit-popup" class="popup">
@@ -147,7 +169,7 @@
             <button class="close-popup">Go back</button>
           </div>
         </div>
-        <!-- <div id="camera-popup" class="popup">
+        <div id="camera-popup" class="popup">
           <div class="popup-message">
             <div class="camera">
               <video id="video">Video stream not available.</video>
@@ -160,7 +182,7 @@
             </div>
             <button class="close-popup" id="close-cam-btn" type="button" name="button">Close</button>
           </div>
-        </div> -->
+        </div>
         <div id="view-img-popup" class="popup">
           <div class="popup-message">
             <div id="answer-img-container">
@@ -180,7 +202,7 @@
         </div>
         <br>
         <div class="finish-div">
-          <button onclick="document.location='{% url 'index' %}'" id="finish-btn" type="button">Leave Test</button>
+          <button id="finish-btn" type="button">End Test</button>
         </div>
       </div>
     </div>
@@ -189,11 +211,5 @@
   {% include  'examPortalApp/include_modules/chat_js.html'  %}
   {% include  'examPortalApp/include_modules/video_js.html'  %}
 
-  <!-- { if QType == 's' }
   <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
-  { elif QType == 't' }
-    { if selected_options|length != 0 }
-    <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
-    { endif }
-  { endif } -->
 {% endblock %}

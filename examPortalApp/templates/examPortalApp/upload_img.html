@@ -1,0 +1,50 @@
+{% extends 'examPortalApp/body.html' %}
+
+{% block script %}
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", ()=>{
+    var openCameraBtn = document.querySelector("#open-cam-btn");
+    if (openCameraBtn) {
+      openCameraBtn.onclick = openCameraPopup;
+    }
+  })
+  function openCameraPopup() {
+    document.getElementById('camera-popup').style.display="block";
+  }
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="camera-popup" class="popup">
+  <div class="popup-message">
+    <div class="camera">
+      <video id="video">Video stream not available.</video>
+    </div>
+    <div><button id="startbutton">Take photo</button></div>
+    <div><button id="upload-photo-btn">Upload photo</button></div>
+    <canvas id="canvas"></canvas>
+    <div class="output">
+      <img id="photo" alt="The screen capture will appear in this box.">
+    </div>
+    <button class="close-popup" id="close-cam-btn" type="button" name="button">Close</button>
+  </div>
+</div>
+<h2>Upload answers as images (PDFs do not work)</h2>
+<div id="img-upload-tab-body" style="display: {% if answer_text != "" %}none{% else %}block{% endif %}">
+  <form class="answer-section-form" id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data" onsubmit="return imgFormSubmit(event);">
+    <label for="id_file"><b>Question number: </b></label>
+    <input id="qnumber" type="number" name="qnumber" min='1' max='{{QCount}}' value="{{qnumber}}">
+    <div class="fieldWrapper" id="fileFieldWrapper">
+      <label for="id_file"><b>Upload answers:</b></label>
+      <br>
+      <input type="file" name="file" required id="id_file" accept="image/*">
+    </div>
+    <input id="img-form-submit-btn" type="submit" name="" value="Upload">
+  </form>
+  <br>
+  <button id="open-cam-btn" type="button">Use webcam</button>
+  <br><br>
+</div>
+
+<script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
+{% endblock %}

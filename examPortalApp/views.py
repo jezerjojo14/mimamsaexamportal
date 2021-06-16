@@ -39,11 +39,12 @@ import io
 import base64
 from threading import *
 from django.db.models.functions import Length
-from django.db.models import Count, Sum, Case, When, IntegerField
+from django.db.models import Count, Sum, Case, When, IntegerField, Max
 from django.contrib import messages
 import os
 from django.conf import settings
 GB = 1024 ** 3
+TOTAL_TEST_TIME = 3600*3
 config = TransferConfig(multipart_threshold=0.1*GB)
 
 def correction_subject(request):
@@ -408,7 +409,19 @@ def logout_view(request):
 # Misc
 
 
+def end_test(request):
+    request.user.ended_test=True
+    request.user.save()
+    team=request.user.team_set.first()
+    if User.objects.filter(team=team).filter(entered_test=True).exclude(ended_test=True).count()==0:
+        team.extra_time=-TOTAL_TEST_TIME
+        return JsonResponse({"end": 1})
+    return JsonResponse({"end": 0})
 
+def undo_end_test(request):
+    request.user.ended_test=False
+    request.user.save()
+    return HttpResponse(status=201)
 
 def dashboard(request):
     if request.user.is_authenticated:
@@ -525,8 +538,9 @@ def open_test(request):
 def proctor_view(request):
     if request.user.user_type!="proctor":
         return HttpResponseRedirect(reverse("dashboard"))
-    teams=request.user.proctored_teams
-    return render(request, "examPortalApp/proctor_dashboard.html", {"teams": teams})
+    team=request.user.proctored_teams.first()
+    print(team)
+    return render(request, "examPortalApp/proctor_dashboard.html", {"team": team})
 
 @login_required
 def log_view(request):
@@ -540,12 +554,18 @@ def log_view(request):
         b = Fishylog(username = post_data['username'],popup_opentime = savetime, actionCommited=post_data['actionCommited'])
         b.save()
     else:
-        n = Fishylog.objects.count()
-        lastentry = Fishylog.objects.get(id=n)
+        # n = Fishylog.objects.count()
+        lastentry = Fishylog.objects.filter(username = post_data['username'], popup_closetime=None).order_by("-popup_opentime").first()
         lastentry.popup_closetime = savetime
         lastentry.save()
 
     return HttpResponse(status=201)
+
+
+@login_required(login_url='/')
+def upload_answer_page(request):
+    q_count = Question.objects.all().count();
+    return render(request, "examPortalApp/upload_img.html", {"qnumber": request.user.active_question, "QCount": q_count})
 
 
 @login_required(login_url='/')
@@ -558,6 +578,8 @@ def get_question(request):
     qnumber = json.loads(request.body.decode("utf-8"))["qnumber"]
     q_count = Question.objects.all().count();
     q_current = 1 if (qnumber is None) else int(qnumber);
+    request.user.active_question = q_current
+    request.user.save()
     try:
         q=Question.objects.get(question_number=qnumber)
     except:

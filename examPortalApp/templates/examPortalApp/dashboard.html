@@ -33,8 +33,12 @@
       <h2 style="text-align: left; padding: 10vw 0 0 10vw">Dashboard</h2>
       <br>
       <p style="padding: 20px; padding: 0 0 10vw 10vw">
-        {% if user.username != 'admin' %}
+        {% if user.user_type == 'participant' %}
         <a href="{% url 'test_no' %}">Open Test</a>
+        <br>
+        {% endif %}
+        {% if user.user_type == 'proctor' %}
+        <a href="{% url 'proctor_view' %}">Proctor dashboard</a>
         <br>
         {% endif %}
         <a href="{% url 'instructions' %}">Exam portal instructions</a>

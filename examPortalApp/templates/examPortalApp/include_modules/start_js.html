@@ -1,0 +1,53 @@
+<script type="text/javascript">
+  (function () {
+    var mainContent;
+    if (typeof roomName === 'undefined') {
+      const roomName='{{team.sequence}}';
+    }
+    const startSocket = new WebSocket(
+      'ws://'
+      + window.location.host
+      + '/ws/test/'
+      + roomName
+      + '/'
+    );
+    document.addEventListener("DOMContentLoaded", ()=>{
+      mainContent=document.getElementById('main-content');
+      document.getElementById('finish-btn').onclick=()=>{
+        fetch("{% url 'end_test' %}", {
+          method: 'POST',
+          headers: {
+            "X-CSRFToken": csrftoken
+          }
+        })
+        .then(response => response.json())
+        .then((data) => {
+          if (data["end"]) {
+            startSocket.send(JSON.stringify({
+              "action": "end"
+            }));
+          }
+        })
+      };
+      mainContent.remove()
+    })
+    startSocket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      if (data["message"] == "start") {
+        var el = document.documentElement;
+        var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
+        rfs.call(el);
+        mainContent.after(document.getElementById('start-screen'));
+        document.getElementById('start-screen').style.display="none";
+        document.getElementById('videos-container').after(document.getElementById('videos-container-prev-ele'));
+        document.getElementById('chat-area').after(document.getElementById('video-call-area'));
+        currentQNo=1;
+        initQuestionJS();
+        getQuestion(1);
+      }
+      else if (data["message"] == "end") {
+        location.reload();
+      }
+    }
+  })();
+</script>

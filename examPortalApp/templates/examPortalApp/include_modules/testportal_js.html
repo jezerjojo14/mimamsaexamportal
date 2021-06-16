@@ -65,13 +65,15 @@
           }
         }
         if ((datetime - Date.now()) <= 0) {
+          console.log(datetime);
+          console.log(Date.now());
           clearInterval(intervalVar);
           location.reload();
         }
       };
       // we don't want to wait a full second before the timer starts
       timer();
-      var intervalVar = setInterval(timer, 1000);
+      var intervalVar = setInterval(timer, 5000);
     };
 
 
@@ -79,7 +81,7 @@
       var d = new Date();
       var now = new Date(Date.now());
       d.setUTCDate({{ UTCDate }}+(now.getUTCDate()-{{UTCDateNow}}));
-      d.setUTCMonth({{ UTCMonth }}-1+(now.getUTCMonth()-{{UTCMonthNow}}));
+      d.setUTCMonth({{ UTCMonth }}+(now.getUTCMonth()-{{UTCMonthNow}}));
       d.setUTCFullYear({{ UTCYear }}+(now.getUTCFullYear()-{{UTCYearNow}}));
       d.setUTCHours({{ UTCHours }}+(now.getUTCHours()-{{UTCHoursNow}}));
       d.setUTCMinutes({{ UTCMinutes }}+(now.getUTCMinutes()-{{UTCMinutesNow}}));
@@ -183,19 +185,19 @@
 
       // testportal
 
-      var syncBtnList=document.querySelectorAll(".sync-btn")
-      for(var i = 0; i < syncBtnList.length; i++) {
-        syncBtnList[i].onclick= ()=>{
-          if (unsaved) {
-            saveChangesPopup(()=>{
-              location.reload();
-            });
-          }
-          else {
-            location.reload();
-          }
-        };
-      }
+      // var syncBtnList=document.querySelectorAll(".sync-btn")
+      // for(var i = 0; i < syncBtnList.length; i++) {
+      //   syncBtnList[i].onclick= ()=>{
+      //     if (unsaved) {
+      //       saveChangesPopup(()=>{
+      //         location.reload();
+      //       });
+      //     }
+      //     else {
+      //       location.reload();
+      //     }
+      //   };
+      // }
 
       document.getElementById('img-submit-popup-continue').onclick=()=>{
         document.getElementById('img-submit-popup-continue').innerHTML="Processing request...";
@@ -278,6 +280,11 @@
         markedBtn.onclick = markUnanswered;
       }
 
+      var openCameraBtn = document.querySelector("#open-cam-btn");
+      if (openCameraBtn) {
+        openCameraBtn.onclick = openCameraPopup;
+      }
+
       document.getElementById('prev').onclick = prevQuestion;
       document.getElementById('next').onclick = nextQuestion;
       var viewImgBtnList = document.querySelectorAll(".view-img-btn");
@@ -323,14 +330,13 @@
       }
     }
 
+
     document.addEventListener("DOMContentLoaded", () => {
-      currentQNo=1;
-      initQuestionJS();
       document.getElementById('chat-log').innerHTML="";
       {% for log in chat_logs %}
       document.getElementById('chat-log').innerHTML+="<b>{{log.0}}:</b>"+" {{log.1}}"+"<br>";
       {% endfor %}
-      getQuestion(1);
+      document.getElementById('start-screen').style.display="block";
     });
 
     function saveChangesPopup(foo) {
@@ -569,7 +575,7 @@
         body: null
       })
         .then(response => {
-          location.reload();
+          getQuestion(currentQNo);
         })
     }
 
@@ -586,7 +592,7 @@
         },
         body: JSON.stringify({"qnumber":currentQNo, "page_no": page_no})
       })
-      location.reload();
+      getQuestion(currentQNo);
     }
 
     async function moveAnswerDown(ele) {
@@ -602,7 +608,7 @@
         },
         body: JSON.stringify({"qnumber":currentQNo, "page_no": page_no})
       })
-      location.reload();
+      getQuestion(currentQNo);
     }
 
     function resetForm(form) {
@@ -650,70 +656,70 @@
     return false;
   }
 
-//   function openCameraPopup() {
-//     document.getElementById('camera-popup').style.display="block";
-//   }
-//
-//   function closeCamPopup(ele) {
-//     closePopup(ele);
-//   }
-//
-//   function b64toBlob(b64Data, contentType, sliceSize) {
-//     contentType = contentType || '';
-//     sliceSize = sliceSize || 512;
-//
-//     var byteCharacters = atob(b64Data);
-//     var byteArrays = [];
-//
-//     for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-//       var slice = byteCharacters.slice(offset, offset + sliceSize);
-//
-//       var byteNumbers = new Array(slice.length);
-//       for (var i = 0; i < slice.length; i++) {
-//         byteNumbers[i] = slice.charCodeAt(i);
-//       }
-//
-//       var byteArray = new Uint8Array(byteNumbers);
-//
-//       byteArrays.push(byteArray);
-//     }
-//
-//   var blob = new Blob(byteArrays, {type: contentType});
-//   return blob;
-// }
-//
-//   function sendWebcamData(data) {
-//     var ImageURL=data
-//     var block = ImageURL.split(";");
-//     // Get the content type of the image
-//     var contentType = block[0].split(":")[1];// In this case "image/gif"
-//     // get the real base64 content of the file
-//     var realData = block[1].split(",")[1];// In this case "R0lGODlhPQBEAPeoAJosM...."
-//
-//     // Convert it to a blob to upload
-//     var blob = b64toBlob(realData, contentType);
-//
-//     var redirect = function(url, method) {
-//       var form = document.createElement('form');
-//       form.method = method;
-//       form.action = url;
-//       form.innerHTML+='{% csrf_token %}';
-//       var input1 = document.createElement('input');
-//       input1.type = 'hidden';
-//       input1.name = "qnumber";
-//       input1.value = "{ QNum }";
-//       form.appendChild(input1);
-//       var input2 = document.createElement('input');
-//       input2.type = 'file';
-//       input2.name = "file";
-//       input2.value = blob;
-//       form.appendChild(input2);
-//       document.body.appendChild(form);
-//       form.submit();
-//     };
-//
-//     redirect('{% url 'upload_answer' %}', 'post');
-//   }
+  function openCameraPopup() {
+    document.getElementById('camera-popup').style.display="block";
+  }
+
+  function closeCamPopup(ele) {
+    closePopup(ele);
+  }
+
+  function b64toBlob(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+      var byteNumbers = new Array(slice.length);
+      for (var i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      var byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+
+  var blob = new Blob(byteArrays, {type: contentType});
+  return blob;
+}
+
+  function sendWebcamData(data) {
+    var ImageURL=data
+    var block = ImageURL.split(";");
+    // Get the content type of the image
+    var contentType = block[0].split(":")[1];// In this case "image/gif"
+    // get the real base64 content of the file
+    var realData = block[1].split(",")[1];// In this case "R0lGODlhPQBEAPeoAJosM...."
+
+    // Convert it to a blob to upload
+    var blob = b64toBlob(realData, contentType);
+
+    var redirect = function(url, method) {
+      var form = document.createElement('form');
+      form.method = method;
+      form.action = url;
+      form.innerHTML+='{% csrf_token %}';
+      var input1 = document.createElement('input');
+      input1.type = 'hidden';
+      input1.name = "qnumber";
+      input1.value = currentQNo;
+      form.appendChild(input1);
+      var input2 = document.createElement('input');
+      input2.type = 'file';
+      input2.name = "file";
+      input2.value = blob;
+      form.appendChild(input2);
+      document.body.appendChild(form);
+      form.submit();
+    };
+
+    redirect('{% url 'upload_answer' %}', 'post');
+  }
 
   function grayer(formId, yesNo) {
     var f = document.getElementById(formId), s, opacity;

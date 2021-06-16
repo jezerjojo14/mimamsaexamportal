@@ -1,5 +1,7 @@
 <script type="text/javascript">
-  const roomName='{{team.sequence}}';
+  if (typeof roomName === 'undefined') {
+    const roomName='{{team.sequence}}';
+  }
   const chatSocket = new WebSocket(
     'ws://'
     + window.location.host
@@ -10,7 +12,11 @@
 
   var sentTexts =[]
 
-  document.querySelector('#chat-log').lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
+  document.addEventListener("DOMContentLoaded", ()=>{
+    if (document.querySelector('#chat-log').lastElementChild) {
+      document.querySelector('#chat-log').lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  });
 
   chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
