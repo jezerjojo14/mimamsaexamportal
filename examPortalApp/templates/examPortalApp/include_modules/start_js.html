@@ -1,9 +1,6 @@
 <script type="text/javascript">
   (function () {
     var mainContent;
-    if (typeof ws_scheme === 'undefined') {
-      const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    }
     if (typeof roomName === 'undefined') {
       const roomName='{{team.sequence}}';
     }
