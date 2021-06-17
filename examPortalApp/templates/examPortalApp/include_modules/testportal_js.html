@@ -394,8 +394,11 @@
     }
 
     const roomName='{{team.sequence}}';
+    if (typeof ws_scheme === 'undefined') {
+      const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    }
     const markQuestion = new WebSocket(
-      'ws://'
+      ws_scheme+'://'
       + window.location.host
       + '/ws/mark-question/'
       + roomName
