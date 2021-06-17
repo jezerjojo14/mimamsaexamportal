@@ -13,3 +13,4 @@ psycopg2_binary==2.8.6
 boto3==1.16
 django-mathfilters==1.0.0
 channels-redis
+supervisor
