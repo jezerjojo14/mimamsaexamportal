@@ -1,6 +1,7 @@
 {% extends 'examPortalApp/body.html' %}
 {% block script %}
 <script type="text/javascript">
+  const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 
   function makeid(length) {
     var result = [];
