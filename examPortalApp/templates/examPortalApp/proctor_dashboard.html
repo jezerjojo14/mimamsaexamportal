@@ -115,9 +115,7 @@
     const videoSignalSocket = new WebSocket(
       ws_scheme+'://'
       + window.location.host
-      + '/ws/video-signal/'
-      + roomName
-      + '/'
+      + '/ws/video-signal/{{team.sequence}}/'
     );
 
     /**
