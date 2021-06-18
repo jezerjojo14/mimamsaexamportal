@@ -15,6 +15,7 @@ class User(AbstractUser):
     user_type = models.CharField(max_length=30, default='participant')
     active_question = models.IntegerField(default=0)
     entered_test = models.BooleanField(default=False)
+    entered_video_call = models.BooleanField(default=False)
     started_test = models.BooleanField(default=False)
     ended_test = models.BooleanField(default=False)
 

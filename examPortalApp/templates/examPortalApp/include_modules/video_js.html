@@ -1,228 +1,159 @@
-<script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.11.0/simplepeer.min.js" integrity="sha512-0f7Ahsuvr+/P2btTY4mZIw9Vl23lS6LY/Y7amdkmUg2dqsUF+cTe4QjWvj/NIBHJoGksOiqndKQuI9yzn2hB0g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript">
+
   function joinCall() {
     document.getElementById('videos-container').style.display="flex";
     document.getElementById('join-call-btn').remove();
-    var peer = new Peer(id="{{team.team_id}}-{{self_peer_id}}", {
-      "host": "ec2-65-0-180-85.ap-south-1.compute.amazonaws.com",
-      "port": "3000",
-      "path": '/peerjs',
-      "config": {
-        iceservers: [
-          {
-            url: 'turn:52.66.187.16:3478',
-            username: 'mimamsa',
-            credential: 'mimamsa',
-          },
-
-          {
-            urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "stun:stun3.l.google.com:19302", "stun:stun3.l.google.com:19302"]
-          }
-        ]
-      },
-      "debug": 3
-    });
-    var userOrderList = {{others_peer_id|safe}};
-    console.log(userOrderList);
 
 
-    function makeCall(stream, userID, responseID) {
-      var call = peer.call(userID, stream);
-      console.log("Calling "+userID);
-      call.on('stream', function(remoteStream) {
-        // Show stream in some video/canvas element.
-        console.log("got stream response from "+responseID);
-        if (responseID!=null) {
-          document.getElementById(responseID).srcObject=remoteStream;
+    const videoSignalSocket = new WebSocket(
+      ws_scheme+'://'
+      + window.location.host
+      + '/ws/video-signal/'
+      + roomName
+      + '/'
+    );
+
+    /**
+     * The stream object used to send media
+     */
+    let localStream = null;
+    /**
+     * All peer connections
+     */
+    let peers = {}
+
+    // redirect if not https
+    if(location.href.substr(0,5) !== 'https')
+        location.href = 'https' + location.href.substr(4, location.href.length - 4)
+
+
+    //////////// CONFIGURATION //////////////////
+
+    /**
+     * RTCPeerConnection configuration
+     */
+    const configuration = {
+      iceservers: [
+        {
+          url: 'turn:52.66.187.16:3478',
+          username: 'mimamsa',
+          credential: 'mimamsa',
+        },
+
+        {
+          urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "stun:stun3.l.google.com:19302", "stun:stun3.l.google.com:19302"]
         }
-      });
+      ]
     }
 
-    navigator.mediaDevices.getUserMedia({
+    /**
+     * UserMedia constraints
+     */
+    let constraints = {
       video: true,
       audio: true,
       width: { max: 640 },
       height: { max: 400 },
       frameRate: { max: 30 },
       facingMode: { exact: "user" }
-    })
-    .then(function(stream) {
-      peer.on('call', function(call) {
-        console.log("received call");
-        if (call.peer.includes("{{team.team_id}}-")) {
-          console.log("decided to answer call");
-          call.answer(stream); // Answer the call with an A/V stream.
-          call.on('stream', function(remoteStream) {
-            // Show stream in some video/canvas element.
-            document.getElementById('video-'+call.peer).srcObject=remoteStream;
-            document.getElementById('video-'+call.peer).controls=true;
-          });
+    }
+
+    /////////////////////////////////////////////////////////
+
+    constraints.video.facingMode = {
+        ideal: "user"
+    }
+
+    // enabling the camera at startup
+    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+        console.log('Received local stream');
+
+        document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').srcObject=stream;
+        localStream = stream;
+
+        init()
+
+    }).catch(e => alert(`getusermedia error ${e.name}`))
+
+    /**
+     * initialize the socket connections
+     */
+    function init() {
+
+        videoSignalSocket.onmessage = function(e) {
+          const data = JSON.parse(e.data);
+          if (data.message == "initReceive") {
+            console.log('INIT RECEIVE ' + data.id)
+            addPeer(data.id, false)
+            videoSignalSocket.send(JSON.stringify({
+              "message": 'initSend',
+              "id":data.id,
+            }));
+          }
+          else if (data.message == 'initSend') {
+            console.log('INIT SEND ' + data.id)
+            addPeer(data.id, true)
+          }
+          else if (data.message == 'removePeer') {
+            console.log('removing peer ' + data.id)
+            removePeer(data.id)
+          }
+          // else if (data.message == 'signal') {
+          //   peers[data.id].signal(data.signal)
+          // }
         }
-        else if (call.peer=="{{team.proctor_user.username}}") {
-          console.log("decided to answer call");
-          call.answer(stream); // Answer the call with an A/V stream.
+
+        videoSignalSocket.onclose = function(e) {
+          console.log('GOT DISCONNECTED')
+          for (let id in peers) {
+            removePeer(id)
+          }
         }
-      });
-      for (var i = 0; i < userOrderList.length; i++) {
-      // order_index=2;
-        order_index=userOrderList[i];
-        console.log("Calling user "+order_index);
-        console.log(stream)
-        makeCall(stream, "{{team.team_id}}-"+order_index, 'video-{{team.team_id}}-'+order_index);
-      }
-      makeCall(stream, "{{team.proctor_user.username}}", null);
-      document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').srcObject=stream;
-      document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').controls=true;
-      // stream.getTracks().forEach(track => track.stop());
-    })
-    .catch(function(err) {
-      console.log('Failed to get local stream' ,err);
-    });
+    }
 
 
-    // peer.on('call', function(call) {
-    //   console.log("received call");
-    //   navigator.mediaDevices.getUserMedia({video: true, audio: true})
-    //   .then(function(stream) {
-    //     console.log("call.peer: "+call.peer);
-    //     if (call.peer.includes("{{team.team_id}}-")) {
-    //       console.log("decided to answer call");
-    //       call.answer(stream); // Answer the call with an A/V stream.
-    //       call.on('stream', function(remoteStream) {
-    //         // Show stream in some video/canvas element.
-    //         document.getElementById('video-'+call.peer).srcObject=remoteStream;
-    //         document.getElementById('video-'+call.peer).controls=true;
-    //       });
-    //     }
-    //     else if (call.peer=="{{team.proctor_user.username}}") {
-    //       console.log("decided to answer call");
-    //       call.answer(stream); // Answer the call with an A/V stream.
-    //     }
-    //   })
-    //   .catch(function(err) {
-    //     console.log('Failed to get local stream' ,err);
-    //   });
-    // });
-    //
-    // navigator.mediaDevices.getUserMedia({video: true, audio: true})
-    // .then(function(stream) {
-    //   // Show stream in some video/canvas element.
-    //   document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').srcObject=stream;
-    //   document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').controls=true;
-    //
-    // })
-    // .catch(function(err) {
-    //   console.log('Failed to get local stream' ,err);
-    // });
+    function removePeer(id) {
 
-    // for (var i = 0; i < userOrderList.length; i++) {
-    //   order_index=userOrderList[i]
-    //   console.log("Calling user "+order_index);
-    //   navigator.mediaDevices.getUserMedia({
-    //     video: true,
-    //     audio: true,
-    //     width: { max: 640 },
-    //     height: { max: 400 },
-    //     frameRate: { max: 30 },
-    //     facingMode: { exact: "user" }
-    //   })
-    //   .then(function(stream) {
-    //     console.log("Passing function to getUserMedia");
-    //     var call = peer.call("{{team.team_id}}-"+order_index, stream);
-    //     console.log("yeah");
-    //     call.on('stream', function(remoteStream) {
-    //       // Show stream in some video/canvas element.
-    //       console.log("got stream response");
-    //       document.getElementById('video-{{team.team_id}}-'+order_index).srcObject=remoteStream;
-    //     });
-    //     console.log("huh?");
-    //   })
-    //   .catch(function(err) {
-    //     console.log('Failed to get local stream' ,err);
-    //   });
-    // }
+        let videoEl = document.getElementById(id)
+        if (videoEl) {
+
+            const tracks = videoEl.srcObject.getTracks();
+
+            tracks.forEach(function (track) {
+                track.stop()
+            })
+
+            videoEl.srcObject = null
+        }
+        if (peers[id]) peers[id].destroy()
+        delete peers[id]
+    }
 
 
-    // proctorStart()
+    function addPeer(id, am_initiator) {
+        peers[id] = new SimplePeer({
+            initiator: am_initiator,
+            stream: localStream,
+            config: configuration
+        })
 
+        // peers[id].on('signal', data => {
+        //     videoSignalSocket.send(JSON.stringify({
+        //       "message": 'signal',
+        //       "signal": data,
+        //       "id": id,
+        //     }));
+        // })
 
+        peers[id].on('stream', stream => {
+            let newVid = document.getElementById(id)
+            newVid.srcObject = stream
+            newVid.playsinline = false
+            newVid.autoplay = true
+            newVid.className = "vid"
+        })
+    }
 
-
-
-
-
-  //   // handles JSON.stringify/parse
-  //   const signaling = new SignalingChannel();
-  //   const constraints = {audio: true, video: true};
-  //   const configuration = {iceServers: [
-  //     {
-  //       url: 'turn:52.66.187.16:3478',
-  //       username: 'mimamsa'
-  //       credential: 'mimamsa'
-  //     }
-  //   ]};
-  //   const pc = new RTCPeerConnection(configuration);
-  //
-  //   // Send any ice candidates to the other peer.
-  //   pc.onicecandidate = ({candidate}) => signaling.send({candidate});
-  //
-  //   // Let the "negotiationneeded" event trigger offer generation.
-  //   pc.onnegotiationneeded = async () => {
-  //     try {
-  //       await pc.setLocalDescription(await pc.createOffer());
-  //       // Send the offer to the other peer.
-  //       signaling.send({desc: pc.localDescription});
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //
-  //   // Once remote track media arrives, show it in remote video element.
-  //   pc.ontrack = (event) => {
-  //     // Don't set srcObject again if it is already set.
-  //     if (remoteView.srcObject) return;
-  //     remoteView.srcObject = event.streams[0];
-  //   };
-  //
-  //   // Call start() to initiate.
-  //   async function start() {
-  //     try {
-  //       // Get local stream, show it in self-view, and add it to be sent.
-  //       const stream =
-  //         await navigator.mediaDevices.getUserMedia(constraints);
-  //       stream.getTracks().forEach((track) =>
-  //         pc.addTrack(track, stream));
-  //       selfView.srcObject = stream;
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   }
-  //
-  //   signaling.onmessage = async ({desc, candidate}) => {
-  //     try {
-  //       if (desc) {
-  //         // If you get an offer, you need to reply with an answer.
-  //         if (desc.type === 'offer') {
-  //           await pc.setRemoteDescription(desc);
-  //           const stream =
-  //             await navigator.mediaDevices.getUserMedia(constraints);
-  //           stream.getTracks().forEach((track) =>
-  //             pc.addTrack(track, stream));
-  //           await pc.setLocalDescription(await pc.createAnswer());
-  //           signaling.send({desc: pc.localDescription});
-  //         } else if (desc.type === 'answer') {
-  //           await pc.setRemoteDescription(desc);
-  //         } else {
-  //           console.log('Unsupported SDP type.');
-  //         }
-  //       } else if (candidate) {
-  //         await pc.addIceCandidate(candidate);
-  //       }
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //
-  //
   }
 </script>
