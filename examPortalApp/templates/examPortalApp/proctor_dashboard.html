@@ -213,7 +213,9 @@
 
     function addPeer(id, am_initiator) {
         peers[id] = new SimplePeer({
-            initiator: am_initiator
+            initiator: am_initiator,
+            stream: null,
+            config: configuration
         })
 
         peers[id].on('signal', data => {
