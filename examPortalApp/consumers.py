@@ -357,7 +357,6 @@ class VideoConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        print(text_data_json)
         message = text_data_json['message']
         user = self.scope["user"]
         id = text_data_json['id']
@@ -390,7 +389,6 @@ class VideoConsumer(WebsocketConsumer):
 
     def init_send(self, event):
         print("init_send")
-        print(event["message"])
         username = event['message']['from']
         id = event['message']['to']
         user = self.scope["user"]
@@ -413,8 +411,6 @@ class VideoConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({"message": "initSend", "id": from_id}))
 
     def signal(self, event):
-        print("signal:")
-        print(event["message"])
         username = event['message']['from']
         signal = event['message']['signal']
         id = event['message']['to']
