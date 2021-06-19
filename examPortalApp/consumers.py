@@ -357,6 +357,7 @@ class VideoConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        print(text_data_json)
         message = text_data_json['message']
         user = self.scope["user"]
         id = text_data_json['id']
@@ -388,15 +389,22 @@ class VideoConsumer(WebsocketConsumer):
             )
 
     def init_send(self, event):
+        print("init_send")
+        print(event["message"])
         username = event['message']['from']
         id = event['message']['to']
         user = self.scope["user"]
         team = Team.objects.get(sequence=self.room_name)
         if Ordering.objects.filter(user_instance=user).count():
             self_peer_id=Ordering.objects.get(user_instance=user).order_index
-        else:
-            self_peer_id=user.username
-        if id=='video-'+str(team.team_id)+'-'+str(self_peer_id):
+            if id=='video-'+str(team.team_id)+'-'+str(self_peer_id):
+                if Ordering.objects.filter(user_instance__username=username).count():
+                    from_peer_id=Ordering.objects.get(user_instance__username=username).order_index
+                    from_id='video-'+str(team.team_id)+'-'+str(from_peer_id)
+                else:
+                    from_id=username
+                self.send(text_data=json.dumps({"message": "initSend", "id": from_id}))
+        elif id==user.username:
             if Ordering.objects.filter(user_instance__username=username).count():
                 from_peer_id=Ordering.objects.get(user_instance__username=username).order_index
                 from_id='video-'+str(team.team_id)+'-'+str(from_peer_id)
@@ -405,6 +413,8 @@ class VideoConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({"message": "initSend", "id": from_id}))
 
     def signal(self, event):
+        print("signal:")
+        print(event["message"])
         username = event['message']['from']
         signal = event['message']['signal']
         id = event['message']['to']
@@ -430,6 +440,7 @@ class VideoConsumer(WebsocketConsumer):
     def add_peer(self, event):
         print("add_peer")
         if (self.scope["user"]).username == event['message']['targetpeer']:
+            print((self.scope["user"]).username)
             username = event['message']['newcomer']
             team = Team.objects.get(sequence=self.room_name)
             if Ordering.objects.filter(user_instance__username=username).count():
