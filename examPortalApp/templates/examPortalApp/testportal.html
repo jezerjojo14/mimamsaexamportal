@@ -85,6 +85,7 @@
           </div>
           {% endfor %}
         </div>
+        <button id="enter-test-btn" type="button" disabled name="button">Waiting for proctor...</button>
         <div id="chat-area">
           <h3>Chat:</h3>
           <div id="chat-log"></div><br>
@@ -211,6 +212,7 @@
 
   {% include  'examPortalApp/include_modules/chat_js.html'  %}
   {% include  'examPortalApp/include_modules/video_js.html'  %}
+  {% include 'examPortalApp/include_modules/start_js.html' %}
 
   <script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
 {% endblock %}

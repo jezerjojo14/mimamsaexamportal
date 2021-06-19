@@ -55,8 +55,12 @@
   );
   document.addEventListener("DOMContentLoaded", ()=>{
     document.getElementById('start-btn').onclick=()=>{
+      console.log("button clicked");
       startSocket.send(JSON.stringify({
-        "action": "start"
+        "message": "start",
+      }));
+      console.log(JSON.stringify({
+        "message": "start",
       }));
     }
     if (document.querySelector('.chatbox-{{team.team_id}}-logs').lastElementChild) {
@@ -66,7 +70,7 @@
     chatInput.addEventListener("keyup", submitChatInput);
 
     document.querySelector('#chatbox-{{team.team_id}}-submit').onclick = function(e) {
-      const message = messageInputDom.value;
+      const message = chatInput.value;
       console.log(message);
       if (message.trim()) {
         code=makeid(8);
@@ -74,7 +78,7 @@
         document.querySelector('.'+code).scrollIntoView();
         chatSocket.send(JSON.stringify({
           "message": message.trim(),
-          "username":"Proctor",
+          "username":"{{user.username}}",
           "code": code
         }));
       }
@@ -149,13 +153,15 @@
     /**
      * UserMedia constraints
      */
-    init()
+    document.addEventListener("DOMContentLoaded", ()=>{
+      init()
+    });
 
     /**
      * initialize the socket connections
      */
     function init() {
-
+        console.log("init");
         videoSignalSocket.onmessage = function(e) {
           const data = JSON.parse(e.data);
           if (data.message == "initReceive") {

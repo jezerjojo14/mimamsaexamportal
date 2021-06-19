@@ -33,17 +33,26 @@
     })
     startSocket.onmessage = function(e) {
       const data = JSON.parse(e.data);
+      console.log(data);
       if (data["message"] == "start") {
-        var el = document.documentElement;
-        var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
-        rfs.call(el);
-        mainContent.after(document.getElementById('start-screen'));
-        document.getElementById('start-screen').style.display="none";
-        document.getElementById('videos-container').after(document.getElementById('videos-container-prev-ele'));
-        document.getElementById('chat-area').after(document.getElementById('video-call-area'));
-        currentQNo=1;
-        initQuestionJS();
-        getQuestion(1);
+        document.getElementById('enter-test-btn').disabled=false;
+        document.getElementById('enter-test-btn').innerHTML="Enter test";
+        document.getElementById('enter-test-btn').onclick = ()=>{
+          var el = document.documentElement;
+          var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
+          rfs.call(el);
+          console.log(mainContent);
+          // mainContent.after(document.getElementById('start-screen'));
+          document.getElementById('start-screen').parentNode.insertBefore(mainContent, document.getElementById('start-screen').nextSibling);
+          document.getElementById('start-screen').style.display="none";
+          document.getElementById('videos-container-prev-ele').parentNode.insertBefore(document.getElementById('videos-container'), document.getElementById('videos-container-prev-ele').nextSibling);
+          // document.getElementById('videos-container').after(document.getElementById('videos-container-prev-ele'));
+          document.getElementById('video-call-area').parentNode.insertBefore(document.getElementById('chat-area'), document.getElementById('video-call-area').nextSibling);
+          // document.getElementById('chat-area').after(document.getElementById('video-call-area'));
+          currentQNo=1;
+          initQuestionJS();
+          getQuestion(1);
+        }
       }
       else if (data["message"] == "end") {
         location.reload();

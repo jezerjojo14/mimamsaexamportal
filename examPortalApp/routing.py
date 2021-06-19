@@ -8,4 +8,5 @@ websocket_urlpatterns = [
     re_path(r'ws/video-signal/(?P<room_name>\w+)/$', consumers.VideoConsumer),
     re_path(r'ws/log/(?P<room_name>\w+)/$', consumers.LogsConsumer),
     re_path(r'ws/test/(?P<room_name>\w+)/$', consumers.TestConsumer),
+    # re_path(r'ws/consume/(?P<room_name>\w+)/$', consumers.TheConsumer),
 ]

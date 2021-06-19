@@ -73,7 +73,7 @@
       };
       // we don't want to wait a full second before the timer starts
       timer();
-      var intervalVar = setInterval(timer, 5000);
+      var intervalVar = setInterval(timer, 1000);
     };
 
 
@@ -334,7 +334,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById('chat-log').innerHTML="";
       {% for log in chat_logs %}
-      document.getElementById('chat-log').innerHTML+="<b>{{log.0}}:</b>"+" {{log.1}}"+"<br>";
+      document.getElementById('chat-log').innerHTML+="<div><b>{% if log.0 == team.proctor_user.username %}Proctor{% else %}{{log.0}}{% endif %}:</b>"+" {{log.1}}</div>";
       {% endfor %}
       document.getElementById('start-screen').style.display="block";
     });
