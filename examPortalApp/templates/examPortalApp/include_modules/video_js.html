@@ -6,14 +6,6 @@
     document.getElementById('join-call-btn').remove();
 
 
-    const videoSignalSocket = new WebSocket(
-      ws_scheme+'://'
-      + window.location.host
-      + '/ws/video-signal/'
-      + roomName
-      + '/'
-    );
-
     /**
      * The stream object used to send media
      */
@@ -22,10 +14,6 @@
      * All peer connections
      */
     let peers = {}
-
-    // redirect if not https
-    if(location.href.substr(0,5) !== 'https')
-        location.href = 'https' + location.href.substr(4, location.href.length - 4)
 
 
     //////////// CONFIGURATION //////////////////
@@ -65,10 +53,19 @@
         ideal: "user"
     }
 
+    let videoSignalSocket;
+
     // enabling the camera at startup
     navigator.mediaDevices.getUserMedia(constraints).then(stream => {
         console.log('Received local stream');
 
+        videoSignalSocket = new WebSocket(
+          ws_scheme+'://'
+          + window.location.host
+          + '/ws/video-signal/'
+          + roomName
+          + '/'
+        );
         document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').srcObject=stream;
         localStream = stream;
 
@@ -83,6 +80,7 @@
 
         videoSignalSocket.onmessage = function(e) {
           const data = JSON.parse(e.data);
+          console.log(data);
           if (data.message == "initReceive") {
             console.log('INIT RECEIVE ' + data.id)
             addPeer(data.id, false)
@@ -99,9 +97,9 @@
             console.log('removing peer ' + data.id)
             removePeer(data.id)
           }
-          // else if (data.message == 'signal') {
-          //   peers[data.id].signal(data.signal)
-          // }
+          else if (data.message == 'signal') {
+            peers[data.id].signal(data.signal)
+          }
         }
 
         videoSignalSocket.onclose = function(e) {
@@ -137,16 +135,18 @@
             stream: localStream,
             config: configuration
         })
+        console.log(peers);
 
-        // peers[id].on('signal', data => {
-        //     videoSignalSocket.send(JSON.stringify({
-        //       "message": 'signal',
-        //       "signal": data,
-        //       "id": id,
-        //     }));
-        // })
+        peers[id].on('signal', data => {
+            videoSignalSocket.send(JSON.stringify({
+              "message": 'signal',
+              "signal": data,
+              "id": id,
+            }));
+        })
 
         peers[id].on('stream', stream => {
+            console.log("received stream");
             let newVid = document.getElementById(id)
             newVid.srcObject = stream
             newVid.playsinline = false

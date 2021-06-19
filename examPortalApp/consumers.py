@@ -2,7 +2,7 @@
 import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
-from .models import ChatRoom, ChatLog, User, Team
+from .models import ChatRoom, ChatLog, User, Team, Ordering
 
 
 LOG_MAX=10
@@ -18,25 +18,31 @@ class VideoConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-
+        print("joined room")
         user = self.scope["user"]
         user.entered_video_call=True
         user.save()
+        print(user.username+" joined video call logged")
         team = Team.objects.get(sequence=self.room_name)
+        print(team)
         peers = list(User.objects.filter(team=team).filter(entered_video_call=True).values_list('username', flat=True))
+        print(peers)
         for peer in peers:
+            print(peer)
             if user.username == peer:
+                print("lol thats just me tho")
                 continue
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
                 {
                     'type': 'add_peer',
                     'message': {
-                        'username': username,
+                        'targetpeer': peer,
+                        'newcomer': user.username,
                     }
                 }
             )
-
+        print("adding peers")
         self.accept()
 
     def disconnect(self, close_code):
@@ -75,6 +81,20 @@ class VideoConsumer(WebsocketConsumer):
                     }
                 }
             )
+        if message=='signal':
+            # Send message to room group
+            signal = text_data_json['signal']
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'signal',
+                    'message': {
+                        'from': user.username,
+                        'to': id,
+                        'signal': signal
+                    }
+                }
+            )
 
     def init_send(self, event):
         username = event['message']['from']
@@ -82,20 +102,42 @@ class VideoConsumer(WebsocketConsumer):
         user = self.scope["user"]
         team = Team.objects.get(sequence=self.room_name)
         self_peer_id=Ordering.objects.get(user_instance=user).order_index
-        if id=='video-'+team.team_id+'-'+self_peer_id:
-            team = Team.objects.get(sequence=self.room_name)
-            self_peer_id=Ordering.objects.get(user_instance__username=username).order_index
-            id='video-'+team.team_id+'-'+self_peer_id
-            self.send(text_data=json.dumps({"message": "initSend", "id": id}))
+        if id=='video-'+str(team.team_id)+'-'+str(self_peer_id):
+            from_peer_id=Ordering.objects.get(user_instance__username=username).order_index
+            from_id='video-'+str(team.team_id)+'-'+str(from_peer_id)
+            self.send(text_data=json.dumps({"message": "initSend", "id": from_id}))
+
+    def signal(self, event):
+        username = event['message']['from']
+        signal = event['message']['signal']
+        id = event['message']['to']
+        user = self.scope["user"]
+        team = Team.objects.get(sequence=self.room_name)
+        self_peer_id=Ordering.objects.get(user_instance=user).order_index
+        if id=='video-'+str(team.team_id)+'-'+str(self_peer_id):
+            from_peer_id=Ordering.objects.get(user_instance__username=username).order_index
+            from_id='video-'+str(team.team_id)+'-'+str(from_peer_id)
+            self.send(text_data=json.dumps({"message": "signal", "id": from_id, "signal": signal}))
 
     def add_peer(self, event):
-        username = event['message']['username']
-        team = Team.objects.get(sequence=self.room_name)
-        self_peer_id=Ordering.objects.get(user_instance__username=username).order_index
-        id='video-'+team.team_id+'-'+self_peer_id
-        self.send(text_data=json.dumps({"message": "initReceive", "id": id}))
+        print("add_peer")
+        if (self.scope["user"]).username == event['message']['targetpeer']:
+            username = event['message']['newcomer']
+            print(username)
+            team = Team.objects.get(sequence=self.room_name)
+            print("team's fine")
+            self_peer_id=Ordering.objects.get(user_instance__username=username).order_index
+            print("ordering's fine")
+            id='video-'+str(team.team_id)+'-'+str(self_peer_id)
+            print("almost there")
+            self.send(text_data=json.dumps({"message": "initReceive", "id": id}))
+            print((self.scope["user"]).username+" supposedly received message from "+username)
+        else:
+            print("else")
+            return
 
     def remove_peer(self, event):
+        print("remove peer")
         username = event['message']['username']
         team = Team.objects.get(sequence=self.room_name)
         self_peer_id=Ordering.objects.get(user_instance__username=username).order_index
