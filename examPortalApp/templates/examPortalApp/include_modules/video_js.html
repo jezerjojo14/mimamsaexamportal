@@ -67,6 +67,7 @@
           + '/'
         );
         document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').srcObject=stream;
+        document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').muted=true;
         localStream = stream;
 
         init()

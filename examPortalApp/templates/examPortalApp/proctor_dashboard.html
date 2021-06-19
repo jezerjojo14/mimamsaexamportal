@@ -59,13 +59,15 @@
       startSocket.send(JSON.stringify({
         "message": "start",
       }));
-      console.log(JSON.stringify({
-        "message": "start",
-      }));
     }
+    document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML="";
+    {% for log in chat_logs %}
+    document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML+="<div><b>{% if log.0 == team.proctor_user.username %}Proctor{% else %}{{log.0}}{% endif %}:</b>"+" {{log.1}}</div>";
+    {% endfor %}
     if (document.querySelector('.chatbox-{{team.team_id}}-logs').lastElementChild) {
       document.querySelector('.chatbox-{{team.team_id}}-logs').lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
     }
+
     var chatInput=document.querySelector('#chatbox-{{team.team_id}}-input');
     chatInput.addEventListener("keyup", submitChatInput);
 
@@ -94,23 +96,25 @@
 {% block content %}
   <div class="fluid-container">
     <h2>{{team.team_id}}</h2>
-    <div class="{{team.team_id}}">
+    <div id="videos-container">
       {% for ordering in team.ordering_set.all %}
-      <div class="video-container-{{team.team_id}}-{{ordering.order_index}}">
+      <div class="video-container video-container-{{team.team_id}}-{{ordering.order_index}}" style="color: white">
         <video autoplay id="video-{{team.team_id}}-{{ordering.order_index}}">
         </video>
-        <br>{{ordering.user_instance.username}}<br><br>
+        <br>&nbsp;{{ordering.user_instance.username}}<br><br>
       </div>
       {% endfor %}
-      <div class="">
-        <button id="start-btn" type="button" name="button">Start Exam</button>
+    </div>
+    <div style="text-align: center">
+      <br>
+      <button id="start-btn" type="button" name="button">Start Exam</button>
+      <br>
+    </div>
+    <div class="chatbox-{{team.team_id}}">
+      <div class="chatbox-{{team.team_id}}-logs">
       </div>
-      <div class="chatbox-{{team.team_id}}">
-        <div class="chatbox-{{team.team_id}}-logs">
-        </div>
-        <input id="chatbox-{{team.team_id}}-input" type="text" name="" value=""><br>
-        <input id="chatbox-{{team.team_id}}-submit" type="button" value="Send">
-      </div>
+      <input id="chatbox-{{team.team_id}}-input" type="text" name="" value=""><br>
+      <input id="chatbox-{{team.team_id}}-submit" type="button" value="Send">
     </div>
   </div>
 

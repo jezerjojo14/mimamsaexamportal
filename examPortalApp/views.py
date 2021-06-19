@@ -539,8 +539,13 @@ def proctor_view(request):
     if request.user.user_type!="proctor":
         return HttpResponseRedirect(reverse("dashboard"))
     team=request.user.proctored_teams.first()
+    room_model=ChatRoom.objects.get_or_create(team_instance=team, defaults={'chatlog_start': 0})[0]
+    chatlog_start=room_model.chatlog_start
+    chat_logs=list(ChatLog.objects.filter(chatroom_instance=room_model).order_by('log_number').values_list('user_instance__username', 'message'))
+    chat_logs=chat_logs[chatlog_start:]+chat_logs[0:chatlog_start]
+
     print(team)
-    return render(request, "examPortalApp/proctor_dashboard.html", {"team": team})
+    return render(request, "examPortalApp/proctor_dashboard.html", {"team": team, "chat_logs": chat_logs})
 
 @login_required
 def log_view(request):
