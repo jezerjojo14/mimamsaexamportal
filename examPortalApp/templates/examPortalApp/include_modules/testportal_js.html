@@ -280,11 +280,6 @@
         markedBtn.onclick = markUnanswered;
       }
 
-      var openCameraBtn = document.querySelector("#open-cam-btn");
-      if (openCameraBtn) {
-        openCameraBtn.onclick = openCameraPopup;
-      }
-
       document.getElementById('prev').onclick = prevQuestion;
       document.getElementById('next').onclick = nextQuestion;
       var viewImgBtnList = document.querySelectorAll(".view-img-btn");
@@ -326,6 +321,19 @@
                alert("File is too big!");
                this.value = "";
             };
+        };
+      }
+
+      if (document.getElementById('open-cam-btn')) {
+        console.log("heya");
+        document.getElementById('open-cam-btn').onclick = ()=>{
+          openCameraPopup();
+          camStartup();
+        };
+      }
+      if (document.getElementById('upload-photo-btn')) {
+        document.getElementById('upload-photo-btn').onclick = ()=>{
+          uploadWebcamPicture();
         };
       }
     }
@@ -685,12 +693,13 @@
       byteArrays.push(byteArray);
     }
 
-  var blob = new Blob(byteArrays, {type: contentType});
-  return blob;
-}
+    var blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+  }
 
   function sendWebcamData(data) {
     var ImageURL=data
+    console.log(ImageURL);
     var block = ImageURL.split(";");
     // Get the content type of the image
     var contentType = block[0].split(":")[1];// In this case "image/gif"
@@ -699,28 +708,76 @@
 
     // Convert it to a blob to upload
     var blob = b64toBlob(realData, contentType);
+    console.log(blob);
 
     var redirect = function(url, method) {
       var form = document.createElement('form');
       form.method = method;
       form.action = url;
-      form.innerHTML+='{% csrf_token %}';
+      form.enctype="multipart/form-data";
+      form.innerHTML+='<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">';
       var input1 = document.createElement('input');
       input1.type = 'hidden';
       input1.name = "qnumber";
       input1.value = currentQNo;
       form.appendChild(input1);
+      let file = new File([blob], "img.jpg",{type:"image/jpeg", lastModified:new Date().getTime()});
+      let container = new DataTransfer();
+      container.items.add(file);
       var input2 = document.createElement('input');
       input2.type = 'file';
       input2.name = "file";
-      input2.value = blob;
+      input2.files = container.files;
       form.appendChild(input2);
       document.body.appendChild(form);
-      form.submit();
+      // form.submit();
+      fetch(form.action, {
+        method: form.method,
+        body: new FormData(form),
+      })
+      .then(()=>{
+        unsaved=false;
+        document.getElementById('loading-overlay').style.display="none";
+        getQuestion(currentQNo);
+      });
     };
 
     redirect('{% url 'upload_answer' %}', 'post');
   }
+
+
+  // function uploadWebcamPicture() {
+  //   let blob = await new Promise(resolve => document.getElementById('canvas').toBlob(resolve, 'image/png'));
+  //   console.log(blob);
+  //   var form = document.createElement('form');
+  //   form.method = 'post';
+  //   form.action = '{% url 'upload_answer' %}';
+  //   form.innerHTML+='<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">';
+  //   var input1 = document.createElement('input');
+  //   input1.type = 'hidden';
+  //   input1.name = "qnumber";
+  //   input1.value = currentQNo;
+  //   form.appendChild(input1);
+  //   var input2 = document.createElement('input');
+  //   input2.type = 'file';
+  //   input2.name = "file";
+  //   input2.value = blob;
+  //   form.appendChild(input2);
+  //   document.body.appendChild(form);
+  //   form.submit();
+  //   // let csrftoken = getCookie('csrftoken');
+  //   // let response = await fetch('{% url 'upload_answer' %}', {
+  //   //   method: 'POST',
+  //   //   headers: {
+  //   //     "X-CSRFToken": csrftoken
+  //   //   },
+  //   //   body: blob
+  //   // });
+  //
+  //   // the server responds with confirmation and the image size
+  //   let result = await response.json();
+  //   alert(result.message);
+  // }
 
   function grayer(formId, yesNo) {
     var f = document.getElementById(formId), s, opacity;

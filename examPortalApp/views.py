@@ -31,6 +31,9 @@ from django.utils import timezone
 import datetime
 import pytz
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 from .models import *
 
 from PIL import Image
@@ -415,6 +418,8 @@ def end_test(request):
     team=request.user.team_set.first()
     if User.objects.filter(team=team).filter(entered_test=True).exclude(ended_test=True).count()==0:
         team.extra_time=-TOTAL_TEST_TIME
+        team.finished=True
+        team.save()
         return JsonResponse({"end": 1})
     return JsonResponse({"end": 0})
 
@@ -446,7 +451,22 @@ def instructions(request):
 
 # Views related to the exam portal itself
 
-
+@login_required(login_url='/')
+def test_changedevice(request):
+    request.user.entered_test=False
+    request.user.save()
+    team=request.user.team_set.first()
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        'test_'+str(team.sequence),
+        {
+            'type': 'change_device',
+            'message': {
+                'username': request.user.username
+            }
+        }
+    )
+    return HttpResponseRedirect(reverse("dashboard"))
 
 @login_required(login_url='/')
 def open_test(request):
@@ -483,6 +503,9 @@ def open_test(request):
 
     if now>test_end:
         return render(request, "examPortalApp/testended.html")
+
+    if request.user.entered_test:
+        return HttpResponseRedirect(reverse("dashboard"))
 
     q_count= Question.objects.all().count();
     qnumber = 1;
@@ -960,6 +983,8 @@ def upload_answer(request):
     test_end=GlobalVariables.objects.get(pk=1).test_end + datetime.timedelta(seconds=team.extra_time + 10)
 
     if now<test_end and now>test_start:
+        print(request)
+        print(request.FILES)
         answerfile=request.FILES["file"]
         qnumber=request.POST["qnumber"]
         try:

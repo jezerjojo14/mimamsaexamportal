@@ -202,11 +202,11 @@ h2{
 }
 
 .sidenav > * {
-  width: 70vw;
+  width: 40vw;
 }
 
 .opened {
- width: 70vw;
+ width: 40vw;
 }
 
 .closed {

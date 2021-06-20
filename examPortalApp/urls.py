@@ -14,6 +14,7 @@ urlpatterns = [
     path('instructions', views.instructions, name="instructions"),
 
     path('test', views.open_test, name="test_no"),
+    path('test-changedevice', views.test_changedevice, name="test_changedevice"),
     path('get-question', views.get_question, name="get_question"),
     path('upload-answer', views.upload_answer, name="upload_answer"),
     path('upload-text-answer', views.upload_text_answer, name="upload_text_answer"),
@@ -30,6 +31,8 @@ urlpatterns = [
     path('review', views.mark_for_review, name="review"),
     path('answered', views.mark_as_answered, name="answered"),
     path('unanswered', views.mark_as_unanswered, name="unanswered"),
+
+    path('upload-page', views.upload_answer_page, name="upload_page"),
 
     path('log', views.log_view, name="log_view"),
 
@@ -49,6 +52,7 @@ urlpatterns = [
     path('correction/q/<int:question>/<str:sequence>', views.correction, name="correction"),
     path('toggle-graded-confirm', views.toggle_graded_confirm, name='toggle_graded_confirm'),
     path('end-test', views.end_test, name='end_test'),
+    path('undo-end-test', views.undo_end_test, name='undo_end_test'),
 
     path('proctor-dashboard', views.proctor_view, name='proctor_view'),
     # path('auto-correction', views.automated_correction, name="automated_correction"),

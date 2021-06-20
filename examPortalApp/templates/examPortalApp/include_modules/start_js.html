@@ -28,6 +28,22 @@
               "action": "end"
             }));
           }
+          document.getElementById('end-screen').style.display="block";
+          document.getElementById('end-screen-last-element').parentNode.insertBefore(document.getElementById('videos-container'), document.getElementById('end-screen-last-element'));
+          document.getElementById('end-screen-last-element').parentNode.insertBefore(document.getElementById('chat-area'), document.getElementById('end-screen-last-element'));
+          document.getElementById('undo-vote-end-test').onclick = ()=>{
+            document.getElementById('end-screen').style.display="none";
+            document.getElementById('start-screen').parentNode.insertBefore(mainContent, document.getElementById('start-screen').nextSibling);
+            document.getElementById('start-screen').style.display="none";
+            document.getElementById('videos-container-prev-ele').parentNode.insertBefore(document.getElementById('videos-container'), document.getElementById('videos-container-prev-ele').nextSibling);
+            document.getElementById('video-call-area').parentNode.insertBefore(document.getElementById('chat-area'), document.getElementById('video-call-area').nextSibling);
+            fetch("{% url 'undo_end_test' %}", {
+              method: 'POST',
+              headers: {
+                "X-CSRFToken": csrftoken
+              }
+            })
+          };
         })
       };
       mainContent.remove()
@@ -46,19 +62,20 @@
           console.log(mainContent);
           // mainContent.after(document.getElementById('start-screen'));
           document.getElementById('start-screen').parentNode.insertBefore(mainContent, document.getElementById('start-screen').nextSibling);
-          document.getElementById('start-screen').style.display="none";
           document.getElementById('videos-container-prev-ele').parentNode.insertBefore(document.getElementById('videos-container'), document.getElementById('videos-container-prev-ele').nextSibling);
-          // document.getElementById('videos-container').after(document.getElementById('videos-container-prev-ele'));
           document.getElementById('video-call-area').parentNode.insertBefore(document.getElementById('chat-area'), document.getElementById('video-call-area').nextSibling);
-          // document.getElementById('chat-area').after(document.getElementById('video-call-area'));
+          document.getElementById('start-screen').style.display="none";
           currentQNo=1;
           initQuestionJS();
           getQuestion(1);
-          
+
         }
       }
       else if (data["message"] == "end") {
         location.reload();
+      }
+      else if (data["message"] == "leave") {
+        window.location="{% url 'dashboard' %}";
       }
     }
   })();

@@ -1,7 +1,7 @@
 {% extends 'examPortalApp/body.html' %}
 
 {% block sidepane %}
-{% if user.username != 'admin' %}
+{% if user.user_type == 'participant' %}
 <div id="members">
   <h3>Team id:</h3>
   <h4>{{team.team_id}}</h4>
@@ -34,7 +34,13 @@
       <br>
       <p style="padding: 20px; padding: 0 0 10vw 10vw">
         {% if user.user_type == 'participant' %}
+        {% if user.entered_test %}
+        The exam is already open on a different device (Click <a href="{% url 'test_changedevice' %}">here</a> if this isn't the case)
+        {% else %}
         <a href="{% url 'test_no' %}">Open Test</a>
+        {% endif %}
+        <br>
+        <a href="{% url 'upload_page' %}">Upload answers</a>
         <br>
         {% endif %}
         {% if user.user_type == 'proctor' %}

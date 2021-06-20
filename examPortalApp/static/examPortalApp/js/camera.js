@@ -1,4 +1,3 @@
-(function() {
 
   var width = 320; // We will scale the photo width to this
   var height = 0; // This will be computed based on the input stream
@@ -11,6 +10,7 @@
   var startbutton = null;
 
   function camStartup() {
+    console.log("camStartup");
     video = document.getElementById('video');
     canvas = document.getElementById('canvas');
     photo = document.getElementById('photo');
@@ -88,18 +88,3 @@
     var data = canvas.toDataURL('image/png');
     sendWebcamData(data);
   }
-
-  // window.addEventListener('load', startup, false);
-  document.addEventListener('DOMContentLoaded', ()=>{
-    if (document.getElementById('open-cam-btn')) {
-      document.getElementById('open-cam-btn').onclick = ()=>{
-        camStartup();
-      };
-    }
-    if (document.getElementById('upload-photo-btn')) {
-      document.getElementById('upload-photo-btn').onclick = ()=>{
-        uploadWebcamPicture();
-      };
-    }
-  })
-})();

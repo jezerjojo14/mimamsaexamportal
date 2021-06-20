@@ -29,6 +29,7 @@ class Team(models.Model):
     zone = models.CharField(max_length=5)
     extra_time = models.IntegerField(default=0)
     proctor_user = models.ForeignKey(User, null=True, default=None, on_delete=models.SET_NULL, related_name="proctored_teams")
+    finished = models.BooleanField(default=False)
 
 #This database adds an extra datum to each connection between a group and its members expressing the ordering of the users in their teams
 class Ordering(models.Model):

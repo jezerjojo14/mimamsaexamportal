@@ -470,6 +470,10 @@ class TestConsumer(WebsocketConsumer):
             self.channel_name
         )
 
+        user = self.scope["user"]
+        user.entered_test=True
+        user.save()
+
         self.accept()
 
     def disconnect(self, close_code):
@@ -478,6 +482,12 @@ class TestConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+        team = Team.objects.get(sequence=self.room_name)
+        user = self.scope["user"]
+        user.entered_test=False
+        if not team.finished:
+            user.ended_test=True
+        user.save()
 
     def receive(self, text_data):
         print("received text data")
@@ -506,10 +516,21 @@ class TestConsumer(WebsocketConsumer):
         # Send message to WebSocket
         self.send(text_data=json.dumps({"message": "end"}))
         user = self.scope["user"]
-        user.entered_test=False
-        user.started_test=False
+        # user.entered_test=False
+        # user.started_test=False
         user.ended_test=True
         user.save()
+
+    def change_device(self, event):
+        print("change_device")
+        print(event)
+        username=event["message"]["username"]
+        user = self.scope["user"]
+        print(username)
+        print(user.username)
+        if user.username==username:
+            print("sending")
+            self.send(text_data=json.dumps({"message": "leave"}))
 
 
 class LogsConsumer(WebsocketConsumer):
@@ -523,10 +544,6 @@ class LogsConsumer(WebsocketConsumer):
             self.channel_name
         )
 
-        user = self.scope["user"]
-        user.entered_test=True
-        user.save()
-
         self.accept()
 
     def disconnect(self, close_code):
@@ -535,11 +552,6 @@ class LogsConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-
-        user = self.scope["user"]
-        user.entered_test=False
-        user.started_test=False
-        user.save()
 
     def receive(self, text_data):
         # Send message to room group

@@ -6,6 +6,15 @@
   <script type="text/javascript" src="{% static 'examPortalApp/js/simplepeer.min.js' %}"></script>
   {% include 'examPortalApp/include_modules/testportal_js.html' %}
   {% include 'examPortalApp/include_modules/proctoring_js.html' %}
+  <style media="screen">
+    .sidenav > * {
+      width: 70vw;
+    }
+
+    .opened {
+     width: 70vw;
+    }
+  </style>
 {% endblock %}
 
 {% block header_center %}
@@ -96,10 +105,16 @@
       </div>
     </div>
   </div>
-
-  <div class="end-screen">
-
+  <div id="end-screen" class="popup" style="background-color: #FFFFFFEC; z-index: 100; display: none">
+    <div class="popup-message">
+      <h2>You've voted to end the test. The test will end once all the participants do the same. To undo your vote and go back to the test, click below.</h2>
+      <div style="margin: auto; text-align: center">
+        <button id="undo-vote-end-test" type="button" name="button">Go back</button>
+      </div>
+      <br id="end-screen-last-element">
+    </div>
   </div>
+
 
   <div id="main-content" class="fluid-container" oncopy="return false" oncut="return false" onpaste="return false">
     <div class="row">
@@ -135,12 +150,6 @@
           <div class="popup-message" style="background-color: #0000">
             <h2>Loading...</h2>
           </div>
-        </div>
-        <div id="end-test-display" class="popup" style="background-color: #FFFFFFEC">
-          <div class="popup-message" style="background-color: #0000">
-            <h2>You've voted to end the test. The test will end once all the participants do the same and you'll be redirected. To take back your vote, click below.</h2>
-          </div>
-          <button class="close-popup">Go back and continue writing</button>
         </div>
         <div id="proctor-warning" class="popup">
           <div id="proctor-warning-message" class="popup-message">
