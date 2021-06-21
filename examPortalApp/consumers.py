@@ -486,7 +486,7 @@ class TestConsumer(WebsocketConsumer):
         user = self.scope["user"]
         user.entered_test=False
         if not team.finished:
-            user.ended_test=True
+            user.ended_test=False
         user.save()
 
     def receive(self, text_data):
@@ -554,18 +554,30 @@ class LogsConsumer(WebsocketConsumer):
         )
 
     def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        print(text_data_json)
+        log = text_data_json['log']
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
-                'type': 'log_message'
+                'type': 'log_message',
+                "message": {
+                    "log": log
+                }
             }
         )
 
     # Receive message from room group
     def log_message(self, event):
         # Send message to WebSocket
-        self.send()
+        user = self.scope["user"]
+        if user.user_type == "proctor":
+            log = event['message']['log']
+            # Send message to WebSocket
+            self.send(text_data=json.dumps({
+                'log': log
+            }))
 
 
 class QuestionConsumer(WebsocketConsumer):

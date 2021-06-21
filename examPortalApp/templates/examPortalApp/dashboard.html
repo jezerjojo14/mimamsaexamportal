@@ -34,6 +34,9 @@
       <br>
       <p style="padding: 20px; padding: 0 0 10vw 10vw">
         {% if user.user_type == 'participant' %}
+        {% if team.finished %}
+        <a href="{% url 'test_no' %}">Feedback form</a>
+        {% else %}
         {% if user.entered_test %}
         The exam is already open on a different device (Click <a href="{% url 'test_changedevice' %}">here</a> if this isn't the case)
         {% else %}
@@ -42,6 +45,7 @@
         <br>
         <a href="{% url 'upload_page' %}">Upload answers</a>
         <br>
+        {% endif %}
         {% endif %}
         {% if user.user_type == 'proctor' %}
         <a href="{% url 'proctor_view' %}">Proctor dashboard</a>

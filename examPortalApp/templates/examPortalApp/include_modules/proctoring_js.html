@@ -35,6 +35,9 @@
         },
         body: JSON.stringify(log)
       });
+      logSocket.send(JSON.stringify({
+        "log": JSON.stringify(log)
+      }));
     }
 
     function sendLogReturned(log) {

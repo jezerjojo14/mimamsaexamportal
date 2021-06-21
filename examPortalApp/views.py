@@ -502,6 +502,8 @@ def open_test(request):
         return render(request, "examPortalApp/waitingroom.html", template_var)
 
     if now>test_end:
+        team.finished=True
+        team.save()
         return render(request, "examPortalApp/testended.html")
 
     if request.user.entered_test:

@@ -24,21 +24,35 @@
       <button id="open-cam-btn" type="button">Use webcam</button>
       <br><br>
       <h6><b>Uploaded Answers:</b></h6>
-      <div id="uploadedAnswers">
+      <table id="uploadedAnswers" class="table">
         {% for file in uploaded_files %}
-        <div id="file{{forloop.counter}}" data-pageno="{{ forloop.counter0 }}" class="uploaded-file">
-          {{ forloop.counter }}. {{file}}
-          <button class="view-img-btn" type="button" name="button">View</button>
-          <button class="del-img-btn" type="button" name="button">Delete</button>
-          {% if forloop.counter != 1 %}
-          <button class="move-img-up-btn" type="button" name="button">Move Up</button>
-          {% endif %}
-          {% if forloop.counter != uploaded_files|length %}
-          <button class="move-img-down-btn" type="button" name="button">Move Down</button>
-          {% endif %}
-        </div>
+        <tr id="file{{forloop.counter}}" data-pageno="{{ forloop.counter0 }}" class="uploaded-file">
+          <td>
+            {{ forloop.counter }}. {{file}}
+          </td>
+          <td>
+            <button class="view-img-btn" type="button" name="button">View</button>
+          </td>
+          <td>
+            <button class="del-img-btn" type="button" name="button">Delete</button>
+          </td>
+          <td>
+            {% if forloop.counter != 1 %}
+            <button class="move-img-up-btn" type="button" name="button">Move Up</button>
+            {% else %}
+            -
+            {% endif %}
+          </td>
+          <td>
+            {% if forloop.counter != uploaded_files|length %}
+            <button class="move-img-down-btn" type="button" name="button">Move Down</button>
+            {% else %}
+            -
+            {% endif %}
+          </td>
+        </tr>
         {% endfor %}
-      </div>
+      </table>
     </div>
     <div id="typebox-upload-tab-body" style="display: {% if answer_text == "" %}none{% else %}block{% endif %}">
       <form class="answer-section-form" id="txt-form" action="{% url 'upload_text_answer' %}" method="post" onsubmit="return txtFormSubmit(event);">

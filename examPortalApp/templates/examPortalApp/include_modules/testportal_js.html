@@ -1,652 +1,667 @@
 
-  <script type="text/javascript">
+<script type="text/javascript">
 
-    var unsaved=false;
+  const roomName='{{team.sequence}}';
+  const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+  const logSocket = new WebSocket(
+    ws_scheme+'://'
+    + window.location.host
+    + '/ws/log/'
+    + roomName
+    + '/'
+  );
 
-    function answerChange() {
-      unsaved=true;
-    }
+  window.addEventListener('error', function(event) {
+    logSocket.send(JSON.stringify({
+      "log": event.message
+    }));
+  });
 
-    function getCookie(name) {
-      var cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-          var cookie = cookies[i].trim();
-          // Does this cookie string begin with the name we want?
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
+  var unsaved=false;
+
+  function answerChange() {
+    unsaved=true;
+  }
+
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
         }
       }
-      return cookieValue;
     }
+    return cookieValue;
+  }
 
-    function startTimer(datetime, displays) {
-      var diff0,
-        diff,
-        minutes,
-        seconds;
-      function timer() {
+  function startTimer(datetime, displays) {
+    var diff0,
+      diff,
+      minutes,
+      seconds;
+    function timer() {
 
-        diff0 = ((datetime - Date.now()) / 1000);
-        diff = diff0;
+      diff0 = ((datetime - Date.now()) / 1000);
+      diff = diff0;
+      if (diff0>20*60) {
+        diff-=20*60;
+      }
+
+      // does the same job as parseInt truncates the float
+      hours = (diff / (60 * 60)) | 0;
+      diff = (diff % (60 * 60)) | 0;
+      minutes = (diff / 60) | 0;
+      seconds = (diff % 60) | 0;
+
+      for (var i=0; i<displays.length; i++) {
+        if (hours > 0) {
+          displays[i].innerHTML = hours + ":" + minutes.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+        }
+        else if (minutes > 0) {
+          displays[i].innerHTML = minutes + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+        }
+        else {
+          displays[i].innerHTML = seconds + " seconds";
+        }
         if (diff0>20*60) {
-          diff-=20*60;
-        }
-
-        // does the same job as parseInt truncates the float
-        hours = (diff / (60 * 60)) | 0;
-        diff = (diff % (60 * 60)) | 0;
-        minutes = (diff / 60) | 0;
-        seconds = (diff % 60) | 0;
-
-        for (var i=0; i<displays.length; i++) {
           if (hours > 0) {
-            displays[i].innerHTML = hours + ":" + minutes.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
-          }
-          else if (minutes > 0) {
-            displays[i].innerHTML = minutes + ":" + seconds.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            displays[i].innerHTML += " + 00:20:00";
           }
           else {
-            displays[i].innerHTML = seconds + " seconds";
-          }
-          if (diff0>20*60) {
-            if (hours > 0) {
-              displays[i].innerHTML += " + 00:20:00";
-            }
-            else {
-              displays[i].innerHTML += " + 20:00";
-            }
-          }
-          else {
-            displays[i].innerHTML += " (Uploading Time)";
+            displays[i].innerHTML += " + 20:00";
           }
         }
-        if ((datetime - Date.now()) <= 0) {
-          console.log(datetime);
-          console.log(Date.now());
-          clearInterval(intervalVar);
-          location.reload();
+        else {
+          displays[i].innerHTML += " (Uploading Time)";
         }
-      };
-      // we don't want to wait a full second before the timer starts
-      timer();
-      var intervalVar = setInterval(timer, 1000);
+      }
+      if ((datetime - Date.now()) <= 0) {
+        console.log(datetime);
+        console.log(Date.now());
+        clearInterval(intervalVar);
+        location.reload();
+      }
     };
+    // we don't want to wait a full second before the timer starts
+    timer();
+    var intervalVar = setInterval(timer, 1000);
+  };
 
 
-    window.onload = function () {
-      var d = new Date();
-      var now = new Date(Date.now());
-      d.setUTCDate({{ UTCDate }}+(now.getUTCDate()-{{UTCDateNow}}));
-      d.setUTCMonth({{ UTCMonth }}+(now.getUTCMonth()-{{UTCMonthNow}}));
-      d.setUTCFullYear({{ UTCYear }}+(now.getUTCFullYear()-{{UTCYearNow}}));
-      d.setUTCHours({{ UTCHours }}+(now.getUTCHours()-{{UTCHoursNow}}));
-      d.setUTCMinutes({{ UTCMinutes }}+(now.getUTCMinutes()-{{UTCMinutesNow}}));
-      d.setUTCSeconds({{ UTCSeconds }}+(now.getUTCSeconds()-{{UTCSecondsNow}}));
-      var timer_display = document.querySelectorAll('.time');
-      startTimer(d.getTime(), timer_display);
-      // var que_display = document.querySelector('#nav-questions')
-      // display_question_numbers(que_display);
-    };
+  window.onload = function () {
+    var d = new Date();
+    var now = new Date(Date.now());
+    d.setUTCDate({{ UTCDate }}+(now.getUTCDate()-{{UTCDateNow}}));
+    d.setUTCMonth({{ UTCMonth }}+(now.getUTCMonth()-{{UTCMonthNow}}));
+    d.setUTCFullYear({{ UTCYear }}+(now.getUTCFullYear()-{{UTCYearNow}}));
+    d.setUTCHours({{ UTCHours }}+(now.getUTCHours()-{{UTCHoursNow}}));
+    d.setUTCMinutes({{ UTCMinutes }}+(now.getUTCMinutes()-{{UTCMinutesNow}}));
+    d.setUTCSeconds({{ UTCSeconds }}+(now.getUTCSeconds()-{{UTCSecondsNow}}));
+    var timer_display = document.querySelectorAll('.time');
+    startTimer(d.getTime(), timer_display);
+    // var que_display = document.querySelector('#nav-questions')
+    // display_question_numbers(que_display);
+  };
 
-    var currentQNo;
-    var answer_text="";
+  var currentQNo;
+  var answer_text="";
 
-    function getQuestion(questionNumber) {
-      if (!unsaved) {
-        document.getElementById('loading-overlay').style.display="block";
-        let csrftoken = getCookie('csrftoken');
-        fetch("{% url 'get_question' %}", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": csrftoken
-          },
-          body: JSON.stringify({"qnumber":questionNumber})
-        })
-        .then((response) => {
-          return response.json()
-        })
-        .then((data) => {
+  function getQuestion(questionNumber) {
+    if (!unsaved) {
+      document.getElementById('loading-overlay').style.display="block";
+      let csrftoken = getCookie('csrftoken');
+      fetch("{% url 'get_question' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({"qnumber":questionNumber})
+      })
+      .then((response) => {
+        return response.json()
+      })
+      .then((data) => {
 
-          document.getElementById('q-content').innerHTML=data["question"];
-          document.querySelector('.answer-section').innerHTML=data["answer"];
-          if (document.getElementById('answer-textarea')) {
-            answer_text=document.getElementById('answer-textarea').value;
-          }
-          else {
-            answer_text="";
-          }
-          document.getElementById("q-btn-"+currentQNo).classList.remove('active');
-          document.getElementById("q-btn-"+currentQNo).classList.remove('visited');
-          currentQNo=questionNumber;
-          document.getElementById("q-btn-"+currentQNo).classList.add('active');
-          document.getElementById("q-btn-"+currentQNo).classList.add('visited');
-          let forms=document.querySelectorAll(".answer-section-form");
-          for (var i = 0; i < forms.length; i++) {
-            forms[i].innerHTML='<input type="hidden" name="csrfmiddlewaretoken" value="'+"{{csrf_token}}"+'">'+forms[i].innerHTML;
-          }
-          // markQuestion.send(JSON.stringify({
-          //   "qnumber": currentQNo,
-          //   "status" : "visit",
-          //   "username" : "{{user.username}}",
-          // }));
-          initQuestionJS();
-          document.getElementById('loading-overlay').style.display="none";
-        })
-      }
-      else {
-        saveChangesPopup(()=>{
-          unsaved=false;
-          getQuestion(questionNumber);
-        })
-      }
-
-    }
-
-    function nextQuestion() {
-      if (currentQNo < {{ QCount }})
-      {
-        getQuestion(currentQNo+1);
-        // Qactive(currentQNo);
-      }
-    }
-
-    function prevQuestion() {
-      if (currentQNo > 1) {
-        getQuestion(currentQNo-1);
-        // Qactive(currentQNo);
-      }
-    }
-
-
-
-    function initQuestionJS() {
-      if (currentQNo == 1) {
-        document.getElementById('prev').setAttribute("disabled", "disabled");
-        document.getElementById('prev').style.opacity=0.5;
-      }
-      else {
-        document.getElementById('prev').removeAttribute("disabled");
-        document.getElementById('prev').style.opacity=1;
-      }
-      if (currentQNo == {{ QCount }})
-      {
-        document.getElementById('next').setAttribute("disabled", "disabled");
-        document.getElementById('next').style.opacity=0.5;
-      }
-      else {
-        document.getElementById('next').removeAttribute("disabled");
-        document.getElementById('next').style.opacity=1;
-      }
-
-      // testportal
-
-      // var syncBtnList=document.querySelectorAll(".sync-btn")
-      // for(var i = 0; i < syncBtnList.length; i++) {
-      //   syncBtnList[i].onclick= ()=>{
-      //     if (unsaved) {
-      //       saveChangesPopup(()=>{
-      //         location.reload();
-      //       });
-      //     }
-      //     else {
-      //       location.reload();
-      //     }
-      //   };
-      // }
-
-      document.getElementById('img-submit-popup-continue').onclick=()=>{
-        document.getElementById('img-submit-popup-continue').innerHTML="Processing request...";
-        document.getElementById('img-submit-popup-continue').style.opacity=0.5;
-        document.getElementById('img-submit-popup-continue').disabled=true;
-        document.getElementById('img-submit-popup-continue').onclick= function() {
-          return false;
-        };
-        var closePopupList = document.querySelectorAll(".close-popup");
-        for(var i = 0; i < closePopupList.length; i++) {
-          closePopupList[i].style.opacity=0.5;
-          closePopupList[i].disabled=true;
-          closePopupList[i].onclick = function() {
-            return false;
-          };
+        document.getElementById('q-content').innerHTML=data["question"];
+        document.querySelector('.answer-section').innerHTML=data["answer"];
+        if (document.getElementById('answer-textarea')) {
+          answer_text=document.getElementById('answer-textarea').value;
         }
-        document.getElementById('img-form').submit();
-      };
-      document.getElementById('txt-submit-popup-continue').onclick=()=>{
-        document.getElementById('txt-submit-popup-continue').innerHTML="Processing request...";
-        document.getElementById('txt-submit-popup-continue').style.opacity=0.5;
-        document.getElementById('txt-submit-popup-continue').disabled=true;
-        document.getElementById('txt-submit-popup-continue').onclick= function() {
-          return false;
-        };
-        var closePopupList = document.querySelectorAll(".close-popup");
-        for(var i = 0; i < closePopupList.length; i++) {
-          closePopupList[i].style.opacity=0.5;
-          closePopupList[i].disabled=true;
-          closePopupList[i].onclick = function() {
-            return false;
-          };
+        else {
+          answer_text="";
         }
-        document.getElementById('txt-form').submit();
+        document.getElementById("q-btn-"+currentQNo).classList.remove('active');
+        document.getElementById("q-btn-"+currentQNo).classList.remove('visited');
+        currentQNo=questionNumber;
+        document.getElementById("q-btn-"+currentQNo).classList.add('active');
+        document.getElementById("q-btn-"+currentQNo).classList.add('visited');
+        let forms=document.querySelectorAll(".answer-section-form");
+        for (var i = 0; i < forms.length; i++) {
+          forms[i].innerHTML='<input type="hidden" name="csrfmiddlewaretoken" value="'+"{{csrf_token}}"+'">'+forms[i].innerHTML;
+        }
+        // markQuestion.send(JSON.stringify({
+        //   "qnumber": currentQNo,
+        //   "status" : "visit",
+        //   "username" : "{{user.username}}",
+        // }));
+        initQuestionJS();
+        document.getElementById('loading-overlay').style.display="none";
+      })
+    }
+    else {
+      saveChangesPopup(()=>{
+        unsaved=false;
+        getQuestion(questionNumber);
+      })
+    }
+
+  }
+
+  function nextQuestion() {
+    if (currentQNo < {{ QCount }})
+    {
+      getQuestion(currentQNo+1);
+      // Qactive(currentQNo);
+    }
+  }
+
+  function prevQuestion() {
+    if (currentQNo > 1) {
+      getQuestion(currentQNo-1);
+      // Qactive(currentQNo);
+    }
+  }
+
+
+
+  function initQuestionJS() {
+    if (currentQNo == 1) {
+      document.getElementById('prev').setAttribute("disabled", "disabled");
+      document.getElementById('prev').style.opacity=0.5;
+    }
+    else {
+      document.getElementById('prev').removeAttribute("disabled");
+      document.getElementById('prev').style.opacity=1;
+    }
+    if (currentQNo == {{ QCount }})
+    {
+      document.getElementById('next').setAttribute("disabled", "disabled");
+      document.getElementById('next').style.opacity=0.5;
+    }
+    else {
+      document.getElementById('next').removeAttribute("disabled");
+      document.getElementById('next').style.opacity=1;
+    }
+
+    // testportal
+
+    // var syncBtnList=document.querySelectorAll(".sync-btn")
+    // for(var i = 0; i < syncBtnList.length; i++) {
+    //   syncBtnList[i].onclick= ()=>{
+    //     if (unsaved) {
+    //       saveChangesPopup(()=>{
+    //         location.reload();
+    //       });
+    //     }
+    //     else {
+    //       location.reload();
+    //     }
+    //   };
+    // }
+
+    document.getElementById('img-submit-popup-continue').onclick=()=>{
+      document.getElementById('img-submit-popup-continue').innerHTML="Processing request...";
+      document.getElementById('img-submit-popup-continue').style.opacity=0.5;
+      document.getElementById('img-submit-popup-continue').disabled=true;
+      document.getElementById('img-submit-popup-continue').onclick= function() {
+        return false;
       };
       var closePopupList = document.querySelectorAll(".close-popup");
       for(var i = 0; i < closePopupList.length; i++) {
-        closePopupList[i].style.opacity=1;
-        closePopupList[i].disabled=false;
-        closePopupList[i].onclick = closePopup.bind(this, closePopupList[i]);
-      }
-      var popupList = document.querySelectorAll(".popup");
-      for(var i = 0; i < popupList.length; i++) {
-        if (popupList[i].id!="start-screen") {
-          popupList[i].style.display="none";
-        }
-      }
-      var navBtnList = document.querySelectorAll(".nav-btn");
-      for(var i = 0; i < navBtnList.length; i++) {
-        navBtnList[i].onclick = getQuestion.bind(this, parseInt(navBtnList[i].innerHTML));
-      }
-      var mcqBtnList = document.querySelectorAll(".mcq-btn");
-      for(var i = 0; i < mcqBtnList.length; i++) {
-        mcqBtnList[i].oninput = answerChange;
-      }
-      var ttBtnList = document.querySelectorAll(".tt-btn");
-      for(var i = 0; i < ttBtnList.length; i++) {
-        ttBtnList[i].oninput = answerChange;
-      }
-      var clearResponseBtn=document.getElementById('clear-response-btn');
-      if (clearResponseBtn) {
-        clearResponseBtn.onclick = resetForm.bind(this, clearResponseBtn.form);
-      }
-
-      var clearToTOptionBtn=document.getElementById('clear-tot-opt-btn');
-      if (clearToTOptionBtn) {
-        clearToTOptionBtn.onclick=clearToTOption;
-      }
-
-      var markReviewBtn = document.querySelector(".mark-review");
-      if (markReviewBtn) {
-        markReviewBtn.onclick = markReview;
-      }
-      var markAnsweredBtn = document.querySelector(".mark-answered");
-      if (markAnsweredBtn) {
-        markAnsweredBtn.onclick = markAnswered;
-      }
-      var markedBtn = document.querySelector(".marked");
-      if (markedBtn) {
-        markedBtn.onclick = markUnanswered;
-      }
-
-      document.getElementById('prev').onclick = prevQuestion;
-      document.getElementById('next').onclick = nextQuestion;
-      var viewImgBtnList = document.querySelectorAll(".view-img-btn");
-      for(var i = 0; i < viewImgBtnList.length; i++) {
-        viewImgBtnList[i].onclick = viewImage.bind(this, viewImgBtnList[i]);
-      }
-      var delImgBtnList = document.querySelectorAll(".del-img-btn");
-      for(var i = 0; i < delImgBtnList.length; i++) {
-        delImgBtnList[i].onclick = deleteImage.bind(this, delImgBtnList[i]);
-      }
-      var moveImgUpBtnList = document.querySelectorAll(".move-img-up-btn");
-      for(var i = 0; i < moveImgUpBtnList.length; i++) {
-        moveImgUpBtnList[i].onclick = moveAnswerUp.bind(this, moveImgUpBtnList[i]);
-      }
-      var moveImgDownBtnList = document.querySelectorAll(".move-img-down-btn");
-      for(var i = 0; i < moveImgDownBtnList.length; i++) {
-        moveImgDownBtnList[i].onclick = moveAnswerDown.bind(this, moveImgDownBtnList[i]);
-      }
-      var answerTextarea = document.getElementById('answer-textarea');
-      if (answerTextarea) {
-        answerTextarea.oninput = answerChange;
-      }
-
-      // forms_card
-      var imgUploadTabBtn = document.getElementById('img-upload-tab-btn');
-      if (imgUploadTabBtn) {
-        imgUploadTabBtn.onclick = activateImgUploadForm;
-      }
-      var typeboxUploadTabBtn = document.getElementById('typebox-upload-tab-btn');
-      if (typeboxUploadTabBtn) {
-        typeboxUploadTabBtn.onclick = activateTextboxForm;
-      }
-      var uploadField = document.getElementById("id_file");
-
-      if (uploadField)
-      {
-        uploadField.onchange = function() {
-            if(this.files[0].size > 1572864000){
-               alert("File is too big!");
-               this.value = "";
-            };
-        };
-      }
-
-      if (document.getElementById('open-cam-btn')) {
-        console.log("heya");
-        document.getElementById('open-cam-btn').onclick = ()=>{
-          openCameraPopup();
-          camStartup();
-        };
-      }
-      if (document.getElementById('upload-photo-btn')) {
-        document.getElementById('upload-photo-btn').onclick = ()=>{
-          uploadWebcamPicture();
-        };
-      }
-    }
-
-
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById('chat-log').innerHTML="";
-      {% for log in chat_logs %}
-      document.getElementById('chat-log').innerHTML+="<div><b>{% if log.0 == team.proctor_user.username %}Proctor{% else %}{{log.0}}{% endif %}:</b>"+" {{log.1}}</div>";
-      {% endfor %}
-      document.getElementById('start-screen').style.display="block";
-    });
-
-    function saveChangesPopup(foo) {
-      document.getElementById('save-changes-popup').style.display="block";
-      document.getElementById('save-changes-popup-continue').onclick=()=>{
-        document.getElementById('save-changes-popup-continue').innerHTML="Processing request...";
-        document.getElementById('save-changes-popup-continue').style.opacity=0.5;
-        document.getElementById('save-changes-popup-continue').disabled=true;
-        document.getElementById('save-changes-popup-continue').onclick= function() {
+        closePopupList[i].style.opacity=0.5;
+        closePopupList[i].disabled=true;
+        closePopupList[i].onclick = function() {
           return false;
         };
-        var closePopupList = document.querySelectorAll(".close-popup");
-        for(var i = 0; i < closePopupList.length; i++) {
-          closePopupList[i].style.opacity=0.5;
-          closePopupList[i].disabled=true;
-          closePopupList[i].onclick = function() {
-            return false;
+      }
+      document.getElementById('img-form').submit();
+    };
+    document.getElementById('txt-submit-popup-continue').onclick=()=>{
+      document.getElementById('txt-submit-popup-continue').innerHTML="Processing request...";
+      document.getElementById('txt-submit-popup-continue').style.opacity=0.5;
+      document.getElementById('txt-submit-popup-continue').disabled=true;
+      document.getElementById('txt-submit-popup-continue').onclick= function() {
+        return false;
+      };
+      var closePopupList = document.querySelectorAll(".close-popup");
+      for(var i = 0; i < closePopupList.length; i++) {
+        closePopupList[i].style.opacity=0.5;
+        closePopupList[i].disabled=true;
+        closePopupList[i].onclick = function() {
+          return false;
+        };
+      }
+      document.getElementById('txt-form').submit();
+    };
+    var closePopupList = document.querySelectorAll(".close-popup");
+    for(var i = 0; i < closePopupList.length; i++) {
+      closePopupList[i].style.opacity=1;
+      closePopupList[i].disabled=false;
+      closePopupList[i].onclick = closePopup.bind(this, closePopupList[i]);
+    }
+    var popupList = document.querySelectorAll(".popup");
+    for(var i = 0; i < popupList.length; i++) {
+      if (popupList[i].id!="start-screen") {
+        popupList[i].style.display="none";
+      }
+    }
+    var navBtnList = document.querySelectorAll(".nav-btn");
+    for(var i = 0; i < navBtnList.length; i++) {
+      navBtnList[i].onclick = getQuestion.bind(this, parseInt(navBtnList[i].innerHTML));
+    }
+    var mcqBtnList = document.querySelectorAll(".mcq-btn");
+    for(var i = 0; i < mcqBtnList.length; i++) {
+      mcqBtnList[i].oninput = answerChange;
+    }
+    var ttBtnList = document.querySelectorAll(".tt-btn");
+    for(var i = 0; i < ttBtnList.length; i++) {
+      ttBtnList[i].oninput = answerChange;
+    }
+    var clearResponseBtn=document.getElementById('clear-response-btn');
+    if (clearResponseBtn) {
+      clearResponseBtn.onclick = resetForm.bind(this, clearResponseBtn.form);
+    }
+
+    var clearToTOptionBtn=document.getElementById('clear-tot-opt-btn');
+    if (clearToTOptionBtn) {
+      clearToTOptionBtn.onclick=clearToTOption;
+    }
+
+    var markReviewBtn = document.querySelector(".mark-review");
+    if (markReviewBtn) {
+      markReviewBtn.onclick = markReview;
+    }
+    var markAnsweredBtn = document.querySelector(".mark-answered");
+    if (markAnsweredBtn) {
+      markAnsweredBtn.onclick = markAnswered;
+    }
+    var markedBtn = document.querySelector(".marked");
+    if (markedBtn) {
+      markedBtn.onclick = markUnanswered;
+    }
+
+    document.getElementById('prev').onclick = prevQuestion;
+    document.getElementById('next').onclick = nextQuestion;
+    var viewImgBtnList = document.querySelectorAll(".view-img-btn");
+    for(var i = 0; i < viewImgBtnList.length; i++) {
+      viewImgBtnList[i].onclick = viewImage.bind(this, viewImgBtnList[i]);
+    }
+    var delImgBtnList = document.querySelectorAll(".del-img-btn");
+    for(var i = 0; i < delImgBtnList.length; i++) {
+      delImgBtnList[i].onclick = deleteImage.bind(this, delImgBtnList[i]);
+    }
+    var moveImgUpBtnList = document.querySelectorAll(".move-img-up-btn");
+    for(var i = 0; i < moveImgUpBtnList.length; i++) {
+      moveImgUpBtnList[i].onclick = moveAnswerUp.bind(this, moveImgUpBtnList[i]);
+    }
+    var moveImgDownBtnList = document.querySelectorAll(".move-img-down-btn");
+    for(var i = 0; i < moveImgDownBtnList.length; i++) {
+      moveImgDownBtnList[i].onclick = moveAnswerDown.bind(this, moveImgDownBtnList[i]);
+    }
+    var answerTextarea = document.getElementById('answer-textarea');
+    if (answerTextarea) {
+      answerTextarea.oninput = answerChange;
+    }
+
+    // forms_card
+    var imgUploadTabBtn = document.getElementById('img-upload-tab-btn');
+    if (imgUploadTabBtn) {
+      imgUploadTabBtn.onclick = activateImgUploadForm;
+    }
+    var typeboxUploadTabBtn = document.getElementById('typebox-upload-tab-btn');
+    if (typeboxUploadTabBtn) {
+      typeboxUploadTabBtn.onclick = activateTextboxForm;
+    }
+    var uploadField = document.getElementById("id_file");
+
+    if (uploadField)
+    {
+      uploadField.onchange = function() {
+          if(this.files[0].size > 1572864000){
+             alert("File is too big!");
+             this.value = "";
           };
-        }
-        initQuestionJS();
-        document.getElementById('save-changes-popup-continue').innerHTML="Continue";
-        document.getElementById('save-changes-popup-continue').style.opacity=1;
-        document.getElementById('save-changes-popup-continue').disabled=false;
-        foo();
       };
     }
 
-    function closePopup(ele) {
-      ele.closest('.popup').style.display="none";
+    if (document.getElementById('open-cam-btn')) {
+      console.log("heya");
+      document.getElementById('open-cam-btn').onclick = ()=>{
+        openCameraPopup();
+        camStartup();
+      };
     }
-
-    function clearToTOption() {
-      if (!unsaved)
-      {
-        document.getElementById('loading-overlay').style.display="block";
-        let csrftoken = getCookie('csrftoken');
-        fetch("{% url 'clear_t_options' %}", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": csrftoken
-          },
-          body: JSON.stringify({"qnumber":currentQNo})
-        })
-        .then(() => {
-          getQuestion(currentQNo);
-        })
-      }
-      else {
-        saveChangesPopup(()=>{
-          unsaved=false;
-          markAnswered();
-        });
-      }
+    if (document.getElementById('upload-photo-btn')) {
+      document.getElementById('upload-photo-btn').onclick = ()=>{
+        uploadWebcamPicture();
+      };
     }
+  }
 
-    const roomName='{{team.sequence}}';
-    const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    const markQuestion = new WebSocket(
-      ws_scheme+'://'
-      + window.location.host
-      + '/ws/mark-question/'
-      + roomName
-      + '/'
-    );
 
-    markQuestion.onmessage = function(e) {
-      console.log("received data from server");
-      const data = JSON.parse(e.data);
-      console.log(data);
-      if (data.status=="answered") {
-        document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-review");
-        document.getElementById('q-btn-'+data.qnumber).classList.add("btn-answered");
-        if (currentQNo==data.qnumber) {
-          if (document.querySelector('.mark-answered')) {
-            document.querySelector('.mark-answered').classList.add("marked");
-            document.querySelector('.mark-answered').innerHTML="Marked as Answered";
-          }
-          document.querySelector('.mark-review').classList.remove("marked");
-          document.querySelector('.mark-review').innerHTML="Mark for Review";
-          initQuestionJS();
-        }
-      }
-      else if (data.status=="review") {
-        document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-answered");
-        document.getElementById('q-btn-'+data.qnumber).classList.add("btn-review");
-        if (currentQNo==data.qnumber) {
-          if (document.querySelector('.mark-answered')) {
-            document.querySelector('.mark-answered').classList.remove("marked");
-            document.querySelector('.mark-answered').innerHTML="Mark as Answered";
-          }
-          document.querySelector('.mark-review').classList.add("marked");
-          document.querySelector('.mark-review').innerHTML="Marked for Review";
-          initQuestionJS();
-        }
-      }
-      else if (data.status=="unanswered") {
-        document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-answered");
-        document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-review");
-        if (currentQNo==data.qnumber) {
-          if (document.querySelector('.mark-answered')) {
-            document.querySelector('.mark-answered').classList.remove("marked");
-            document.querySelector('.mark-answered').innerHTML="Mark as Answered";
-          }
-          document.querySelector('.mark-review').classList.remove("marked");
-          document.querySelector('.mark-review').innerHTML="Mark for Review";
-          initQuestionJS();
-        }
-      }
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('chat-log').innerHTML="";
+    {% for log in chat_logs %}
+    document.getElementById('chat-log').innerHTML+="<div><b>{% if log.0 == team.proctor_user.username %}Proctor{% else %}{{log.0}}{% endif %}:</b>"+" {{log.1}}</div>";
+    {% endfor %}
+    document.getElementById('start-screen').style.display="block";
+  });
 
+  function saveChangesPopup(foo) {
+    document.getElementById('save-changes-popup').style.display="block";
+    document.getElementById('save-changes-popup-continue').onclick=()=>{
+      document.getElementById('save-changes-popup-continue').innerHTML="Processing request...";
+      document.getElementById('save-changes-popup-continue').style.opacity=0.5;
+      document.getElementById('save-changes-popup-continue').disabled=true;
+      document.getElementById('save-changes-popup-continue').onclick= function() {
+        return false;
+      };
+      var closePopupList = document.querySelectorAll(".close-popup");
+      for(var i = 0; i < closePopupList.length; i++) {
+        closePopupList[i].style.opacity=0.5;
+        closePopupList[i].disabled=true;
+        closePopupList[i].onclick = function() {
+          return false;
+        };
+      }
+      initQuestionJS();
+      document.getElementById('save-changes-popup-continue').innerHTML="Continue";
+      document.getElementById('save-changes-popup-continue').style.opacity=1;
+      document.getElementById('save-changes-popup-continue').disabled=false;
+      foo();
     };
+  }
 
-    markQuestion.onclose = function(e) {
-      console.error('Test socket closed unexpectedly');
-    };
+  function closePopup(ele) {
+    ele.closest('.popup').style.display="none";
+  }
 
-    function markAnswered() {
-      if (!unsaved)
-      {
-
-        document.getElementById('loading-overlay').style.display="block";
-        let csrftoken = getCookie('csrftoken');
-        fetch("{% url 'answered' %}", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": csrftoken
-          },
-          body: JSON.stringify({"qnumber":currentQNo})
-        })
-        .then(() => {
-          document.getElementById('q-btn-'+currentQNo).classList.remove("btn-review");
-          document.getElementById('q-btn-'+currentQNo).classList.add("btn-answered");
-          getQuestion(currentQNo);
-          markQuestion.send(JSON.stringify({
-            "qnumber": currentQNo,
-            "status" : "answered",
-            "username" : "{{user.username}}",
-          }));
-          console.log("sent data from browser to server");
-        })
-      }
-      else {
-        saveChangesPopup(()=>{
-          unsaved=false;
-          markAnswered();
-        });
-      }
-    }
-
-    function markReview() {
-
-      if (!unsaved) {
-        document.getElementById('loading-overlay').style.display="block";
-        let csrftoken = getCookie('csrftoken');
-        fetch("{% url 'review' %}", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": csrftoken
-          },
-          body: JSON.stringify({"qnumber":currentQNo})
-        })
-        .then(() => {
-          document.getElementById('q-btn-'+currentQNo).classList.remove("btn-answered");
-          document.getElementById('q-btn-'+currentQNo).classList.add("btn-review");
-          getQuestion(currentQNo);
-          markQuestion.send(JSON.stringify({
-            "qnumber": currentQNo,
-            "status" : "review",
-            "username" : "{{user.username}}",
-          }));
-        })
-      }
-      else {
-        saveChangesPopup(()=>{
-          unsaved=false;
-          markReview();
-        });
-      }
-    }
-
-    function markUnanswered() {
-      if (!unsaved) {
-        document.getElementById('loading-overlay').style.display="block";
-        let csrftoken = getCookie('csrftoken');
-        fetch("{% url 'unanswered' %}", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": csrftoken
-          },
-          body: JSON.stringify({"qnumber":currentQNo})
-        })
-        .then(() => {
-          document.getElementById('q-btn-'+currentQNo).classList.remove("btn-answered");
-          document.getElementById('q-btn-'+currentQNo).classList.remove("btn-review");
-          getQuestion(currentQNo);
-          markQuestion.send(JSON.stringify({
-            "qnumber": currentQNo,
-            "status" : "unanswered",
-            "username" : "{{user.username}}",
-          }));
-        })
-      }
-      else {
-        saveChangesPopup(()=>{
-          unsaved=false;
-          markUnanswered();
-        });
-      }
-    }
-
-    function viewImage(ele) {
-      document.getElementById('view-img-popup').style.display = "block";
-      document.getElementById('answer-img-container').innerHTML = "Loading... <br>";
-      page_no=ele.parentElement.dataset.pageno;
-      fetch(("{% url 'get_answer' qnumber=1 page_no=1 %}").substring(0, ("{% url 'get_answer' qnumber=1 page_no=1 %}").length - 3) + currentQNo + '/' + page_no)
-        .then(response => response.json())
-        .then((data) => {
-          var URI = data["image"];
-          document.getElementById('answer-img-container').innerHTML = "<img class='uploaded-img' src='" + URI + "'>";
-        })
-    }
-
-    function deleteImage(ele) {
-      let page_no=ele.parentElement.dataset.pageno;
-      ele.removeAttribute('onclick');
-      document.querySelector(".card").style.opacity=0.5;
+  function clearToTOption() {
+    if (!unsaved)
+    {
+      document.getElementById('loading-overlay').style.display="block";
       let csrftoken = getCookie('csrftoken');
-      fetch(("{% url 'del_answer' qnumber=1 page_no=1 %}").substring(0, ("{% url 'del_answer' qnumber=1 page_no=1 %}").length - 3) + currentQNo + '/' + page_no, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          "X-CSRFToken": csrftoken
-        },
-        body: null
-      })
-        .then(response => {
-          getQuestion(currentQNo);
-        })
-    }
-
-    async function moveAnswerUp(ele) {
-      let page_no=ele.parentElement.dataset.pageno;
-      ele.removeAttribute('onclick');
-      document.querySelector(".card").style.opacity=0.5;
-      let csrftoken = getCookie('csrftoken');
-      let response= await fetch("{% url 'move_up' %}", {
+      fetch("{% url 'clear_t_options' %}", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           "X-CSRFToken": csrftoken
         },
-        body: JSON.stringify({"qnumber":currentQNo, "page_no": page_no})
+        body: JSON.stringify({"qnumber":currentQNo})
       })
-      getQuestion(currentQNo);
+      .then(() => {
+        getQuestion(currentQNo);
+      })
+    }
+    else {
+      saveChangesPopup(()=>{
+        unsaved=false;
+        markAnswered();
+      });
+    }
+  }
+
+  const markQuestion = new WebSocket(
+    ws_scheme+'://'
+    + window.location.host
+    + '/ws/mark-question/'
+    + roomName
+    + '/'
+  );
+
+  markQuestion.onmessage = function(e) {
+    console.log("received data from server");
+    const data = JSON.parse(e.data);
+    console.log(data);
+    if (data.status=="answered") {
+      document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-review");
+      document.getElementById('q-btn-'+data.qnumber).classList.add("btn-answered");
+      if (currentQNo==data.qnumber) {
+        if (document.querySelector('.mark-answered')) {
+          document.querySelector('.mark-answered').classList.add("marked");
+          document.querySelector('.mark-answered').innerHTML="Marked as Answered";
+        }
+        document.querySelector('.mark-review').classList.remove("marked");
+        document.querySelector('.mark-review').innerHTML="Mark for Review";
+        initQuestionJS();
+      }
+    }
+    else if (data.status=="review") {
+      document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-answered");
+      document.getElementById('q-btn-'+data.qnumber).classList.add("btn-review");
+      if (currentQNo==data.qnumber) {
+        if (document.querySelector('.mark-answered')) {
+          document.querySelector('.mark-answered').classList.remove("marked");
+          document.querySelector('.mark-answered').innerHTML="Mark as Answered";
+        }
+        document.querySelector('.mark-review').classList.add("marked");
+        document.querySelector('.mark-review').innerHTML="Marked for Review";
+        initQuestionJS();
+      }
+    }
+    else if (data.status=="unanswered") {
+      document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-answered");
+      document.getElementById('q-btn-'+data.qnumber).classList.remove("btn-review");
+      if (currentQNo==data.qnumber) {
+        if (document.querySelector('.mark-answered')) {
+          document.querySelector('.mark-answered').classList.remove("marked");
+          document.querySelector('.mark-answered').innerHTML="Mark as Answered";
+        }
+        document.querySelector('.mark-review').classList.remove("marked");
+        document.querySelector('.mark-review').innerHTML="Mark for Review";
+        initQuestionJS();
+      }
     }
 
-    async function moveAnswerDown(ele) {
-      let page_no=ele.parentElement.dataset.pageno;
-      ele.removeAttribute('onclick');
-      document.querySelector(".card").style.opacity=0.5;
+  };
+
+  markQuestion.onclose = function(e) {
+    console.error('Test socket closed unexpectedly');
+  };
+
+  function markAnswered() {
+    if (!unsaved)
+    {
+
+      document.getElementById('loading-overlay').style.display="block";
       let csrftoken = getCookie('csrftoken');
-      let response= await fetch("{% url 'move_down' %}", {
+      fetch("{% url 'answered' %}", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           "X-CSRFToken": csrftoken
         },
-        body: JSON.stringify({"qnumber":currentQNo, "page_no": page_no})
+        body: JSON.stringify({"qnumber":currentQNo})
       })
-      getQuestion(currentQNo);
+      .then(() => {
+        document.getElementById('q-btn-'+currentQNo).classList.remove("btn-review");
+        document.getElementById('q-btn-'+currentQNo).classList.add("btn-answered");
+        getQuestion(currentQNo);
+        markQuestion.send(JSON.stringify({
+          "qnumber": currentQNo,
+          "status" : "answered",
+          "username" : "{{user.username}}",
+        }));
+        console.log("sent data from browser to server");
+      })
     }
+    else {
+      saveChangesPopup(()=>{
+        unsaved=false;
+        markAnswered();
+      });
+    }
+  }
 
-    function resetForm(form) {
-    // clearing inputs
-      answerChange();
-      var inputs = form.getElementsByTagName('input');
-      for (var i = 0; i<inputs.length; i++) {
-          switch (inputs[i].type) {
-              // case 'hidden':
-              case 'text':
-                  inputs[i].value = '';
-                  break;
-              case 'radio':
-              case 'checkbox':
-                  inputs[i].checked = false;
-          }
-      }
+  function markReview() {
 
-      // clearing selects
-      var selects = form.getElementsByTagName('select');
-      for (var i = 0; i<selects.length; i++)
-          selects[i].selectedIndex = 0;
+    if (!unsaved) {
+      document.getElementById('loading-overlay').style.display="block";
+      let csrftoken = getCookie('csrftoken');
+      fetch("{% url 'review' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({"qnumber":currentQNo})
+      })
+      .then(() => {
+        document.getElementById('q-btn-'+currentQNo).classList.remove("btn-answered");
+        document.getElementById('q-btn-'+currentQNo).classList.add("btn-review");
+        getQuestion(currentQNo);
+        markQuestion.send(JSON.stringify({
+          "qnumber": currentQNo,
+          "status" : "review",
+          "username" : "{{user.username}}",
+        }));
+      })
+    }
+    else {
+      saveChangesPopup(()=>{
+        unsaved=false;
+        markReview();
+      });
+    }
+  }
 
-      // clearing textarea
-      var text= form.getElementsByTagName('textarea');
-      for (var i = 0; i<text.length; i++)
-          text[i].innerHTML= '';
+  function markUnanswered() {
+    if (!unsaved) {
+      document.getElementById('loading-overlay').style.display="block";
+      let csrftoken = getCookie('csrftoken');
+      fetch("{% url 'unanswered' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({"qnumber":currentQNo})
+      })
+      .then(() => {
+        document.getElementById('q-btn-'+currentQNo).classList.remove("btn-answered");
+        document.getElementById('q-btn-'+currentQNo).classList.remove("btn-review");
+        getQuestion(currentQNo);
+        markQuestion.send(JSON.stringify({
+          "qnumber": currentQNo,
+          "status" : "unanswered",
+          "username" : "{{user.username}}",
+        }));
+      })
+    }
+    else {
+      saveChangesPopup(()=>{
+        unsaved=false;
+        markUnanswered();
+      });
+    }
+  }
 
-      return false;
+  function viewImage(ele) {
+    document.getElementById('view-img-popup').style.display = "block";
+    document.getElementById('answer-img-container').innerHTML = "Loading... <br>";
+    page_no=ele.parentElement.parentElement.dataset.pageno;
+    fetch(("{% url 'get_answer' qnumber=1 page_no=1 %}").substring(0, ("{% url 'get_answer' qnumber=1 page_no=1 %}").length - 3) + currentQNo + '/' + page_no)
+      .then(response => response.json())
+      .then((data) => {
+        var URI = data["image"];
+        document.getElementById('answer-img-container').innerHTML = "<img class='uploaded-img' src='" + URI + "'>";
+      })
+  }
+
+  function deleteImage(ele) {
+    let page_no=ele.parentElement.dataset.pageno;
+    ele.removeAttribute('onclick');
+    document.querySelector(".card").style.opacity=0.5;
+    let csrftoken = getCookie('csrftoken');
+    fetch(("{% url 'del_answer' qnumber=1 page_no=1 %}").substring(0, ("{% url 'del_answer' qnumber=1 page_no=1 %}").length - 3) + currentQNo + '/' + page_no, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        "X-CSRFToken": csrftoken
+      },
+      body: null
+    })
+      .then(response => {
+        getQuestion(currentQNo);
+      })
+  }
+
+  async function moveAnswerUp(ele) {
+    let page_no=ele.parentElement.dataset.pageno;
+    ele.removeAttribute('onclick');
+    document.querySelector(".card").style.opacity=0.5;
+    let csrftoken = getCookie('csrftoken');
+    let response= await fetch("{% url 'move_up' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        "X-CSRFToken": csrftoken
+      },
+      body: JSON.stringify({"qnumber":currentQNo, "page_no": page_no})
+    })
+    getQuestion(currentQNo);
+  }
+
+  async function moveAnswerDown(ele) {
+    let page_no=ele.parentElement.dataset.pageno;
+    ele.removeAttribute('onclick');
+    document.querySelector(".card").style.opacity=0.5;
+    let csrftoken = getCookie('csrftoken');
+    let response= await fetch("{% url 'move_down' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        "X-CSRFToken": csrftoken
+      },
+      body: JSON.stringify({"qnumber":currentQNo, "page_no": page_no})
+    })
+    getQuestion(currentQNo);
+  }
+
+  function resetForm(form) {
+  // clearing inputs
+    answerChange();
+    var inputs = form.getElementsByTagName('input');
+    for (var i = 0; i<inputs.length; i++) {
+        switch (inputs[i].type) {
+            // case 'hidden':
+            case 'text':
+                inputs[i].value = '';
+                break;
+            case 'radio':
+            case 'checkbox':
+                inputs[i].checked = false;
+        }
+    }
+    // clearing selects
+    var selects = form.getElementsByTagName('select');
+    for (var i = 0; i<selects.length; i++)
+    {
+      selects[i].selectedIndex = 0;
+    }
+    // clearing textarea
+    var text= form.getElementsByTagName('textarea');
+    for (var i = 0; i<text.length; i++)
+    {
+      text[i].innerHTML= '';
+    }
+    return false;
   }
 
   function activateTextboxForm() {

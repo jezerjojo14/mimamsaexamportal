@@ -2,6 +2,11 @@
 {% block script %}
 <script type="text/javascript">
   const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+  const logSocket = new WebSocket(
+    ws_scheme+'://'
+    + window.location.host
+    + '/ws/log/{{team.sequence}}/'
+  );
 
   function makeid(length) {
     var result = [];
@@ -12,6 +17,7 @@
     }
     return result.join('');
   }
+  
   function submitChatInput(e) {
     if (e.keyCode === 13) {  // enter, return
       document.querySelector('#chatbox-{{team.team_id}}-submit').click();
@@ -41,6 +47,11 @@
       document.querySelector('.'+data.code).scrollIntoView({ behavior: "smooth", block: "end" });
     }
   };
+
+  logSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    alert(data.log);
+  }
 
   chatSocket.onclose = function(e) {
     console.error('Chat socket closed unexpectedly');
