@@ -82,16 +82,16 @@ class Migration(migrations.Migration):
                 ('chatlog_start', models.IntegerField(default=0)),
             ],
         ),
-        migrations.CreateModel(
-            name='Fishylog',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('username', models.TextField()),
-                ('popup_opentime', models.DateTimeField()),
-                ('actionCommited', models.TextField()),
-                ('popup_closetime', models.DateTimeField(default=None, null=True)),
-            ],
-        ),
+        # migrations.CreateModel(
+        #     name='Fishylog',
+        #     fields=[
+        #         ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+        #         ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+        #         ('popup_opentime', models.DateTimeField()),
+        #         ('actionCommited', models.TextField()),
+        #         ('popup_closetime', models.DateTimeField(default=None, null=True)),
+        #     ],
+        # ),
         migrations.CreateModel(
             name='GlobalVariables',
             fields=[
