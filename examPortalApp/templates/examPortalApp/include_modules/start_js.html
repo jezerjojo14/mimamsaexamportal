@@ -72,6 +72,8 @@
           document.getElementById('videos-container-prev-ele').parentNode.insertBefore(document.getElementById('videos-container'), document.getElementById('videos-container-prev-ele').nextSibling);
           document.getElementById('video-call-area').parentNode.insertBefore(document.getElementById('chat-area'), document.getElementById('video-call-area').nextSibling);
           document.getElementById('start-screen').style.display="none";
+          document.getElementById('start-screen').style.position="absolute";
+          document.getElementById('start-screen').style.height=0;
           currentQNo=1;
           proctorStart()
           initQuestionJS();
