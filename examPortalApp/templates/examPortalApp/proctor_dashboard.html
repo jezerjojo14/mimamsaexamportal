@@ -111,7 +111,7 @@
     <div id="videos-container">
       {% for ordering in team.ordering_set.all %}
       <div class="video-container video-container-{{team.team_id}}-{{ordering.order_index}}" style="color: white">
-        <video autoplay id="video-{{team.team_id}}-{{ordering.order_index}}">
+        <video id="video-{{team.team_id}}-{{ordering.order_index}}" autoplay loop muted playsinline>
         </video>
         <br>&nbsp;{{ordering.user_instance.username}}<br><br>
       </div>

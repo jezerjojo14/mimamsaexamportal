@@ -89,7 +89,7 @@
           <hr style="border-color: #fff0; flex-basis: 100%; margin: 0">
           {% endif %}
           <div class="video-container" id="video-container{{team.team_id}}-{{forloop.counter}}">
-            <video autoplay id="video-{{team.team_id}}-{{forloop.counter}}">
+            <video id="video-{{team.team_id}}-{{forloop.counter}}" autoplay loop muted playsinline>
             </video>
           </div>
           {% endfor %}
@@ -187,7 +187,7 @@
         <div id="camera-popup" class="popup">
           <div class="popup-message">
             <div class="camera">
-              <video id="video">Video stream not available.</video>
+              <video id="video" autoplay loop muted playsinline>Video stream not available.</video>
             </div>
             <div><button id="startbutton">Take photo</button></div>
             <div><button id="upload-photo-btn">Upload photo</button></div>
