@@ -64,6 +64,9 @@
           var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
           rfs.call(el);
         }
+        catch (e) {
+          console.error("Fullscreen not possible");
+        }
       });
     };
 

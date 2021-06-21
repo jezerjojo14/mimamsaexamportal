@@ -63,6 +63,9 @@
             var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
             rfs.call(el);
           }
+          catch (e) {
+            console.error("Fullscreen not possible");
+          }
           console.log(mainContent);
           // mainContent.after(document.getElementById('start-screen'));
           document.getElementById('start-screen').parentNode.insertBefore(mainContent, document.getElementById('start-screen').nextSibling);
