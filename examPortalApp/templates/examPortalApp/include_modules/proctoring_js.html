@@ -59,9 +59,11 @@
     //Fullscreen on click
     function fullScreen(){
       addEventListener("click", function() {
-        var el = document.documentElement;
-        var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
-        rfs.call(el);
+        try {
+          var el = document.documentElement;
+          var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
+          rfs.call(el);
+        }
       });
     };
 

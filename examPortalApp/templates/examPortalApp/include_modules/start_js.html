@@ -58,9 +58,11 @@
         document.getElementById('enter-test-btn').style.opacity=1;
         document.getElementById('enter-test-btn').innerHTML="Enter test";
         document.getElementById('enter-test-btn').onclick = ()=>{
-          var el = document.documentElement;
-          var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
-          rfs.call(el);
+          try {
+            var el = document.documentElement;
+            var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
+            rfs.call(el);
+          }
           console.log(mainContent);
           // mainContent.after(document.getElementById('start-screen'));
           document.getElementById('start-screen').parentNode.insertBefore(mainContent, document.getElementById('start-screen').nextSibling);

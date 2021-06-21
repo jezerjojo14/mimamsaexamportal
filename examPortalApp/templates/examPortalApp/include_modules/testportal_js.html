@@ -585,7 +585,7 @@
   }
 
   function deleteImage(ele) {
-    let page_no=ele.parentElement.dataset.pageno;
+    let page_no=ele.parentElement.parentElement.dataset.pageno;
     ele.removeAttribute('onclick');
     document.querySelector(".card").style.opacity=0.5;
     let csrftoken = getCookie('csrftoken');
@@ -603,7 +603,7 @@
   }
 
   async function moveAnswerUp(ele) {
-    let page_no=ele.parentElement.dataset.pageno;
+    let page_no=ele.parentElement.parentElement.dataset.pageno;
     ele.removeAttribute('onclick');
     document.querySelector(".card").style.opacity=0.5;
     let csrftoken = getCookie('csrftoken');
@@ -619,7 +619,7 @@
   }
 
   async function moveAnswerDown(ele) {
-    let page_no=ele.parentElement.dataset.pageno;
+    let page_no=ele.parentElement.parentElement.dataset.pageno;
     ele.removeAttribute('onclick');
     document.querySelector(".card").style.opacity=0.5;
     let csrftoken = getCookie('csrftoken');
