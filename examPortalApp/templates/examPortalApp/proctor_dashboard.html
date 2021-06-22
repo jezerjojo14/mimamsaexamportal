@@ -110,8 +110,8 @@
     <h2>{{team.team_id}}</h2>
     <div id="videos-container">
       {% for ordering in team.ordering_set.all %}
-      <div class="video-container video-container-{{team.team_id}}-{{ordering.order_index}}" style="color: white">
-        <video id="video-{{team.team_id}}-{{ordering.order_index}}" autoplay loop playsinline>
+      <div class="video-container video-container-{{team.team_id}}-{{ordering.order_index}}" style="text-align: center; color: white">
+        <video id="video-{{team.team_id}}-{{ordering.order_index}}" autoplay loop playsinline style="max-height: 100%">
         </video>
         <br>&nbsp;{{ordering.user_instance.username}}<br><br>
       </div>

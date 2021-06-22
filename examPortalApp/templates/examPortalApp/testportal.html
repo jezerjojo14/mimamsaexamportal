@@ -88,8 +88,8 @@
           {% if forloop.counter == 3 %}
           <hr style="border-color: #fff0; flex-basis: 100%; margin: 0">
           {% endif %}
-          <div class="video-container" id="video-container{{team.team_id}}-{{forloop.counter}}">
-            <video id="video-{{team.team_id}}-{{forloop.counter}}" autoplay loop playsinline>
+          <div class="video-container" id="video-container{{team.team_id}}-{{forloop.counter}}" style="text-align: center">
+            <video id="video-{{team.team_id}}-{{forloop.counter}}" autoplay loop playsinline style="max-height: 100%">
             </video>
           </div>
           {% endfor %}
