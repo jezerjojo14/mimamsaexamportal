@@ -756,6 +756,7 @@ def del_answer(request, page_no, qnumber):
             s3.delete_object(Bucket='mimamsauploadedanswers', Key=subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+filename+'.jpeg')
             af.delete()
 
+
             #noofpages=5
             #page_no=2
 

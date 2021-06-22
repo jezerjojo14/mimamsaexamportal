@@ -36,6 +36,7 @@
         {% if user.user_type == 'participant' %}
         {% if team.finished %}
         <a href="{% url 'test_no' %}">Feedback form</a>
+        <br>
         {% else %}
         {% if user.entered_test %}
         The exam is already open on a different device (Click <a href="{% url 'test_changedevice' %}">here</a> if this isn't the case)
