@@ -153,18 +153,14 @@
      * RTCPeerConnection configuration
      */
     const configuration = {
-      iceservers: [
-        {
-          urls: 'turn:13.233.105.7:3478',
-          username: 'mimamsa',
-          credential: 'mimamsa',
-        },
-
-        {
-          urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "stun:stun3.l.google.com:19302", "stun:stun3.l.google.com:19302"]
-        }
-      ]
-    }
+      iceServers: [{
+        urls: 'turn:13.233.105.7:3478',
+        username: 'mimamsa',
+        credential: 'mimamsa',
+      }, {
+        urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "stun:stun3.l.google.com:19302", "stun:stun3.l.google.com:19302"]
+      }]
+    };
 
     /**
      * UserMedia constraints
