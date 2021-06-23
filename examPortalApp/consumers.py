@@ -359,9 +359,9 @@ class VideoConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
         user = self.scope["user"]
-        id = text_data_json['id']
         if message=='initSend':
             # Send message to room group
+            id = text_data_json['id']
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
                 {
@@ -374,6 +374,7 @@ class VideoConsumer(WebsocketConsumer):
             )
         if message=='signal':
             # Send message to room group
+            id = text_data_json['id']
             signal = text_data_json['signal']
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,

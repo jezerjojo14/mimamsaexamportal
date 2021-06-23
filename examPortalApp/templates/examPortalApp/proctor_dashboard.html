@@ -2,6 +2,9 @@
 {% load static %}
 {% block script %}
 <script type="text/javascript">
+  // if (location.protocol !== 'https:') {
+  //   location.replace(`https:${location.href.substring(location.protocol.length)}`);
+  // }
   const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
   const logSocket = new WebSocket(
     ws_scheme+'://'
@@ -226,6 +229,7 @@
           console.log("ping");
           tm = setTimeout(function () {
             try {
+              console.log("too slow");
               videoSignalSocket.close();
             } catch(e) {
               console.log(e);
@@ -240,7 +244,7 @@
           clearTimeout(tm);
         }
         videoSignalSocket.onopen = function () {
-          ti = setInterval(ping, 25000);
+          ti = setInterval(ping, 15000);
         }
     }
 
