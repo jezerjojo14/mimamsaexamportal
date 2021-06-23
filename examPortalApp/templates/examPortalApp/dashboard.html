@@ -49,8 +49,12 @@
         {% endif %}
         {% endif %}
         {% if user.user_type == 'proctor' %}
+        {% if team.finished %}
+        Exam is over
+        {% else %}
         <a href="{% url 'proctor_view' %}">Proctor dashboard</a>
         <br>
+        {% endif %}
         {% endif %}
         <a href="{% url 'instructions' %}">Exam portal instructions</a>
         <br>

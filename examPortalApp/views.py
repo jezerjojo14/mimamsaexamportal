@@ -431,7 +431,10 @@ def undo_end_test(request):
 def dashboard(request):
     if request.user.is_authenticated:
         if request.user.passwordSet or request.user.username=="admin":
-            team=request.user.team_set.first()
+            if request.user.user_type=="proctor":
+                team=request.user.team_set.first()
+            if request.user.user_type=="participant":
+                team=request.user.proctored_teams.first()
             return render(request, "examPortalApp/dashboard.html", {"team": team})
         else:
             return HttpResponseRedirect(reverse("change_password"))
@@ -454,6 +457,7 @@ def instructions(request):
 @login_required(login_url='/')
 def test_changedevice(request):
     request.user.entered_test=False
+    request.user.started_test=False
     request.user.save()
     team=request.user.team_set.first()
     channel_layer = get_channel_layer()
@@ -562,6 +566,8 @@ def open_test(request):
 @login_required
 def proctor_view(request):
     if request.user.user_type!="proctor":
+        return HttpResponseRedirect(reverse("dashboard"))
+    if (request.user.proctored_teams.first()).finished:
         return HttpResponseRedirect(reverse("dashboard"))
     team=request.user.proctored_teams.first()
     room_model=ChatRoom.objects.get_or_create(team_instance=team, defaults={'chatlog_start': 0})[0]

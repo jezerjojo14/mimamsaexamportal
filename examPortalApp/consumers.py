@@ -386,6 +386,21 @@ class VideoConsumer(WebsocketConsumer):
                     }
                 }
             )
+        if message=='ping':
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'ping',
+                    'message': {
+                        'from': user.username,
+                    }
+                }
+            )
+
+    def ping(self, event):
+        if (self.scope["user"]).username==event["message"]["from"]:
+            self.send(text_data=json.dumps({"message": "pong"}))
+
 
     def init_send(self, event):
         print("init_send")

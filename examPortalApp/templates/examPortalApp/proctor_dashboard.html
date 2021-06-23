@@ -72,6 +72,15 @@
         "message": "start",
       }));
     }
+
+    startSocket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      console.log(data);
+      if (data["message"] == "end") {
+        location.reload();
+      }
+    }
+
     document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML="";
     {% for log in chat_logs %}
     document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML+="<div><b>{% if log.0 == team.proctor_user.username %}Proctor{% else %}{{log.0}}{% endif %}:</b>"+" {{log.1}}</div>";
@@ -132,11 +141,6 @@
 
   <script src="{% static 'examPortalApp/js/simplepeer.min.js' %}"></script>
   <script type="text/javascript">
-    const videoSignalSocket = new WebSocket(
-      ws_scheme+'://'
-      + window.location.host
-      + '/ws/video-signal/{{team.sequence}}/'
-    );
 
     /**
      * The stream object used to send media
@@ -158,7 +162,7 @@
         username: 'mimamsa',
         credential: 'mimamsa',
       }, {
-        urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "stun:stun3.l.google.com:19302", "stun:stun3.l.google.com:19302"]
+        urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun3.l.google.com:19302"]
       }]
     };
 
@@ -172,10 +176,21 @@
     /**
      * initialize the socket connections
      */
+
+    var videoSignalSocket;
+
     function init() {
         console.log("init");
+        videoSignalSocket = new WebSocket(
+          ws_scheme+'://'
+          + window.location.host
+          + '/ws/video-signal/{{team.sequence}}/'
+        );
         videoSignalSocket.onmessage = function(e) {
           const data = JSON.parse(e.data);
+          if (data.message == 'pong') {
+              pong();
+          }
           if (data.message == "initReceive") {
             console.log('INIT RECEIVE ' + data.id)
             addPeer(data.id, false)
@@ -201,6 +216,27 @@
           else if (data.message == 'signal') {
             peers[data.id].signal(data.signal)
           }
+        }
+        var tm, ti;
+        function ping() {
+          videoSignalSocket.send(JSON.stringify({
+            "message": "ping",
+          }));
+          tm = setTimeout(function () {
+            try {
+              videoSignalSocket.close();
+            } finally {
+              init();
+              clearInterval(ti);
+            }
+          }, 8000);
+        }
+
+        function pong() {
+          clearTimeout(tm);
+        }
+        videoSignalSocket.onopen = function () {
+          ti = setInterval(ping, 25000);
         }
     }
 

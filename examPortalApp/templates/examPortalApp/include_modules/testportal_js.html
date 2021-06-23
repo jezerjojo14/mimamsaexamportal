@@ -1,6 +1,10 @@
 
 <script type="text/javascript">
 
+  if (location.protocol !== 'https:') {
+    location.replace(`https:${location.href.substring(location.protocol.length)}`);
+  }
+
   const roomName='{{team.sequence}}';
   const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
   const logSocket = new WebSocket(
@@ -745,6 +749,12 @@
       input2.files = container.files;
       form.appendChild(input2);
       document.body.appendChild(form);
+      form.style.display="none";
+      form.style.position="absolute";
+      form.style.height=0;
+      form.style.margin=0;
+      form.style.padding=0;
+      form.style.left= -9999;
       // form.submit();
       fetch(form.action, {
         method: form.method,

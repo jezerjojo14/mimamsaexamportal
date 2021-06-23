@@ -3,13 +3,17 @@
 
 {% block script %}
 <script type="text/javascript">
+  if (location.protocol !== 'https:') {
+    location.replace(`https:${location.href.substring(location.protocol.length)}`);
+  }
   function closePopup(ele) {
     ele.closest('.popup').style.display="none";
   }
   document.addEventListener("DOMContentLoaded", ()=>{
-    var openCameraBtn = document.querySelector("#open-cam-btn");
-    openCameraBtn.onclick = openCameraPopup;
-
+    document.getElementById('open-cam-btn').onclick = ()=>{
+      openCameraPopup();
+      camStartup();
+    };
   })
   function openCameraPopup() {
     document.getElementById('camera-popup').style.display="block";
