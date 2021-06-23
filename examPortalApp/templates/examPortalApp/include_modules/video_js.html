@@ -119,6 +119,8 @@
         tm = setTimeout(function () {
           try {
             videoSignalSocket.close();
+          } catch(e) {
+            console.log(e);
           } finally {
             init();
             clearInterval(ti);

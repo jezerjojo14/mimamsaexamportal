@@ -189,6 +189,7 @@
         videoSignalSocket.onmessage = function(e) {
           const data = JSON.parse(e.data);
           if (data.message == 'pong') {
+            console.log("pong");
             pong();
           }
           if (data.message == "initReceive") {
@@ -222,9 +223,12 @@
           videoSignalSocket.send(JSON.stringify({
             "message": "ping",
           }));
+          console.log("ping");
           tm = setTimeout(function () {
             try {
               videoSignalSocket.close();
+            } catch(e) {
+              console.log(e);
             } finally {
               init();
               clearInterval(ti);
