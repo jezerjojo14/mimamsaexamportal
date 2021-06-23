@@ -51,6 +51,7 @@
         {% if user.user_type == 'proctor' %}
         {% if team.finished %}
         Exam is over
+        <br>
         {% else %}
         <a href="{% url 'proctor_view' %}">Proctor dashboard</a>
         <br>
