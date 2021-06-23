@@ -189,7 +189,7 @@
         videoSignalSocket.onmessage = function(e) {
           const data = JSON.parse(e.data);
           if (data.message == 'pong') {
-              pong();
+            pong();
           }
           if (data.message == "initReceive") {
             console.log('INIT RECEIVE ' + data.id)
@@ -207,14 +207,14 @@
             console.log('removing peer ' + data.id)
             removePeer(data.id)
           }
-          else if (data.message == 'disconnect') {
-            console.log('GOT DISCONNECTED')
-            for (let id in peers) {
-              removePeer(id)
-            }
-          }
           else if (data.message == 'signal') {
             peers[data.id].signal(data.signal)
+          }
+        }
+        videoSignalSocket.onclose = function(e) {
+          console.log('GOT DISCONNECTED')
+          for (let id in peers) {
+            removePeer(id)
           }
         }
         var tm, ti;

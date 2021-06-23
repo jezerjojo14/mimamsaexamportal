@@ -50,19 +50,12 @@
         ideal: "user"
     }
 
-    let videoSignalSocket;
+    var videoSignalSocket;
 
     // enabling the camera at startup
     navigator.mediaDevices.getUserMedia(constraints).then(stream => {
         console.log('Received local stream');
 
-        videoSignalSocket = new WebSocket(
-          ws_scheme+'://'
-          + window.location.host
-          + '/ws/video-signal/'
-          + roomName
-          + '/'
-        );
         document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').srcObject=stream;
         document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').muted=true;
         localStream = stream;
@@ -74,38 +67,71 @@
     /**
      * initialize the socket connections
      */
+
     function init() {
 
-        videoSignalSocket.onmessage = function(e) {
-          const data = JSON.parse(e.data);
-          console.log(data);
-          if (data.message == "initReceive") {
-            console.log('INIT RECEIVE ' + data.id)
-            addPeer(data.id, false)
-            videoSignalSocket.send(JSON.stringify({
-              "message": 'initSend',
-              "id":data.id,
-            }));
-          }
-          else if (data.message == 'initSend') {
-            console.log('INIT SEND ' + data.id)
-            addPeer(data.id, true)
-          }
-          else if (data.message == 'removePeer') {
-            console.log('removing peer ' + data.id)
-            removePeer(data.id)
-          }
-          else if (data.message == 'signal') {
-            peers[data.id].signal(data.signal)
-          }
-        }
+      videoSignalSocket = new WebSocket(
+        ws_scheme+'://'
+        + window.location.host
+        + '/ws/video-signal/'
+        + roomName
+        + '/'
+      );
 
-        videoSignalSocket.onclose = function(e) {
-          console.log('GOT DISCONNECTED')
-          for (let id in peers) {
-            removePeer(id)
-          }
+      videoSignalSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        console.log(data);
+        if (data.message == 'pong') {
+          pong();
         }
+        if (data.message == "initReceive") {
+          console.log('INIT RECEIVE ' + data.id)
+          addPeer(data.id, false)
+          videoSignalSocket.send(JSON.stringify({
+            "message": 'initSend',
+            "id":data.id,
+          }));
+        }
+        else if (data.message == 'initSend') {
+          console.log('INIT SEND ' + data.id)
+          addPeer(data.id, true)
+        }
+        else if (data.message == 'removePeer') {
+          console.log('removing peer ' + data.id)
+          removePeer(data.id)
+        }
+        else if (data.message == 'signal') {
+          peers[data.id].signal(data.signal)
+        }
+      }
+
+      videoSignalSocket.onclose = function(e) {
+        console.log('GOT DISCONNECTED')
+        for (let id in peers) {
+          removePeer(id)
+        }
+      }
+      var tm, ti;
+      function ping() {
+        videoSignalSocket.send(JSON.stringify({
+          "message": "ping",
+        }));
+        tm = setTimeout(function () {
+          try {
+            videoSignalSocket.close();
+          } finally {
+            init();
+            clearInterval(ti);
+          }
+        }, 8000);
+      }
+
+      function pong() {
+        clearTimeout(tm);
+      }
+      videoSignalSocket.onopen = function () {
+        ti = setInterval(ping, 25000);
+      }
     }
 
 
