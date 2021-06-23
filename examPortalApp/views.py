@@ -432,9 +432,9 @@ def dashboard(request):
     if request.user.is_authenticated:
         if request.user.passwordSet or request.user.username=="admin":
             if request.user.user_type=="proctor":
-                team=request.user.team_set.first()
-            if request.user.user_type=="participant":
                 team=request.user.proctored_teams.first()
+            if request.user.user_type=="participant":
+                team=request.user.team_set.first()
             return render(request, "examPortalApp/dashboard.html", {"team": team})
         else:
             return HttpResponseRedirect(reverse("change_password"))
