@@ -1,9 +1,9 @@
 
 <script type="text/javascript">
 
-  // if (location.protocol !== 'https:') {
-  //   location.replace(`https:${location.href.substring(location.protocol.length)}`);
-  // }
+  if (location.protocol !== 'https:') {
+    location.replace(`https:${location.href.substring(location.protocol.length)}`);
+  }
 
   const roomName='{{team.sequence}}';
   const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
