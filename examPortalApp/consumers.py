@@ -338,22 +338,38 @@ class VideoConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Leave room group
+        print("We're in")
         user = self.scope["user"]
+        print("user defined")
         user.entered_video_call=False
         user.save()
+        print("entered_video_call False")
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
                 'type': 'remove_peer',
                 'message': {
-                    'username': username,
+                    'username': user.username,
                 }
             }
         )
+        print("remove_peer")
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
             self.channel_name
         )
+
+    def remove_peer(self, event):
+        print("remove peer")
+        username = event['message']['username']
+        team = Team.objects.get(sequence=self.room_name)
+        if Ordering.objects.filter(user_instance__username=username).count():
+            self_peer_id=Ordering.objects.get(user_instance__username=username).order_index
+            id='video-'+str(team.team_id)+'-'+str(self_peer_id)
+        else:
+            id=username
+        print("id: "+id)
+        self.send(text_data=json.dumps({"message": "removePeer", "id": id}))
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -462,17 +478,6 @@ class VideoConsumer(WebsocketConsumer):
                 id=username
             self.send(text_data=json.dumps({"message": "initReceive", "id": id}))
 
-    def remove_peer(self, event):
-        print("remove peer")
-        username = event['message']['username']
-        team = Team.objects.get(sequence=self.room_name)
-        if Ordering.objects.filter(user_instance__username=username).count():
-            self_peer_id=Ordering.objects.get(user_instance__username=username).order_index
-            id='video-'+str(team.team_id)+'-'+str(self_peer_id)
-        else:
-            id=username
-        self.send(text_data=json.dumps({"message": "removePeer", "id": id}))
-
 
 class TestConsumer(WebsocketConsumer):
     def connect(self):
@@ -532,8 +537,8 @@ class TestConsumer(WebsocketConsumer):
         # Send message to WebSocket
         self.send(text_data=json.dumps({"message": "end"}))
         user = self.scope["user"]
-        # user.entered_test=False
-        # user.started_test=False
+        user.entered_test=False
+        user.started_test=False
         user.ended_test=True
         user.save()
 

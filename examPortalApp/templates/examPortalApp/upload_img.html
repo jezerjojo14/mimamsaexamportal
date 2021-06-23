@@ -17,8 +17,8 @@
   })
   function openCameraPopup() {
     document.getElementById('camera-popup').style.display="block";
+    document.getElementById('close-cam-btn').onclick = closePopup.bind(this, document.getElementById('close-cam-btn'));
   }
-  document.getElementById('close-cam-btn').onclick = closePopup.bind(this, document.getElementById('close-cam-btn'));
   function b64toBlob(b64Data, contentType, sliceSize) {
     contentType = contentType || '';
     sliceSize = sliceSize || 512;
