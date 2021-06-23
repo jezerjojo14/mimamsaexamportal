@@ -1,5 +1,11 @@
 {% extends 'examPortalApp/body.html' %}
-
+{% block script %}
+<script type="text/javascript">
+  if (location.protocol !== 'https:') {
+    location.replace(`https:${location.href.substring(location.protocol.length)}`);
+  }
+</script>
+{% endblock %}
 {% block sidepane %}
 <ul class="list-group">
   <li class=""><a href="http://mimamsa.iiserpune.ac.in">Official Mimamsa website</a></li>
