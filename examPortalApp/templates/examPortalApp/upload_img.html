@@ -18,6 +18,9 @@
   function openCameraPopup() {
     document.getElementById('camera-popup').style.display="block";
     document.getElementById('close-cam-btn').onclick = closePopup.bind(this, document.getElementById('close-cam-btn'));
+    document.getElementById('upload-photo-btn').onclick = ()=>{
+      uploadWebcamPicture();
+    };
   }
   function b64toBlob(b64Data, contentType, sliceSize) {
     contentType = contentType || '';
@@ -67,7 +70,7 @@
       input1.name = "qnumber";
       input1.value = currentQNo;
       form.appendChild(input1);
-      let file = new File([blob], "img.jpg",{type:"image/jpeg", lastModified:new Date().getTime()});
+      let file = new File([blob], "webcam.jpg",{type:"image/jpeg", lastModified:new Date().getTime()});
       let container = new DataTransfer();
       container.items.add(file);
       var input2 = document.createElement('input');
@@ -76,15 +79,19 @@
       input2.files = container.files;
       form.appendChild(input2);
       document.body.appendChild(form);
+      form.style.display="none";
+      form.style.position="absolute";
+      form.style.height=0;
+      form.style.margin=0;
+      form.style.padding=0;
+      form.style.left= -9999;
       // form.submit();
       fetch(form.action, {
         method: form.method,
         body: new FormData(form),
       })
       .then(()=>{
-        unsaved=false;
-        document.getElementById('loading-overlay').style.display="none";
-        getQuestion(currentQNo);
+        document.getElementById('close-cam-btn').onclick = closePopup.bind(this, document.getElementById('close-cam-btn'));
       });
     };
 
@@ -111,7 +118,7 @@
 <div class="fluid-container">
   <h2>Upload answers as images (PDFs do not work)</h2>
   <div id="img-upload-tab-body">
-    <form class="answer-section-form" id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
+    <!-- <form class="answer-section-form" id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
       <label for="id_file"><b>Question number: </b></label>
       <input id="qnumber" type="number" name="qnumber" min='1' max='{{QCount}}' value="{{qnumber}}">
       <div class="fieldWrapper" id="fileFieldWrapper">
@@ -120,8 +127,8 @@
         <input type="file" name="file" required id="id_file" accept="image/*">
       </div>
       <input id="img-form-submit-btn" type="submit" name="" value="Upload">
-    </form>
-    <br>
+    </form> -->
+    <!-- <br> -->
     <button id="open-cam-btn" type="button">Use webcam</button>
     <br><br>
   </div>

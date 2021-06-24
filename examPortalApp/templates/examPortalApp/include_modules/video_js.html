@@ -119,6 +119,9 @@
         tm = setTimeout(function () {
           try {
             videoSignalSocket.close();
+            for (let id in peers) {
+              removePeer(id)
+            }
           } catch(e) {
             console.log(e);
           } finally {
