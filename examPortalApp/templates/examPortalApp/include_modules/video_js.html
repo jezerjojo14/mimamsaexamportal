@@ -2,6 +2,7 @@
 <script src="{% static 'examPortalApp/js/simplepeer.min.js' %}"></script>
 <script type="text/javascript">
 
+  var localStream = null;
   function joinCall() {
     document.getElementById('videos-container').style.display="flex";
     document.getElementById('join-call-btn').remove();
@@ -10,7 +11,6 @@
     /**
      * The stream object used to send media
      */
-    var localStream = null;
     /**
      * All peer connections
      */
