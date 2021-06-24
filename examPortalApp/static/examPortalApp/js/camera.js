@@ -16,6 +16,20 @@
     photo = document.getElementById('photo');
     startbutton = document.getElementById('startbutton');
     videoEl.play();
+    height = videoEl.videoHeight / (videoEl.videoWidth / width);
+
+    if (isNaN(height)) {
+      console.log(videoEl.videoHeight);
+      console.log(videoEl.videoWidth);
+      height = width / (4 / 3);
+    }
+
+    videoEl.setAttribute('width', width);
+    videoEl.setAttribute('height', height);
+    canvas.setAttribute('width', width);
+    canvas.setAttribute('height', height);
+    photo.setAttribute('width', width);
+    photo.setAttribute('height', height);
     document.getElementById('close-cam-btn').onclick=()=>{
       videoEl.pause();
       closePopup(document.getElementById('close-cam-btn'));
@@ -42,26 +56,26 @@
     //     console.error("An error occurred: " + err);
     //   });
 
-    videoEl.addEventListener('canplay', function(ev) {
-      console.log("canplay");
-      if (!streaming) {
-        height = videoEl.videoHeight / (videoEl.videoWidth / width);
-
-        if (isNaN(height)) {
-          console.log(videoEl.videoHeight);
-          console.log(videoEl.videoWidth);
-          height = width / (4 / 3);
-        }
-
-        videoEl.setAttribute('width', width);
-        videoEl.setAttribute('height', height);
-        canvas.setAttribute('width', width);
-        canvas.setAttribute('height', height);
-        photo.setAttribute('width', width);
-        photo.setAttribute('height', height);
-        streaming = true;
-      }
-    }, false);
+    // videoEl.addEventListener('canplay', function(ev) {
+    //   console.log("canplay");
+    //   if (!streaming) {
+    //     height = videoEl.videoHeight / (videoEl.videoWidth / width);
+    //
+    //     if (isNaN(height)) {
+    //       console.log(videoEl.videoHeight);
+    //       console.log(videoEl.videoWidth);
+    //       height = width / (4 / 3);
+    //     }
+    //
+    //     videoEl.setAttribute('width', width);
+    //     videoEl.setAttribute('height', height);
+    //     canvas.setAttribute('width', width);
+    //     canvas.setAttribute('height', height);
+    //     photo.setAttribute('width', width);
+    //     photo.setAttribute('height', height);
+    //     streaming = true;
+    //   }
+    // }, false);
 
     startbutton.addEventListener('click', function(ev) {
       console.log("Clicked");
