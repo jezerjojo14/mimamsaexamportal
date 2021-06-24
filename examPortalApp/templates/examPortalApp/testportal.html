@@ -88,7 +88,7 @@
           {% if forloop.counter == 3 %}
           <hr style="border-color: #fff0; flex-basis: 100%; margin: 0">
           {% endif %}
-          <div class="video-container" id="video-container{{team.team_id}}-{{forloop.counter}}" style="text-align: center">
+          <div class="video-container" id="video-container{{team.team_id}}-{{forloop.counter}}" style="text-align: center; -webkit-perspective: 900000px; perspective: 900000px;">
             <video id="video-{{team.team_id}}-{{forloop.counter}}" autoplay loop playsinline style="max-height: 100%; {% if self_peer_id == forloop.counter %}transform: rotateY(180deg); -webkit-transform:rotateY(180deg); -moz-transform:rotateY(180deg);{% endif %}">
             </video>
           </div>
