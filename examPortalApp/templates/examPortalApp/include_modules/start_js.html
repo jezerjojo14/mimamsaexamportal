@@ -81,7 +81,7 @@
           proctorStart()
           initQuestionJS();
           getQuestion(1);
-
+          document.getElementById('video').srcObject = localStream;
         }
       }
       else if (data["message"] == "end") {
