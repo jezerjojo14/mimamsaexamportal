@@ -341,6 +341,7 @@ class VideoConsumer(WebsocketConsumer):
         print("We're in")
         user = self.scope["user"]
         print("user defined")
+        user.entered_test=False
         user.entered_video_call=False
         user.save()
         print("entered_video_call False")
@@ -506,6 +507,7 @@ class TestConsumer(WebsocketConsumer):
         )
         team = Team.objects.get(sequence=self.room_name)
         user = self.scope["user"]
+        user.entered_video_call=False
         user.entered_test=False
         if not team.finished:
             user.ended_test=False
