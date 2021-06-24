@@ -249,6 +249,7 @@
         }
         videoSignalSocket.onopen = function () {
           ti = setInterval(ping, 15000);
+          clearInterval(connect_interval)
         }
     }
 
