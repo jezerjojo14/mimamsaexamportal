@@ -15,6 +15,11 @@
     canvas = document.getElementById('canvas');
     photo = document.getElementById('photo');
     startbutton = document.getElementById('startbutton');
+    videoEl.play();
+    document.getElementById('close-cam-btn').onclick=()=>{
+      videoEl.pause();
+      closePopup(document.getElementById('close-cam-btn'));
+    }
 
     // navigator.mediaDevices.getUserMedia({
     //     video: {
@@ -38,6 +43,7 @@
     //   });
 
     videoEl.addEventListener('canplay', function(ev) {
+      console.log("canplay");
       if (!streaming) {
         height = videoEl.videoHeight / (videoEl.videoWidth / width);
 
@@ -58,6 +64,7 @@
     }, false);
 
     startbutton.addEventListener('click', function(ev) {
+      console.log("Clicked");
       takepicture();
       ev.preventDefault();
     }, false);
@@ -68,6 +75,7 @@
 
 
   function clearphoto() {
+    console.log("clearphoto");
     var context = canvas.getContext('2d');
     context.fillStyle = "#AAA";
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -77,8 +85,10 @@
   }
 
   function takepicture() {
+    console.log("takepicture");
     var context = canvas.getContext('2d');
     if (width && height) {
+      console.log("width and height defined");
       canvas.width = width;
       canvas.height = height;
       context.drawImage(videoEl, 0, 0, width, height);
