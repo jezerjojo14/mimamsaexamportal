@@ -87,17 +87,27 @@
       <ul>
         <li>
           <p>
-            When logging in for the first time, use your full email ID and your generated password (in all caps). You'll be prompted to change your password the first time you log in. Your credentials, once saved, will not be reset for future tests. That means the generated password won't work anymore and you'll have to remember your new password.
+            When logging in for the first time, use your full email ID and your generated password (in all caps). You'll be prompted to change your password the first time you log in. If you've attended the prelims round, this doesn't apply to you; simply log in with your email ID and your set (not generated) password.
           </p>
         </li>
         <li>
           <p>
-            Only one device can be logged into an account at a time. Logging in on a second device logs you out of the first.
+            Only one device can be used to attempt the test at a time, ideally a laptop/desktop. If you log in with a second device, the Open Test link won't be immediately available. However, on your new device, you'll have the option to stop the test on all other devices, allowing you to then open the test on the new device (this comes in handy if you disconnect unexpectedly and the server thinks you're still writing the test).
           </p>
         </li>
         <li>
           <p>
-            On the actual exam, timers counting down to the end of the test are located on the top of the screen (for laptops and other widescreen devices) and in the side pane - which you can open by clicking on the hamburger icon - on the top right (for all devices including mobile phones). The last twenty minutes of the exam is to be used for uploading answers. This is reflected in the format in which the timer is displayed. For a 2 hour test for example, the timer counts down from "1:40:00 + 00:20:00" down to "0 seconds + 20:00" and then it switches to "19:59 (Uploading time)" and counts down from there.
+            Upon clicking Open Test, you'll find yourself in a waiting room where you'll be allowed to join the group call with your team mates. You'll also be able to chat with your team and your proctor. Once all the team members join and once it's time for the exam, the proctor will allow you to enter the test. When this happens you'll see a button on the page go from saying "Waiting for proctor..." to saying "Enter Test".
+          </p>
+        </li>
+        <li>
+          <p>
+            Once your test starts, the window will turn to fullscreen mode and from here on the site will make logs every time you exit full screen, right click, or leave the test. The time at which you return will also be logged. Your behavior will also be monitored by your proctor who'll be able to see and hear you the whole time. The amount of overall suspicious behavior observed will be considered during the marking process.
+          </p>
+        </li>
+        <li>
+          <p>
+            Timers counting down to the end of the test are located on the top of the screen (for laptops and other widescreen devices) and in the side pane - which you can open by clicking on the hamburger icon - on the top right (for all devices including mobile phones). The last twenty minutes of the exam is to be used for uploading answers. This is reflected in the format in which the timer is displayed. For a 2 hour test for example, the timer counts down from "1:40:00 + 00:20:00" down to "0 seconds + 20:00" and then it switches to "19:59 (Uploading time)" and counts down from there.
             <br>
             {% if user.is_authenticated %}
             On this page you'll see a dummy timer in those locations looping over a 5 minute countdown.
@@ -107,7 +117,12 @@
         </li>
         <li>
           <p>
-            To navigate through the paper, links for all the questions are listed on the navigation bar.
+            On the sidepane you'll also see your teammates' videos and a chatbox.
+          </p>
+        </li>
+        <li>
+          <p>
+            To navigate through the paper, buttons for all the questions are listed on the navigation bar.
           </p>
           <div id="nav-questions" style="max-width: calc(100% - 30px)">
             {% for i in ''|center:16 %}
@@ -125,98 +140,15 @@
         </li>
         <li>
           <p>
-            You are free to leave the exam at any moment. If the exam hasn't ended, you won't be barred from entering again had you left at any point. There is no final button you need to click to submit your paper; all the answers you'd saved will remain saved when the test ends.
-            <br>
-            Clicking on the Leave Test button doesn't mean you won't be able to enter again.
+            You may vote to "End Test" in the middle of the exam. If all members of your team do the same, your exam will end and you'll see the feedback form. Note that after having ended the test, you won't be allowed back in.
           </p>
-          <button id="finish-btn" type="button">Leave Test</button>
+          <button id="finish-btn" type="button">End Test</button>
           <br><br><br>
         </li>
         <li>
           <p>
-            For questions that require you to explain your answer, you'll be given the option of either typing out your answer or submitting image files; but not both. Image sizes shouldn't exceed 1.4 GB.
+            For questions that require you to explain your answer, you'll be given the option of either typing out your answer or taking pictures of your answers; but not both. <b>If you scan and upload an image as your answer, any text based answer that may have been previously submitted would be deleted. This action can't be undone. The same goes for submitting typed out answers when image based answers are already submitted.</b> If you're using your laptop/desktop to write the test and you don't wish to use your webcam to upload answers, you can log in on your phone and open the Upload Answers link. Here you'll be able to take pictures of your written answers using your phone camera and upload them.
           </p>
-          <div class="card" style="font-size: 16px; width: 80%">
-            <div class="card-header">
-              <ul class="nav nav-tabs card-header-tabs">
-                <li class="nav-item">
-                  <a id="img-upload-tab-btn" class="nav-link active" aria-current="true" onclick="activateImgUploadForm()" href="javascript:;">Upload Images</a>
-                </li>
-                <li class="nav-item">
-                  <a id="typebox-upload-tab-btn" class="nav-link" aria-current="true" onclick="activateTextboxForm()" href="javascript:;">Type answer</a>
-                </li>
-              </ul>
-            </div>
-            <div class="card-body">
-              <div id="img-upload-tab-body" style="display: block">
-                <form id="img-form" action="#" method="get" enctype="multipart/form-data" onsubmit="return false">
-                  <div class="fieldWrapper" id="fileFieldWrapper">
-                    <label for="id_file"><b>Upload answers:</b></label>
-                    <br>
-                    <input type="file" name="file" required id="id_file" accept="image/*">
-                  </div>
-                  <input type="submit" name="" value="Submit">
-                </form>
-                <!-- <br>
-                <button id="open-cam-btn" type="button">Use webcam</button> -->
-                <br><br>
-                <h6><b>Uploaded Answers:</b></h6>
-                <div id="uploadedAnswers">
-                  <div id="file0" data-pageno="0" class="uploaded-file">
-                    1. dummyFile0.jpeg
-                    <button class="view-img-btn" type="button" name="button">View</button>
-                    <button class="del-img-btn" type="button" name="button">Delete</button>
-                    <button class="move-img-down-btn" type="button" name="button">Move Down</button>
-                  </div>
-                  <div id="file1" data-pageno="1" class="uploaded-file">
-                    2. dummyFile1.jpeg
-                    <button class="view-img-btn" type="button" name="button">View</button>
-                    <button class="del-img-btn" type="button" name="button">Delete</button>
-                    <button class="move-img-up-btn" type="button" name="button">Move Up</button>
-                    <button class="move-img-down-btn" type="button" name="button">Move Down</button>
-                  </div>
-                  <div id="file2" data-pageno="2" class="uploaded-file">
-                    3. dummyFile2.jpeg
-                    <button class="view-img-btn" type="button" name="button">View</button>
-                    <button class="del-img-btn" type="button" name="button">Delete</button>
-                    <button class="move-img-up-btn" type="button" name="button">Move Up</button>
-                  </div>
-                </div>
-              </div>
-              <div id="typebox-upload-tab-body" style="display: none">
-                <form id="txt-form" action="#" method="get" onsubmit="return false">
-                  <textarea autocomplete="off" id="answer-textarea" name="answer_text" rows="8" cols="50"></textarea>
-                  <br>
-                  <input type="submit" name="" value="Submit">
-                </form>
-              </div>
-            </div>
-          </div>
-          <br><br>
-        </li>
-        <li>
-          <p>
-            Regarding MCQs and typed answers, you are expected to save frequently. Many of the buttons on the site involve refreshing the page and clicking on them will prompt you either to continue and discard your unsaved changes (if you have any), or to stay back and save your changes.
-          </p>
-          <br>
-          <div id="save-changes-popup" class="popup" style="display: block; position:relative; width: 80vw; height: 70vh; z-index: 0">
-            <div class="popup-message" style="position: relative; z-index: 0; max-height: 80vh; font-size: 16px">
-              <p>
-                You've made unsaved changes to your answer. Discard changes and continue?
-              </p>
-              <button id="save-changes-popup-continue">Continue</button>
-              <button class="close-popup">Go back</button>
-            </div>
-          </div>
-          <br><br>
-        </li>
-        <li>
-          <p>
-            You should keep in mind that while this is a collaborative quiz, changes made by your teammates don't show up in realtime. If you're typing out an answer on a question, you need to be sure that none of your teammates are on the same question. If two people save answers for the same question back to back, the answer that's saved last will be retained while the other answer will be lost.
-            <br>
-            So be sure to communicate with your teammates constantly.
-          </p>
-          <br>
         </li>
         <li>
           <p>
@@ -225,26 +157,11 @@
           <button class="mark-review" type="button" name="review">Mark for Review</button>
           <button class="mark-answered" type="button" name="review">Mark as Answered</button>
           <p>
-            This changes the color of the question in the navigation bar for you and for your teammates the next time they refresh the page. Green for answered questions, and beige for questions marked for review.
+            This changes the color of the question in the navigation bar for you and for your teammates. Green for answered questions, and beige for questions marked for review.
             <br>
             The purpose of marking questions is simply for you and your team to keep track of different questions, and it won't be seen by those who are correcting your paper.
-            <br>
-            Note that these buttons cause the page to refresh, so be sure to <b>save your answers</b> before clicking on them.
           </p>
           <br>
-        </li>
-        <li>
-          <p>
-            As mentioned earlier, you can't see the changes made by your teammates in realtime. You have to refresh the page often to see new changes. This can also be done by clicking on the sync icons.
-          </p>
-          <div class="sync-container" style="position: relative;">
-            <a class="sync-btn" onclick="location.reload()" href="javascript:;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
-                <path class="sync-btn" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-              </svg>
-            </a>
-          </div>
-          <br><br>
         </li>
       </ul>
     </div>
