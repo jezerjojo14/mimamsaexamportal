@@ -138,7 +138,7 @@
     <form class="answer-section-form" id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
       <label for="id_file"><b>Question number: </b></label>
       <input id="qnumber" type="number" name="qnumber" min='1' max='{{QCount}}' value="{{qnumber}}">
-      <div class="desktop">
+      <div class="mobile">
         <div class="fieldWrapper" id="fileFieldWrapper">
           <label for="id_file"><b>Upload answers:</b></label>
           <br>
@@ -146,7 +146,7 @@
         </div>
         <input id="img-form-submit-btn" type="submit" name="" value="Upload">
       </div>
-      <div class="mobile">
+      <div class="desktop">
         <br>
         <button id="open-cam-btn" type="button">Use webcam</button>
       </div>
