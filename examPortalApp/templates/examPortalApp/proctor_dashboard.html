@@ -237,9 +237,9 @@
               }
             } catch(e) {
               console.log(e);
-            } finally {
-              init();
-              clearInterval(ti);
+            }
+            setTimeout(init(), 4000);
+            clearInterval(ti);
             }
           }, 8000);
         }
