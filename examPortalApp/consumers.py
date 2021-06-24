@@ -362,14 +362,15 @@ class VideoConsumer(WebsocketConsumer):
     def remove_peer(self, event):
         print("remove peer")
         username = event['message']['username']
-        team = Team.objects.get(sequence=self.room_name)
-        if Ordering.objects.filter(user_instance__username=username).count():
-            self_peer_id=Ordering.objects.get(user_instance__username=username).order_index
-            id='video-'+str(team.team_id)+'-'+str(self_peer_id)
-        else:
-            id=username
-        print("id: "+id)
-        self.send(text_data=json.dumps({"message": "removePeer", "id": id}))
+        if (self.scope["user"]).username != username:
+            team = Team.objects.get(sequence=self.room_name)
+            if Ordering.objects.filter(user_instance__username=username).count():
+                self_peer_id=Ordering.objects.get(user_instance__username=username).order_index
+                id='video-'+str(team.team_id)+'-'+str(self_peer_id)
+            else:
+                id=username
+            print("id: "+id)
+            self.send(text_data=json.dumps({"message": "removePeer", "id": id}))
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
