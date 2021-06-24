@@ -1001,6 +1001,8 @@ def upload_answer(request):
         qnumber=request.POST["qnumber"]
         try:
             q=Question.objects.get(question_number=int(qnumber))
+            if q.question_type=='m':
+                return JsonResponse({"message": "This is an MCQ"})
             while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
                 Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
             a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
@@ -1016,7 +1018,7 @@ def upload_answer(request):
         a.save()
 
         if team is None:
-            return HttpResponseRedirect(reverse("test_no"))
+            return JsonResponse({"message": "Team not found. Try and refresh?"})
         #Resize and compress uploaded image
 
         try:
@@ -1024,8 +1026,8 @@ def upload_answer(request):
             im.verify()
         except:
             #manage exceptions here
-            messages.info(request, 'Image file corrupt or unsupported')
-            return HttpResponseRedirect(reverse("test_no"))
+            # messages.info(request, 'Image file corrupt or unsupported')
+            return JsonResponse({"message": "Image file corrupt or unsupported"})
         # im.seek(0)
         im = Image.open(answerfile)
         w, h = im.size
@@ -1077,7 +1079,7 @@ def upload_answer(request):
             af.page_no+=1
             af.save()
 
-        return HttpResponseRedirect(reverse("test_no"))
+        return JsonResponse({"message": "Successfully uploaded image"})
     else:
         raise Http404;
 

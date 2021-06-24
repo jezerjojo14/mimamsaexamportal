@@ -4,27 +4,29 @@
 
   var streaming = false;
 
-  var video = null;
+  var videoEl = null;
   var canvas = null;
   var photo = null;
   var startbutton = null;
 
   function camStartup() {
     console.log("camStartup");
-    video = document.getElementById('video');
+    videoEl = document.getElementById('video');
     canvas = document.getElementById('canvas');
     photo = document.getElementById('photo');
     startbutton = document.getElementById('startbutton');
 
     navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          facingMode: 'environment',
+        },
         audio: false
       })
       .then(function(stream) {
-        video.srcObject = stream;
-        video.play();
+        videoEl.srcObject = stream;
+        videoEl.play();
         document.getElementById('close-cam-btn').onclick=()=>{
-          video.pause();
+          videoEl.pause();
           stream.getTracks().forEach(function(track) {
             track.stop();
           });
@@ -32,21 +34,23 @@
         }
       })
       .catch(function(err) {
-        console.log("An error occurred: " + err);
+        console.error("An error occurred: " + err);
       });
 
-    video.addEventListener('canplay', function(ev) {
+    videoEl.addEventListener('canplay', function(ev) {
       if (!streaming) {
-        height = video.videoHeight / (video.videoWidth / width);
+        height = videoEl.videoHeight / (videoEl.videoWidth / width);
 
         if (isNaN(height)) {
           height = width / (4 / 3);
         }
 
-        video.setAttribute('width', width);
-        video.setAttribute('height', height);
+        videoEl.setAttribute('width', width);
+        videoEl.setAttribute('height', height);
         canvas.setAttribute('width', width);
         canvas.setAttribute('height', height);
+        photo.setAttribute('width', width);
+        photo.setAttribute('height', height);
         streaming = true;
       }
     }, false);
@@ -57,7 +61,7 @@
     }, false);
 
     clearphoto();
-    openCameraPopup();
+    // openCameraPopup();
   }
 
 

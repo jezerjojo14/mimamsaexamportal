@@ -71,7 +71,7 @@
       var input1 = document.createElement('input');
       input1.type = 'hidden';
       input1.name = "qnumber";
-      input1.value = currentQNo;
+      input1.value = parseInt(document.getElementById('qnumber').value);
       form.appendChild(input1);
       let file = new File([blob], "webcam.jpg",{type:"image/jpeg", lastModified:new Date().getTime()});
       let container = new DataTransfer();
@@ -93,15 +93,19 @@
         method: form.method,
         body: new FormData(form),
       })
-      .then(()=>{
-        document.getElementById('close-cam-btn').onclick = closePopup.bind(this, document.getElementById('close-cam-btn'));
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
       });
     };
 
     redirect('{% url 'upload_answer' %}', 'post');
   }
 </script>
-<style media="screen">
+<!-- <style media="screen">
   .desktop {
     display: none;
   }
@@ -114,7 +118,7 @@
       display: block;
     }
   }
-</style>
+</style> -->
 {% endblock %}
 
 {% block content %}
@@ -133,7 +137,7 @@
   </div>
 </div>
 <div class="fluid-container">
-  <h2>Upload answers as images (PDFs do not work)</h2>
+  <h2>Upload images</h2>
   <div id="img-upload-tab-body">
     <form class="answer-section-form" id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
       <label for="id_file"><b>Question number: </b></label>

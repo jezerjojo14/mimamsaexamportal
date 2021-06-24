@@ -371,6 +371,20 @@ h2{
   overflow-x: auto;
 }
 
+.desktop {
+  display: none;
+}
+
+@media only screen and (min-resolution: 165dpi) and (max-resolution: 168dpi), only screen and (min-resolution: 155dpi) and (max-resolution: 160dpi), only screen and (min-resolution: 134dpi) and (max-resolution: 144dpi), only screen and (min-resolution: 120dpi) and (max-resolution: 130dpi), only screen and (max-resolution: 116dpi) {
+/* Your click-specific css goes here */
+  .mobile {
+    display: none;
+  }
+  .desktop {
+    display: block;
+  }
+}
+
 .popup {
   top: 0;
   left: 0;

@@ -1,6 +1,6 @@
 
 <script type="text/javascript">
-  
+
   if (location.protocol !== 'https:') {
     location.replace(`https:${location.href.substring(location.protocol.length)}`);
   }
@@ -157,6 +157,9 @@
         initQuestionJS();
         document.getElementById('loading-overlay').style.display="none";
       })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
     }
     else {
       saveChangesPopup(()=>{
@@ -219,23 +222,23 @@
     //   };
     // }
 
-    document.getElementById('img-submit-popup-continue').onclick=()=>{
-      document.getElementById('img-submit-popup-continue').innerHTML="Processing request...";
-      document.getElementById('img-submit-popup-continue').style.opacity=0.5;
-      document.getElementById('img-submit-popup-continue').disabled=true;
-      document.getElementById('img-submit-popup-continue').onclick= function() {
-        return false;
-      };
-      var closePopupList = document.querySelectorAll(".close-popup");
-      for(var i = 0; i < closePopupList.length; i++) {
-        closePopupList[i].style.opacity=0.5;
-        closePopupList[i].disabled=true;
-        closePopupList[i].onclick = function() {
-          return false;
-        };
-      }
-      document.getElementById('img-form').submit();
-    };
+    // document.getElementById('img-submit-popup-continue').onclick=()=>{
+    //   document.getElementById('img-submit-popup-continue').innerHTML="Processing request...";
+    //   document.getElementById('img-submit-popup-continue').style.opacity=0.5;
+    //   document.getElementById('img-submit-popup-continue').disabled=true;
+    //   document.getElementById('img-submit-popup-continue').onclick= function() {
+    //     return false;
+    //   };
+    //   var closePopupList = document.querySelectorAll(".close-popup");
+    //   for(var i = 0; i < closePopupList.length; i++) {
+    //     closePopupList[i].style.opacity=0.5;
+    //     closePopupList[i].disabled=true;
+    //     closePopupList[i].onclick = function() {
+    //       return false;
+    //     };
+    //   }
+    //   document.getElementById('img-form').submit();
+    // };
     document.getElementById('txt-submit-popup-continue').onclick=()=>{
       document.getElementById('txt-submit-popup-continue').innerHTML="Processing request...";
       document.getElementById('txt-submit-popup-continue').style.opacity=0.5;
@@ -412,6 +415,9 @@
       .then(() => {
         getQuestion(currentQNo);
       })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
     }
     else {
       saveChangesPopup(()=>{
@@ -504,6 +510,9 @@
         }));
         console.log("sent data from browser to server");
       })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
     }
     else {
       saveChangesPopup(()=>{
@@ -536,6 +545,9 @@
           "username" : "{{user.username}}",
         }));
       })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
     }
     else {
       saveChangesPopup(()=>{
@@ -567,6 +579,9 @@
           "username" : "{{user.username}}",
         }));
       })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
     }
     else {
       saveChangesPopup(()=>{
@@ -586,6 +601,9 @@
         var URI = data["image"];
         document.getElementById('answer-img-container').innerHTML = "<img class='uploaded-img' src='" + URI + "'>";
       })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   }
 
   function deleteImage(ele) {
@@ -601,9 +619,12 @@
       },
       body: null
     })
-      .then(response => {
-        getQuestion(currentQNo);
-      })
+    .then(response => {
+      getQuestion(currentQNo);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
   }
 
   async function moveAnswerUp(ele) {
@@ -730,6 +751,7 @@
     console.log(blob);
 
     var redirect = function(url, method) {
+      document.getElementById('loading-overlay').style.display="block";
       var form = document.createElement('form');
       form.method = method;
       form.action = url;
@@ -760,10 +782,16 @@
         method: form.method,
         body: new FormData(form),
       })
-      .then(()=>{
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('upload-status-popup').innerHTML="<p>"+data.message+"</p>"+document.getElementById('upload-status-popup').innerHTML;
+        document.getElementById('upload-status-popup').style.display="block";
         unsaved=false;
         document.getElementById('loading-overlay').style.display="none";
         getQuestion(currentQNo);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
       });
     };
 
@@ -812,19 +840,19 @@
     s.filter = 'alpha(opacity='+opacity+')';
   }
 
-  function imgFormSubmit(e) {
-    e.preventDefault();
-    if (answer_text=="") {
-      grayer('img-form', true);
-      document.getElementById('img-form').submit();
-      document.getElementById('img-form-submit-btn').value='Processing';
-      document.getElementById('img-form-submit-btn').disabled=true;
-    }
-    else {
-      openImgSubmitPopup();
-      return false;
-    }
-  }
+  // function imgFormSubmit(e) {
+  //   e.preventDefault();
+  //   if (answer_text=="") {
+  //     grayer('img-form', true);
+  //     document.getElementById('img-form').submit();
+  //     document.getElementById('img-form-submit-btn').value='Processing';
+  //     document.getElementById('img-form-submit-btn').disabled=true;
+  //   }
+  //   else {
+  //     openImgSubmitPopup();
+  //     return false;
+  //   }
+  // }
 
 
   function txtFormSubmit(e) {
@@ -848,9 +876,9 @@
     }
   }
 
-  function openImgSubmitPopup() {
-    document.getElementById('img-submit-popup').style.display="block";
-  }
+  // function openImgSubmitPopup() {
+  //   document.getElementById('img-submit-popup').style.display="block";
+  // }
 
   function openTxtSubmitPopup() {
     document.getElementById('txt-submit-popup').style.display="block";
