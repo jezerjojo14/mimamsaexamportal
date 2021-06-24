@@ -40,7 +40,7 @@
       + '/ws/chat/{{team.sequence}}/'
     );
   }
-
+  chatSocketConnect();
   var sentTexts =[]
 
 
@@ -88,6 +88,7 @@
       + '/ws/test/{{team.sequence}}/'
     );
   }
+  startSocketConnect();
   document.addEventListener("DOMContentLoaded", ()=>{
     document.getElementById('start-btn').onclick=()=>{
       console.log("button clicked");
