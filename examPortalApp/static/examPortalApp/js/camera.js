@@ -17,12 +17,10 @@
     startbutton = document.getElementById('startbutton');
 
     navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: {
-            exact: 'environment'
-          }
+        "video": {
+          facingMode: 'environment',
         },
-        audio: false
+        "audio": false
       })
       .then(function(stream) {
         videoEl.srcObject = stream;
@@ -51,6 +49,8 @@
         videoEl.setAttribute('height', height);
         canvas.setAttribute('width', width);
         canvas.setAttribute('height', height);
+        photo.setAttribute('width', width);
+        photo.setAttribute('height', height);
         streaming = true;
       }
     }, false);
