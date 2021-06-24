@@ -104,6 +104,26 @@
 
     redirect('{% url 'upload_answer' %}', 'post');
   }
+
+  document.addEventListener("submit", (e) => {
+    // Store reference to form to make later code easier to read
+    const form = e.target;
+    // Post data using the Fetch API
+    fetch(form.action, {
+      method: form.method,
+      body: new FormData(form),
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message);
+    })
+    .catch((error) => {
+      alert('Error:', error);
+    });
+
+    // Prevent the default form submit
+    e.preventDefault();
+  });
 </script>
 <!-- <style media="screen">
   .desktop {
