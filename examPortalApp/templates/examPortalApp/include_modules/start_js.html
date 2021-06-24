@@ -4,13 +4,17 @@
     if (typeof roomName === 'undefined') {
       const roomName='{{team.sequence}}';
     }
-    const startSocket = new WebSocket(
-      ws_scheme+'://'
-      + window.location.host
-      + '/ws/test/'
-      + roomName
-      + '/'
-    );
+    var startSocket
+    function startSocketConnect() {
+      startSocket = new WebSocket(
+        ws_scheme+'://'
+        + window.location.host
+        + '/ws/test/'
+        + roomName
+        + '/'
+      );
+    }
+    startSocketConnect()
     document.addEventListener("DOMContentLoaded", ()=>{
       mainContent=document.getElementById('main-content');
       document.getElementById('finish-btn').onclick=()=>{
@@ -50,6 +54,13 @@
       };
       mainContent.remove()
     })
+    var start_connect_interval;
+    startSocket.onclose = function (e) {
+      start_connect_interval=setInterval(startSocketConnect(), 4000);
+    }
+    startSocket.onopen = function() {
+      clearInterval(start_connect_interval);
+    }
     startSocket.onmessage = function(e) {
       const data = JSON.parse(e.data);
       console.log(data);

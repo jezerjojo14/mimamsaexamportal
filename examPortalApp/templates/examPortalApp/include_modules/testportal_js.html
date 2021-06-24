@@ -7,14 +7,24 @@
 
   const roomName='{{team.sequence}}';
   const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-  const logSocket = new WebSocket(
-    ws_scheme+'://'
-    + window.location.host
-    + '/ws/log/'
-    + roomName
-    + '/'
-  );
-
+  var logSocket
+  function logSocketConnect() {
+    logSocket = new WebSocket(
+      ws_scheme+'://'
+      + window.location.host
+      + '/ws/log/'
+      + roomName
+      + '/'
+    );
+  }
+  logSocketConnect()
+  var log_connect_interval;
+  logSocket.onclose = function(e) {
+    log_connect_interval=setInterval(logSocketConnect(), 4000);
+  }
+  logSocket.onopen = function() {
+    clearInterval(log_connect_interval);
+  }
   window.addEventListener('error', function(event) {
     logSocket.send(JSON.stringify({
       "log": event.message
@@ -427,13 +437,17 @@
     }
   }
 
-  const markQuestion = new WebSocket(
-    ws_scheme+'://'
-    + window.location.host
-    + '/ws/mark-question/'
-    + roomName
-    + '/'
-  );
+  var markQuestion
+  function markQuestionConnect() {
+    markQuestion = new WebSocket(
+      ws_scheme+'://'
+      + window.location.host
+      + '/ws/mark-question/'
+      + roomName
+      + '/'
+    );
+  }
+  markQuestionConnect();
 
   markQuestion.onmessage = function(e) {
     console.log("received data from server");
@@ -481,8 +495,14 @@
 
   };
 
+  var mark_connect_interval;
+
   markQuestion.onclose = function(e) {
-    console.error('Test socket closed unexpectedly');
+    mark_connect_interval=setInterval(markQuestionConnect(), 4000);
+  };
+
+  markQuestion.onopen = function (e) {
+    clearInterval(mark_connect_interval);
   };
 
   function markAnswered() {

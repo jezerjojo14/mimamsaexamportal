@@ -2,13 +2,26 @@
   if (typeof roomName === 'undefined') {
     const roomName='{{team.sequence}}';
   }
-  const chatSocket = new WebSocket(
-    ws_scheme+'://'
-    + window.location.host
-    + '/ws/chat/'
-    + roomName
-    + '/'
-  );
+
+  var chatSocket;
+  function chatSocketConnect() {
+    chatSocket = new WebSocket(
+      ws_scheme+'://'
+      + window.location.host
+      + '/ws/chat/'
+      + roomName
+      + '/'
+    );
+  }
+  chatSocketConnect();
+
+  var chat_connect_interval;
+  chatSocket.onclose = function(e) {
+    chat_connect_interval=setInterval(chatSocketConnect(), 4000);
+  };
+  chatSocket.onopen = function() {
+    clearInterval(chat_connect_interval);
+  }
 
   var sentTexts =[]
 
@@ -30,10 +43,6 @@
       document.querySelector('#chat-log').innerHTML += ('<div class="'+data.code+'"><b>'+data.username+'</b>: '+ data.message + '</div>');
       document.querySelector('.'+data.code).scrollIntoView({ behavior: "smooth", block: "end" });
     }
-  };
-
-  chatSocket.onclose = function(e) {
-    console.error('Chat socket closed unexpectedly');
   };
 
   var chatInput=document.querySelector('#chat-message-input');

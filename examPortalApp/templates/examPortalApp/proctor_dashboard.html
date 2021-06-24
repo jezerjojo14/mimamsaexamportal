@@ -6,11 +6,15 @@
     location.replace(`https:${location.href.substring(location.protocol.length)}`);
   }
   const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-  const logSocket = new WebSocket(
-    ws_scheme+'://'
-    + window.location.host
-    + '/ws/log/{{team.sequence}}/'
-  );
+  var logSocket;
+  function logSocketConnect() {
+    logSocket = new WebSocket(
+      ws_scheme+'://'
+      + window.location.host
+      + '/ws/log/{{team.sequence}}/'
+    );
+  }
+  logSocketConnect()
 
   function makeid(length) {
     var result = [];
@@ -28,11 +32,14 @@
     }
   }
 
-  const chatSocket = new WebSocket(
-    ws_scheme+'://'
-    + window.location.host
-    + '/ws/chat/{{team.sequence}}/'
-  );
+  var chatSocket;
+  function chatSocketConnect() {
+    chatSocket = new WebSocket(
+      ws_scheme+'://'
+      + window.location.host
+      + '/ws/chat/{{team.sequence}}/'
+    );
+  }
 
   var sentTexts =[]
 
@@ -56,18 +63,31 @@
     const data = JSON.parse(e.data);
     alert(data.log);
   }
+  var start_connect_interval, log_connect_interval, chat_connect_interval;
+  logSocket.onclose = function(e) {
+    log_connect_interval=setInterval(logSocketConnect(), 4000);
+  }
+  logSocket.onopen = function() {
+    clearInterval(log_connect_interval);
+  }
 
   chatSocket.onclose = function(e) {
-    console.error('Chat socket closed unexpectedly');
+    chat_connect_interval=setInterval(chatSocketConnect(), 4000);
   };
+  chatSocket.onopen = function() {
+    clearInterval(chat_connect_interval);
+  }
 
 
 
-  const startSocket = new WebSocket(
-    ws_scheme+'://'
-    + window.location.host
-    + '/ws/test/{{team.sequence}}/'
-  );
+  var startSocket
+  function startSocketConnect() {
+    startSocket = new WebSocket(
+      ws_scheme+'://'
+      + window.location.host
+      + '/ws/test/{{team.sequence}}/'
+    );
+  }
   document.addEventListener("DOMContentLoaded", ()=>{
     document.getElementById('start-btn').onclick=()=>{
       console.log("button clicked");
@@ -82,6 +102,13 @@
       if (data["message"] == "end") {
         location.reload();
       }
+    }
+
+    startSocket.onclose = function (e) {
+      start_connect_interval=setInterval(startSocketConnect(), 4000);
+    }
+    startSocket.onopen = function() {
+      clearInterval(start_connect_interval);
     }
 
     document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML="";
