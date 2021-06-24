@@ -221,7 +221,7 @@
             removePeer(id)
           }
         }
-        var tm, ti;
+        var tm, ti, connect_interval;
         function ping() {
           videoSignalSocket.send(JSON.stringify({
             "message": "ping",
@@ -238,7 +238,7 @@
             } catch(e) {
               console.log(e);
             }
-            setTimeout(init(), 4000);
+            connect_interval=setInterval(init(), 4000);
             clearInterval(ti);
           }, 8000);
         }
