@@ -122,16 +122,16 @@
   <h2>Upload answers as images (PDFs do not work)</h2>
   <div id="img-upload-tab-body">
     <input id="qnumber" type="number" name="qnumber" min='1' max='{{QCount}}' value="{{qnumber}}">
-    <!-- <form class="answer-section-form" id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
+    <form class="answer-section-form" id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
       <label for="id_file"><b>Question number: </b></label>
       <div class="fieldWrapper" id="fileFieldWrapper">
         <label for="id_file"><b>Upload answers:</b></label>
         <br>
-        <input type="file" name="file" required id="id_file" accept="image/*">
+        <input type="file" name="file" required id="id_file" accept="image/*" capture>
       </div>
       <input id="img-form-submit-btn" type="submit" name="" value="Upload">
-    </form> -->
-    <!-- <br> -->
+    </form>
+    <br>
     <button id="open-cam-btn" type="button">Use webcam</button>
     <br><br>
   </div>

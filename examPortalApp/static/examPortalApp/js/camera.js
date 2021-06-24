@@ -17,10 +17,10 @@
     startbutton = document.getElementById('startbutton');
 
     navigator.mediaDevices.getUserMedia({
-        "video": {
+        video: {
           facingMode: 'environment',
         },
-        "audio": false
+        audio: false
       })
       .then(function(stream) {
         videoEl.srcObject = stream;
