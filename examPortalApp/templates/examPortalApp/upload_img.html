@@ -93,8 +93,15 @@
         method: form.method,
         body: new FormData(form),
       })
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          alert(response);
+          throw new Error('Something went wrong');
+        }
+      })
+      .then((data) => {
         alert(data.message);
       })
       .catch((error) => {
@@ -179,5 +186,5 @@
   </div>
 </div>
 
-<script type="text/javascript" src="{% static 'examPortalApp/js/camera.js' %}"></script>
+<script type="text/javascript" src="{% static 'examPortalApp/js/camera1.js' %}"></script>
 {% endblock %}
