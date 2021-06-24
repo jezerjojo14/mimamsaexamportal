@@ -295,7 +295,7 @@ LOG_MAX=10
 #             log.save()
 #             room_model.chatlog_start=(room_model.chatlog_start+1)%LOG_MAX
 #             room_model.save()
-#
+
 
 class VideoConsumer(WebsocketConsumer):
     def connect(self):
