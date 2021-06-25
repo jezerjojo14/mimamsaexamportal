@@ -119,7 +119,7 @@
     document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML+="<div><b>{% if log.0 == team.proctor_user.username %}Proctor{% else %}{{log.0}}{% endif %}:</b>"+" {{log.1}}</div>";
     {% endfor %}
     if (document.querySelector('.chatbox-{{team.team_id}}-logs').lastElementChild) {
-      document.querySelector('.chatbox-{{team.team_id}}-logs').lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
+      document.querySelector('.chatbox-{{team.team_id}}-logs').scrollTop = document.querySelector('.chatbox-{{team.team_id}}-logs').scrollHeight-200;
     }
 
     var chatInput=document.querySelector('#chatbox-{{team.team_id}}-input');
