@@ -35,6 +35,7 @@
         },
         body: JSON.stringify(log)
       });
+      console.log(log);
       logSocket.send(JSON.stringify({
         "log": JSON.stringify(log)
       }));
@@ -51,6 +52,7 @@
         },
         body: JSON.stringify(log)
       });
+      console.log(log);
       logSocket.send(JSON.stringify({
         "log": JSON.stringify(log)
       }));
