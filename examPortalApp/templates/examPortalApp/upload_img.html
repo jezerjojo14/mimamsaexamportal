@@ -123,7 +123,7 @@
     })
     .then(response => response.json())
     .then(data => {
-      alert(data.message);
+      alert(data.toString());
       document.getElementById('loading-overlay').style.display="none";
     })
     .catch((error) => {
