@@ -131,7 +131,7 @@
       if (message.trim()) {
         code=makeid(8);
         document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML += ('<div class="'+code+'" style="color: #888"><b>{{user.username}}</b>: '+ message.trim() + '</div>');
-        document.querySelector('.'+code).scrollIntoView();
+        document.querySelector('.chatbox-{{team.team_id}}-logs').scrollTop = document.querySelector('.chatbox-{{team.team_id}}-logs').scrollHeight-200;
         chatSocket.send(JSON.stringify({
           "message": message.trim(),
           "username":"{{user.username}}",
