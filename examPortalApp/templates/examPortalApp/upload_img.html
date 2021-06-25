@@ -115,6 +115,7 @@
   document.addEventListener("submit", (e) => {
     // Store reference to form to make later code easier to read
     const form = e.target;
+    document.getElementById('loading-overlay').style.display="block";
     // Post data using the Fetch API
     fetch(form.action, {
       method: form.method,
@@ -123,9 +124,11 @@
     .then(response => response.json())
     .then(data => {
       alert(data.message);
+      document.getElementById('loading-overlay').style.display="none";
     })
     .catch((error) => {
-      alert('Error:', error.prototype.message, error.prototype.toString());
+      document.getElementById('loading-overlay').style.display="none";
+      alert('Error: '+error.prototype.toString());
     });
 
     // Prevent the default form submit
@@ -149,6 +152,11 @@
 {% endblock %}
 
 {% block content %}
+<div id="loading-overlay" class="popup" style="background-color: #FFFFFFEC">
+  <div class="popup-message" style="background-color: #0000">
+    <h2>Loading...</h2>
+  </div>
+</div>
 <div id="camera-popup" class="popup">
   <div class="popup-message">
     <div class="camera">
