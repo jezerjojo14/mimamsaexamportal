@@ -2,6 +2,7 @@
 <script src="{% static 'examPortalApp/js/simplepeer.min.js' %}"></script>
 <script type="text/javascript">
 
+  var localAudioStream = null;
   var localStream = null;
   function joinCall() {
     document.getElementById('videos-container').style.display="flex";
@@ -59,6 +60,11 @@
         document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').srcObject=stream;
         document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').muted=true;
         localStream = stream;
+        localAudioStream = localStream.clone();
+        let videoTracks = localAudioStream.getVideoTracks();
+        videoTracks.forEach(function (track) {
+            track.stop()
+        })
 
         init()
 
@@ -161,11 +167,20 @@
 
 
     function addPeer(id, am_initiator) {
+      if (id=="{{team.proctor_user.username}}") {
         peers[id] = new SimplePeer({
-            initiator: am_initiator,
-            stream: localStream,
-            config: configuration
+          initiator: am_initiator,
+          stream: localStream,
+          config: configuration
         })
+      }
+      else {
+        peers[id] = new SimplePeer({
+          initiator: am_initiator,
+          stream: localAudioStream,
+          config: configuration
+        })
+      }
         console.log(peers);
 
         peers[id].on('signal', data => {
