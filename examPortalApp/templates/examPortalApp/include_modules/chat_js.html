@@ -19,9 +19,31 @@
   chatSocket.onclose = function(e) {
     chat_connect_interval=setInterval(chatSocketConnect(), 4000);
     alert("Unstable connection, chat may not work properly. Attempting to reconnect...");
+    document.querySelector('#chat-message-submit').value = "Waiting to reconnect...";
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+      return false
+    };
   };
   chatSocket.onopen = function() {
     clearInterval(chat_connect_interval);
+    document.querySelector('#chat-message-submit').value = "Send";
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+      const messageInputDom = document.querySelector('#chat-message-input');
+      const message = messageInputDom.value;
+      console.log(message);
+      if (message.trim()) {
+        code=makeid(8);
+        document.querySelector('#chat-log').innerHTML += ('<div class="'+code+'" style="color: #888"><b>{{user.username}}</b>: '+ message.trim() + '</div>');
+        document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight-200;
+        chatSocket.send(JSON.stringify({
+          "message": message.trim(),
+          "username":"{{user.username}}",
+          "code": code
+        }));
+      }
+      messageInputDom.value = '';
+      sentTexts.push(code);
+    };
   }
 
   var sentTexts =[]

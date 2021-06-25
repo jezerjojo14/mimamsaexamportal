@@ -107,7 +107,6 @@ button, input[type=button], input[type=submit], input[type=reset] {
 .sync-container {
   margin:15px;
   display: inline-block;
-  position: absolute;
 }
 
 .mark-answered {
