@@ -62,7 +62,13 @@
   logSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     var readableData = JSON.parse(data.log)
-    var readable_message=readableData["username"]+" "+readableData["actionCommited"];
+    var readable_message
+    if (readableData["actionCommited"] === undefined) {
+      readable_message=readableData["username"]+" "+"returned";
+    }
+    else {
+      readable_message=readableData["username"]+" "+readableData["actionCommited"];
+    }
     document.getElementById('logs').innerHTML += ('<div>'+ readable_message + '</div>');
   }
   var start_connect_interval, log_connect_interval, chat_connect_interval;

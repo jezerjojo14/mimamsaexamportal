@@ -27,7 +27,7 @@
 
   document.addEventListener("DOMContentLoaded", ()=>{
     if (document.querySelector('#chat-log').lastElementChild) {
-      document.querySelector('#chat-log').lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" });
+      document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight-200;
     }
   });
 
@@ -41,7 +41,7 @@
     }
     else {
       document.querySelector('#chat-log').innerHTML += ('<div class="'+data.code+'"><b>'+data.username+'</b>: '+ data.message + '</div>');
-      document.querySelector('.'+data.code).scrollIntoView({ behavior: "smooth", block: "end" });
+      document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight-200;
     }
   };
 
@@ -70,7 +70,7 @@
     if (message.trim()) {
       code=makeid(8);
       document.querySelector('#chat-log').innerHTML += ('<div class="'+code+'" style="color: #888"><b>{{user.username}}</b>: '+ message.trim() + '</div>');
-      document.querySelector('.'+code).scrollIntoView();
+      document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight-200;
       chatSocket.send(JSON.stringify({
         "message": message.trim(),
         "username":"{{user.username}}",
