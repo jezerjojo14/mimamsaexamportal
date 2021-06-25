@@ -133,7 +133,7 @@
 
         // minutes are worth 60 seconds. Hours are worth 60 minutes.
         var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
-        var testTime=total_time-(seconds);
+        var testTime=total_time-(seconds)+20*60;
         log["time"]=testTime;
         log["actionCommited"]="exited fullscreen";
         log["windowOuterHeight"]=window.outerHeight;
@@ -156,7 +156,7 @@
 
       // minutes are worth 60 seconds. Hours are worth 60 minutes.
       var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
-      var testTime=total_time-(seconds);
+      var testTime=total_time-(seconds)+20*60;
       var log = {"username": username, "time": testTime};
       log["windowOuterHeight"]=window.outerHeight;
       log["windowInnerHeight"]=window.innerHeight;
@@ -222,7 +222,7 @@
 
       // minutes are worth 60 seconds. Hours are worth 60 minutes.
       var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
-      var testTime=total_time-(seconds);
+      var testTime=total_time-(seconds)+20*60;
       log["time"]=testTime;
       log["actionCommited"]="left the portal window";
       log["windowOuterHeight"]=window.outerHeight;
@@ -277,7 +277,7 @@
 
           // minutes are worth 60 seconds. Hours are worth 60 minutes.
           var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
-          var testTime=total_time-(seconds);
+          var testTime=total_time-(seconds)+20*60;
           log["time"]=testTime;
           log["actionCommited"]="may have opened Inspect Element";
           log["windowOuterHeight"]=window.outerHeight;
