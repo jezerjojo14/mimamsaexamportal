@@ -125,7 +125,7 @@
       alert(data.message);
     })
     .catch((error) => {
-      alert('Error:', error);
+      alert('Error:', error.prototype.message, error.prototype.toString());
     });
 
     // Prevent the default form submit
