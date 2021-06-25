@@ -8,6 +8,7 @@
   const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
   var logSocket;
   function logSocketConnect() {
+    console.log("logSocketConnect");
     logSocket = new WebSocket(
       ws_scheme+'://'
       + window.location.host
@@ -34,6 +35,7 @@
 
   var chatSocket;
   function chatSocketConnect() {
+    console.log("chatSocketConnect");
     chatSocket = new WebSocket(
       ws_scheme+'://'
       + window.location.host
@@ -90,6 +92,7 @@
 
   var startSocket
   function startSocketConnect() {
+    console.log("startSocketConnect");
     startSocket = new WebSocket(
       ws_scheme+'://'
       + window.location.host
@@ -298,6 +301,7 @@
           clearTimeout(tm);
         }
         videoSignalSocket.onopen = function () {
+          console.log("CONNECTED TO SERVER");
           ti = setInterval(ping, 15000);
           clearInterval(connect_interval)
         }

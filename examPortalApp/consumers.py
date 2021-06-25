@@ -419,6 +419,7 @@ class VideoConsumer(WebsocketConsumer):
     def ping(self, event):
         if (self.scope["user"]).username==event["message"]["from"]:
             self.send(text_data=json.dumps({"message": "pong"}))
+            user=self.scope["user"]
             if user.entered_video_call==False:
                 user.entered_video_call=True
                 user.save()
