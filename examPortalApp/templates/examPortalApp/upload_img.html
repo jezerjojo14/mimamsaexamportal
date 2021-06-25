@@ -125,7 +125,7 @@
       if (response.ok) {
         return response.json();
       } else {
-        alert(response.toString());
+        console.log(response);
         throw new Error('Something went wrong');
       }
     })
