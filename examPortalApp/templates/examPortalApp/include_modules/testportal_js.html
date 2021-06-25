@@ -416,9 +416,11 @@
     };
 
     markQuestion.onopen = function (e) {
-      clearInterval(mark_connect_interval);
+      if (mark_connect_interval !== undefined) {
+        clearInterval(mark_connect_interval);
+      }
     };
-    
+
     function logSocketConnect() {
       logSocket = new WebSocket(
         ws_scheme+'://'
@@ -439,11 +441,15 @@
       log_connect_interval=setInterval(logSocketConnect(), 4000);
     }
     logSocket.onopen = function() {
-      clearInterval(log_connect_interval);
+      if (log_connect_interval !== undefined) {
+        clearInterval(log_connect_interval);
+      }
     }
-    logSocket.send(JSON.stringify({
-      "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "entered waiting room"})
-    }));
+    setTimeout(function () {
+      logSocket.send(JSON.stringify({
+        "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "entered waiting room"})
+      }));
+    }, 2000)
     document.getElementById('chat-log').innerHTML="";
     {% for log in chat_logs %}
     document.getElementById('chat-log').innerHTML+="<div><b>{% if log.0 == team.proctor_user.username %}Proctor{% else %}{{log.0}}{% endif %}:</b>"+" {{log.1}}</div>";
