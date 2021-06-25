@@ -89,7 +89,7 @@
           <hr style="border-color: #fff0; flex-basis: 100%; margin: 0">
           {% endif %}
           <div class="video-container" id="video-container{{team.team_id}}-{{forloop.counter}}" style="text-align: center; -webkit-perspective: 900000px; perspective: 900000px;">
-            <video id="video-{{team.team_id}}-{{forloop.counter}}" autoplay loop playsinline style="max-height: 100%; {% if self_peer_id == forloop.counter %}transform: rotateY(180deg); -webkit-transform:rotateY(180deg); -moz-transform:rotateY(180deg);{% endif %}">
+            <video id="video-{{team.team_id}}-{{forloop.counter}}" autoplay loop playsinline controls style="max-height: 100%; {% if self_peer_id == forloop.counter %}transform: rotateY(180deg); -webkit-transform:rotateY(180deg); -moz-transform:rotateY(180deg);{% endif %}">
             </video>
           </div>
           {% endfor %}
@@ -158,11 +158,12 @@
           </div>
         </div>
         <div id="proctor-notification" class="popup">
-          <h3>Proctor:</h3>
           <div id="proctor-notification-message" class="popup-message">
+            <h3>Proctor:</h3>
+            <br>
             <div id="proctor-notification-message-content">
-
             </div>
+            <br>
             <button id="proctor-notification-close">Close</button>
           </div>
         </div>

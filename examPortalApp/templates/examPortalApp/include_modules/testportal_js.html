@@ -241,7 +241,17 @@
           return false;
         };
       }
-      document.getElementById('txt-form').submit();
+      document.getElementById('loading-overlay').style.display="block";
+      let form=document.getElementById('txt-form');
+      fetch(form.action, {
+        method: form.method,
+        body: new FormData(form),
+      })
+      .then(()=>{
+        unsaved=false;
+        document.getElementById('loading-overlay').style.display="none";
+        getQuestion(currentQNo);
+      });
     };
     var closePopupList = document.querySelectorAll(".close-popup");
     for(var i = 0; i < closePopupList.length; i++) {
