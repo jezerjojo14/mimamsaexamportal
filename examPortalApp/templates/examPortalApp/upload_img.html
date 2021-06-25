@@ -184,6 +184,7 @@
   <h2>Upload images</h2>
   <div id="img-upload-tab-body">
     <form class="answer-section-form" id="img-form" action="{% url 'upload_answer' %}" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
       <label for="id_file"><b>Question number: </b></label>
       <input id="qnumber" type="number" name="qnumber" min='1' max='{{QCount}}' value="{{qnumber}}">
       <div class="mobile">
