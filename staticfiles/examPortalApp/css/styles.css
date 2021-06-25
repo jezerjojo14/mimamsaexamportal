@@ -43,6 +43,16 @@ video {
   word-wrap: break-word;      /* IE */
 }
 
+#logs {
+  overflow-y: auto;
+  height: 200px;
+  white-space: pre-wrap;      /* CSS3 */
+  white-space: -moz-pre-wrap; /* Firefox */
+  white-space: -pre-wrap;     /* Opera <7 */
+  white-space: -o-pre-wrap;   /* Opera 7 */
+  word-wrap: break-word;      /* IE */
+}
+
 
 body {
   /* background-color: #333;
