@@ -16,6 +16,9 @@
     }
     startSocketConnect()
     document.addEventListener("DOMContentLoaded", ()=>{
+      document.getElementById('enter-test-btn').removeAttribute("disabled");
+      document.getElementById('enter-test-btn').style.opacity=1;
+      document.getElementById('enter-test-btn').innerHTML="Enter test";
       mainContent=document.getElementById('main-content');
       document.getElementById('finish-btn').onclick=()=>{
         let csrftoken = getCookie('csrftoken');
