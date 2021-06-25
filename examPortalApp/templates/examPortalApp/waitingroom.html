@@ -43,9 +43,9 @@
 
     window.onload = function () {
       var d = new Date();
-      var now = Date.now();
+      var now = new Date(Date.now());
       d.setUTCDate({{ UTCDate }}+(now.getUTCDate()-{{UTCDateNow}}));
-      d.setUTCMonth({{ UTCMonth }}-1+(now.getUTCMonth()-{{UTCMonthNow}}));
+      d.setUTCMonth({{ UTCMonth }}+(now.getUTCMonth()-{{UTCMonthNow}}));
       d.setUTCFullYear({{ UTCYear }}+(now.getUTCFullYear()-{{UTCYearNow}}));
       d.setUTCHours({{ UTCHours }}+(now.getUTCHours()-{{UTCHoursNow}}));
       d.setUTCMinutes({{ UTCMinutes }}+(now.getUTCMinutes()-{{UTCMinutesNow}}));
