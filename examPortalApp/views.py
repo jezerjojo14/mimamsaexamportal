@@ -587,7 +587,7 @@ def log_view(request):
     teststart = (GlobalVariables.objects.get_or_create(pk=1, defaults={'test_start': pytz.UTC.localize(datetime.datetime(2021, 4, 18, 4, 30, 0)),  'test_end': pytz.UTC.localize(datetime.datetime(2021, 4, 18, 6, 30, 0))})[0]).test_start
     savetime = teststart + timechange
     if "actionCommited" in post_data:
-        b = Fishylog(username = post_data['username'], popup_opentime = savetime, actionCommited=post_data['actionCommited'])
+        b = Fishylog.objects.create(username = post_data['username'], popup_opentime = savetime, actionCommited=post_data['actionCommited'])
         b.save()
     else:
         # n = Fishylog.objects.count()
