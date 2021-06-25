@@ -55,8 +55,7 @@
     }
     else {
       document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML += ('<div class="'+data.code+'"><b>'+data.username+'</b>: '+ data.message + '</div>');
-      document.querySelector('.'+data.code).scrollIntoView({ behavior: "smooth", block: "end" });
-      document.querySelector('.chatbox-{{team.team_id}}-logs').scrollTop = document.querySelector('.chatbox-{{team.team_id}}-logs').scrollHeight;
+      document.querySelector('.chatbox-{{team.team_id}}-logs').scrollTop = document.querySelector('.chatbox-{{team.team_id}}-logs').scrollHeight-200;
     }
   };
 
