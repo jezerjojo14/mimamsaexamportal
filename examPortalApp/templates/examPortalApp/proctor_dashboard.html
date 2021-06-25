@@ -56,12 +56,15 @@
     else {
       document.querySelector('.chatbox-{{team.team_id}}-logs').innerHTML += ('<div class="'+data.code+'"><b>'+data.username+'</b>: '+ data.message + '</div>');
       document.querySelector('.'+data.code).scrollIntoView({ behavior: "smooth", block: "end" });
+      document.querySelector('.chatbox-{{team.team_id}}-logs').scrollTop = document.querySelector('.chatbox-{{team.team_id}}-logs').scrollHeight;
     }
   };
 
   logSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-    alert(data.log);
+    var readableData = JSON.parse(data.log)
+    var readable_message=readableData["username"]+" "+readableData["actionCommited"];
+    document.getElementById('logs').innerHTML += ('<div>'+ readable_message + '</div>');
   }
   var start_connect_interval, log_connect_interval, chat_connect_interval;
   logSocket.onclose = function(e) {
@@ -147,26 +150,41 @@
 
 {% block content %}
   <div class="fluid-container">
-    <h2>{{team.team_id}}</h2>
-    <div id="videos-container">
-      {% for ordering in team.ordering_set.all %}
-      <div class="video-container video-container-{{team.team_id}}-{{ordering.order_index}}" style="text-align: center; color: white">
-        <video id="video-{{team.team_id}}-{{ordering.order_index}}" autoplay loop playsinline style="max-height: 100%">
-        </video>
-        <br>&nbsp;{{ordering.user_instance.username}}<br><br>
+    <div class="row">
+      <div class="col-8">
+        <h2>{{team.team_id}}</h2>
+        <div id="videos-container">
+          {% for ordering in team.ordering_set.all %}
+          {% if forloop.counter == 3 %}
+          <hr style="border-color: #fff0; flex-basis: 100%; margin: 0">
+          {% endif %}
+          <div class="video-container video-container-{{team.team_id}}-{{ordering.order_index}}" style="text-align: center; color: white">
+            <video id="video-{{team.team_id}}-{{ordering.order_index}}" autoplay loop playsinline style="max-height: 100%">
+            </video>
+            <br>&nbsp;{{ordering.user_instance.username}}<br><br>
+          </div>
+          {% endfor %}
+        </div>
+        <div style="text-align: center">
+          <br>
+          <button id="start-btn" type="button" name="button">Start Exam</button>
+          <br>
+        </div>
       </div>
-      {% endfor %}
-    </div>
-    <div style="text-align: center">
-      <br>
-      <button id="start-btn" type="button" name="button">Start Exam</button>
-      <br>
-    </div>
-    <div class="chatbox-{{team.team_id}}">
-      <div class="chatbox-{{team.team_id}}-logs">
+      <div class="col-4">
+        <div class="chatbox-{{team.team_id}}">
+          <div class="logs-{{team.team_id}}">
+            <h3>Logs:</h3>
+            <div id="logs">
+            </div>
+          </div>
+          <h3>Chat:</h3>
+          <div id="chat-log" class="chatbox-{{team.team_id}}-logs">
+          </div>
+          <input id="chatbox-{{team.team_id}}-input" type="text" name="" value=""><br>
+          <input id="chatbox-{{team.team_id}}-submit" type="button" value="Send">
+        </div>
       </div>
-      <input id="chatbox-{{team.team_id}}-input" type="text" name="" value=""><br>
-      <input id="chatbox-{{team.team_id}}-submit" type="button" value="Send">
     </div>
   </div>
 

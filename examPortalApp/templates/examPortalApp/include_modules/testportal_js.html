@@ -27,7 +27,7 @@
   }
   window.addEventListener('error', function(event) {
     logSocket.send(JSON.stringify({
-      "log": event.message
+      "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "encountered an error - "+event.message})
     }));
   });
 
@@ -373,6 +373,9 @@
 
 
   document.addEventListener("DOMContentLoaded", () => {
+    logSocket.send(JSON.stringify({
+      "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "entered waiting room"})
+    }));
     document.getElementById('chat-log').innerHTML="";
     {% for log in chat_logs %}
     document.getElementById('chat-log').innerHTML+="<div><b>{% if log.0 == team.proctor_user.username %}Proctor{% else %}{{log.0}}{% endif %}:</b>"+" {{log.1}}</div>";
