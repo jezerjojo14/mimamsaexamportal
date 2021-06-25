@@ -222,7 +222,7 @@
       var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
       var testTime=total_time-(seconds);
       log["time"]=testTime;
-      log["actionCommited"]="left the portal";
+      log["actionCommited"]="left the portal window";
       log["windowOuterHeight"]=window.outerHeight;
       log["windowInnerHeight"]=window.innerHeight;
       sendLogLeft(log);
@@ -277,7 +277,7 @@
           var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
           var testTime=total_time-(seconds);
           log["time"]=testTime;
-          log["actionCommited"]=" may have opened Inspect Element";
+          log["actionCommited"]="may have opened Inspect Element";
           log["windowOuterHeight"]=window.outerHeight;
           log["windowInnerHeight"]=window.innerHeight;
           sendLogLeft(log);

@@ -195,19 +195,19 @@
 
     // testportal
 
-    // var syncBtnList=document.querySelectorAll(".sync-btn")
-    // for(var i = 0; i < syncBtnList.length; i++) {
-    //   syncBtnList[i].onclick= ()=>{
-    //     if (unsaved) {
-    //       saveChangesPopup(()=>{
-    //         location.reload();
-    //       });
-    //     }
-    //     else {
-    //       location.reload();
-    //     }
-    //   };
-    // }
+    var syncBtnList=document.querySelectorAll(".sync-btn")
+    for(var i = 0; i < syncBtnList.length; i++) {
+      syncBtnList[i].onclick= ()=>{
+        if (unsaved) {
+          saveChangesPopup(()=>{
+            getQuestion(currentQNo);
+          });
+        }
+        else {
+          getQuestion(currentQNo);
+        }
+      };
+    }
 
     // document.getElementById('img-submit-popup-continue').onclick=()=>{
     //   document.getElementById('img-submit-popup-continue').innerHTML="Processing request...";
@@ -903,6 +903,7 @@
       });
     }
     else {
+      e.preventDefault();
       openTxtSubmitPopup();
       return false;
     }
