@@ -121,7 +121,14 @@
       method: form.method,
       body: new FormData(form),
     })
-    .then(response => response.json())
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        alert(response.toString());
+        throw new Error('Something went wrong');
+      }
+    })
     .then(data => {
       alert(data.toString());
       document.getElementById('loading-overlay').style.display="none";
