@@ -117,6 +117,7 @@
     const form = e.target;
     document.getElementById('loading-overlay').style.display="block";
     // Post data using the Fetch API
+    console.log(form);
     fetch(form.action, {
       method: form.method,
       body: new FormData(form),
