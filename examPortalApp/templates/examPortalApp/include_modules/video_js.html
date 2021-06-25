@@ -63,7 +63,7 @@
         localAudioStream = localStream.clone();
         let videoTracks = localAudioStream.getVideoTracks();
         videoTracks.forEach(function (track) {
-            track.stop()
+            localAudioStream.removeTrack(track);
         })
 
         init()
@@ -173,6 +173,7 @@
           stream: localStream,
           config: configuration
         })
+        console.log("connecting to proctor");
       }
       else {
         peers[id] = new SimplePeer({
@@ -180,6 +181,7 @@
           stream: localAudioStream,
           config: configuration
         })
+        console.log("connecting to fellow teammate");
       }
         console.log(peers);
 
