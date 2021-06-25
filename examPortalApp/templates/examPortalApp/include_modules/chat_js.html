@@ -18,6 +18,7 @@
   var chat_connect_interval;
   chatSocket.onclose = function(e) {
     chat_connect_interval=setInterval(chatSocketConnect(), 4000);
+    alert("Unstable connection, chat may not work properly. Attempting to reconnect...");
   };
   chatSocket.onopen = function() {
     clearInterval(chat_connect_interval);

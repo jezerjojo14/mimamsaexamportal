@@ -423,6 +423,7 @@
 
     markQuestion.onclose = function(e) {
       mark_connect_interval=setInterval(markQuestionConnect(), 4000);
+      alert("Unstable connection, some features may not work properly. Attempting to reconnect...");
     };
 
     markQuestion.onopen = function (e) {
@@ -451,6 +452,7 @@
     var log_connect_interval;
     logSocket.onclose = function(e) {
       log_connect_interval=setInterval(logSocketConnect(), 4000);
+      alert("Unstable connection, some features may not work properly. Attempting to reconnect...");
     }
     logSocket.onopen = function() {
       if (log_connect_interval !== undefined) {

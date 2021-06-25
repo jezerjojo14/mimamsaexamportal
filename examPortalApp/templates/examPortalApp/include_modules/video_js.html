@@ -108,6 +108,7 @@
 
       videoSignalSocket.onclose = function(e) {
         console.log('GOT DISCONNECTED')
+        alert("Unstable connection, video may not work properly. Attempting to reconnect...");
         for (let id in peers) {
           removePeer(id)
         }
