@@ -207,7 +207,7 @@
             var ctx = canvas.getContext("2d");src.connect(analyser);
             analyser.connect(context.destination);
 
-            analyser.fftSize = 128;
+            analyser.fftSize = 256;
 
             var bufferLength = analyser.frequencyBinCount;
             console.log(bufferLength);
