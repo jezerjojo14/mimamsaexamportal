@@ -103,6 +103,7 @@
   var answer_text="";
 
   function anandsInteractiveThing() {
+    console.log("anandsInteractiveThing called");
     const canvas = document.getElementById("grid");
     const ctx = canvas.getContext("2d");
 
@@ -251,7 +252,7 @@
     function playGame() {
         initializeGrid();
         canvas.addEventListener("mousedown", mouseDraw);
-
+        document.getElementById("playpausebutton").onclick=playPause;
         automaton = setInterval(function () {updateBoard(); }, waitTime);
     }
 
@@ -300,7 +301,11 @@
         initQuestionJS();
         document.getElementById('loading-overlay').style.display="none";
         if (questionNumber==5) {
+          console.log("calling anand's thing");
           anandsInteractiveThing();
+        }
+        else {
+          console.log(questionNumber);
         }
       })
       .catch((error) => {
