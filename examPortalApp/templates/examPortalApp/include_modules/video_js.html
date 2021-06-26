@@ -64,12 +64,12 @@
         videoTracks.forEach(function (track) {
             localAudioStream.removeTrack(track);
         })
-        let videoTracks = localAudioStream.getVideoTracks();
-        videoTracks.forEach(function (track) {
-            localAudioStream.removeTrack(track);
+        let audioTracks = localVideoStream.getAudioTracks();
+        audioTracks.forEach(function (track) {
+            localVideoStream.removeTrack(track);
         })
 
-        document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').srcObject=stream;
+        document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').srcObject=localVideoStream;
         document.getElementById('video-{{team.team_id}}-{{self_peer_id}}').muted=true;
         init()
 
