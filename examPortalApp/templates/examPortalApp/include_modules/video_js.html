@@ -207,15 +207,15 @@
             var ctx = canvas.getContext("2d");src.connect(analyser);
             analyser.connect(context.destination);
 
-            analyser.fftSize = 256;
+            analyser.fftSize = 64;
 
             var bufferLength = analyser.frequencyBinCount;
             console.log(bufferLength);
 
             var dataArray = new Uint8Array(bufferLength);
 
-            var WIDTH = canvas.parentElement.width;
-            var HEIGHT = canvas.parentElement.height;
+            var WIDTH = canvas.parent.width;
+            var HEIGHT = canvas.parent.height;
 
             var barWidth = (WIDTH / bufferLength) * 2.5;
             var barHeight;
