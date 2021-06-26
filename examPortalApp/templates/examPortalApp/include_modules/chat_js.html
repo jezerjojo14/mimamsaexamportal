@@ -63,7 +63,7 @@
       sentTexts.splice(index, 1);
     }
     else {
-      if (data.username=="Proctor" && document.querySelector('.answer-section').childElementCount) {
+      if (data.username=="Proctor" && document.querySelector('.answer-section')) {
         document.getElementById('proctor-notification-message-content').innerHTML=data.message;
         document.getElementById('proctor-notification').style.display="block";
         document.getElementById('proctor-notification-close').onclick = ()=>{
