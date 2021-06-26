@@ -33,7 +33,7 @@
       console.log(message);
       if (message.trim()) {
         code=makeid(8);
-        document.querySelector('#chat-log').innerHTML += ('<div class="'+code+'" style="color: #888"><b>{{user.username}}</b>: '+ message.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); + '</div>');
+        document.querySelector('#chat-log').innerHTML += ('<div class="'+code+'" style="color: #888"><b>{{user.username}}</b>: '+ message.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') + '</div>');
         document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight-200;
         chatSocket.send(JSON.stringify({
           "message": message.trim(),
