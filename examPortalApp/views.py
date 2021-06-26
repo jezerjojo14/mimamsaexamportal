@@ -601,7 +601,7 @@ def log_view(request):
 @login_required(login_url='/')
 def upload_answer_page(request):
     q_count = Question.objects.all().count();
-    if request.user.active_question:
+    if request.user.active_question>=1:
         return render(request, "examPortalApp/upload_img.html", {"qnumber": request.user.active_question, "QCount": q_count})
     else:
         return render(request, "examPortalApp/upload_img.html", {"qnumber": 1, "QCount": q_count})

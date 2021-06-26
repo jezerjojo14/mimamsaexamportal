@@ -130,13 +130,13 @@
             {% if forloop.counter == 1 %}
             <span style="font-size: 24px">Maths:</span>
             {% endif %}
-            {% if forloop.counter == 6 %}
+            {% if forloop.counter == 7 %}
             <span style="font-size: 24px">Physics:</span>
             {% endif %}
-            {% if forloop.counter == 11 %}
+            {% if forloop.counter == 13 %}
             <span style="font-size: 24px">Biology:</span>
             {% endif %}
-            {% if forloop.counter == 16 %}
+            {% if forloop.counter == 19 %}
             <span style="font-size: 24px">Chemistry:</span>
             {% endif %}
             <button id="q-btn-{{forloop.counter}}" class='nav-btn btn {% if forloop.counter == 1 %}visited active{% endif %} {% if forloop.counter in review_questions %}btn-review{% elif forloop.counter in answered_questions %}btn-answered{% endif %} btn-primary btn-md'>{{forloop.counter}}</button>

@@ -1,15 +1,5 @@
 <script type="text/javascript">
 
-  // This file will contain the required javascript to check if users leave the site
-  // It won't check if the user has closed the tab or browser but it will check if the user switches to a different tab or
-  // window.
-  // It should also disable right clicking and keyboard shortcuts for Inspect Element and have the page go fullscreen as soon as
-  // it loads.
-  // If a user does anything fishy (changes tab/window, somehow opens Inspect Element or the right click menu), call sendLogLeft
-  // and pass as parameter a json object with key value pairs "username": username, "time": <the number of seconds that have
-  // passed since the start of the test (use the timer values)>, actionCommited: "leftPortal"/"rightClick"/"inspectElement"
-  // depending on what it is that the user did.
-
   function proctorStart() {
 
     document.getElementById('videos-container').after(document.getElementById('videos-container-prev-ele'));
