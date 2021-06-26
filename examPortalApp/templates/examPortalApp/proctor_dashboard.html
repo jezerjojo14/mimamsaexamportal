@@ -5,6 +5,9 @@
   if (location.protocol !== 'https:') {
     location.replace(`https:${location.href.substring(location.protocol.length)}`);
   }
+  window.addEventListener('error', function(event) {
+    alert(event.message);
+  });
   const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
   var logSocket;
   function logSocketConnect() {
