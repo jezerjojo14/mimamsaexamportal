@@ -103,7 +103,159 @@
   var answer_text="";
 
   function anandsInteractiveThing() {
-    const canvas=document.getElementById("grid"),ctx=canvas.getContext("2d"),screenWidth=canvas.width,screenHeight=canvas.height,blockWidth=25,blockHeight=25;var play=!1,waitTime=150;ctx.strokeStyle="dimgray",cellGrid=[];class Cell{constructor(e,t){this.isActive=!1,this.x=e,this.y=t,this.color="white"}draw(){ctx.fillStyle=this.color,ctx.beginPath(),ctx.rect(this.x,this.y,blockWidth,blockHeight),ctx.stroke(),ctx.fill(),ctx.closePath()}update(e){this.isActive=e,this.color=e?"black":"white",this.draw()}toggle(){this.update(!this.isActive)}neighbors(){return neighborhood(Math.floor(this.x/blockWidth),Math.floor(this.y/blockHeight))}nextState(){var e=0,t=this.neighbors();console.log("Cell: "+this.x+", "+this.y+" ; Neighbours: "+t);for(var l=0;l<t.length;l++)e+=t[l].isActive;return 1==mod(e,2)}}function initializeGrid(){for(var e=0;e<screenWidth;e+=blockWidth){row=[];for(var t=0;t<screenHeight;t+=blockHeight)newCell=new Cell(e,t),row.push(newCell),newCell.draw();cellGrid.push(row)}}function mod(e,t){return 0<=e&&e<t?e:mod(e<0?e+t:e-t,t)}function neighborhood(e,t){return cell=cellGrid[e][t],[cellGrid[mod(e-1,cellGrid[e].length)][t],cellGrid[mod(e+1,cellGrid[e].length)][t],cellGrid[e][mod(t-1,cellGrid.length)],cellGrid[e][mod(t+1,cellGrid.length)]]}function updateBoard(){if(play){futureStates=[];for(const t of cellGrid){var e=[];for(const l of t)e.push(l.nextState());futureStates.push(e)}for(var t=0;t<cellGrid.length;t++)for(var l=0;l<cellGrid[t].length;l++)0!=t&&t!=cellGrid.length-1&&0!=l&&l!=cellGrid[t].length-1||!cellGrid[t][l].isActive||(stopGame(),document.getElementById("messagelog").innerHTML="The cells have reached the edges of the board."),cellGrid[t][l].update(futureStates[t][l])}}function mouseDraw(e){var t=canvas.getBoundingClientRect();mx=Math.floor((e.clientX-t.left)/blockWidth),my=Math.floor((e.clientY-t.top)/blockHeight),cellGrid[mx][my].toggle()}function playPause(){play=!play,document.getElementById("playpausebutton").innerHTML=play?"PAUSE":"PLAY"}function stopGame(){play=!1,document.getElementById("playpausebutton").innerHTML="PLAY"}function resetBoard(){stopGame(),document.getElementById("messagelog").innerHTML="";for(var e=0;e<cellGrid.length;e++)for(var t=0;t<cellGrid[0].length;t++)cellGrid[e][t].update(!1)}function playGame(){initializeGrid(),canvas.addEventListener("mousedown",mouseDraw),automaton=setInterval(function(){updateBoard()},waitTime)}window.onload=playGame();document.addEventListener("pointerdown", (e)=>{mouseDraw(e)})
+    const canvas = document.getElementById("grid");
+    const ctx = canvas.getContext("2d");
+
+    const screenWidth = canvas.width; const screenHeight = canvas.height;
+    const blockWidth = 25; const blockHeight = 25;
+
+    var play = false; var waitTime = 150;
+
+    ctx.strokeStyle = "dimgray";
+
+    cellGrid = [];
+
+    class Cell {
+        constructor(x, y) {
+            this.isActive = false;
+            this.x = x; this.y = y;
+            this.color = "white";
+        };
+
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.rect(this.x, this.y, blockWidth, blockHeight);
+            ctx.stroke(); ctx.fill();
+            ctx.closePath();
+        };
+
+        update(activeStatus) {
+            this.isActive = activeStatus;
+            this.color = activeStatus ? "black" : "white";
+
+            this.draw();
+        };
+
+        toggle() {
+            this.update(!this.isActive);
+        }
+
+        neighbors() {
+            return neighborhood(Math.floor(this.x/blockWidth), Math.floor(this.y/blockHeight))
+        };
+
+        nextState() {
+            var activeNeighborCount = 0;
+            var neighborCells = this.neighbors();
+
+            console.log("Cell: " + this.x + ", " + this.y + " ; Neighbours: " + neighborCells)
+
+            for (var i = 0; i < neighborCells.length; i++) {
+                activeNeighborCount += neighborCells[i].isActive
+            };
+
+            return (mod(activeNeighborCount, 2) == 1);
+        };
+    };
+
+    function initializeGrid() {
+        for (var i = 0; i < screenWidth; i += blockWidth) {
+            row = [];
+
+            for (var j = 0; j < screenHeight; j += blockHeight) {
+                newCell = new Cell(i, j);
+                row.push(newCell);
+                newCell.draw();
+            }
+
+            cellGrid.push(row);
+        }
+    }
+
+    function mod(a, n) {
+        if ((0 <= a) && (a < n)) {
+            return a;
+        } else {
+            if (a < 0) {
+                return mod(a + n, n);
+            } else {
+                return mod(a - n, n);
+            }
+        };
+    }
+
+    function neighborhood(i, j) {
+        cell = cellGrid[i][j];
+
+        return [
+            cellGrid[mod(i-1, cellGrid[i].length)][j], cellGrid[mod(i+1, cellGrid[i].length)][j],
+            cellGrid[i][mod(j-1, cellGrid.length)], cellGrid[i][mod(j+1, cellGrid.length)]
+        ]
+    }
+
+    function updateBoard() {
+        if (play) {
+            futureStates = [];
+
+            for (const gridrow of cellGrid) {
+                var row = [];
+                for (const cell of gridrow) {
+                    row.push(cell.nextState());
+                }
+                futureStates.push(row);
+           };
+
+            for (var i = 0; i < cellGrid.length; i++) {
+                for (var j = 0; j < cellGrid[i].length; j++) {
+                    if (((i == 0) || (i == cellGrid.length-1) || (j == 0) || (j == cellGrid[i].length-1)) && (cellGrid[i][j].isActive)) {
+                        stopGame();
+                        document.getElementById("messagelog").innerHTML = "The cells have reached the edges of the board.";
+                    }
+
+                    cellGrid[i][j].update(futureStates[i][j]);
+                }
+            }
+        }
+    };
+
+    function mouseDraw(evt) {
+        var canvasRect = canvas.getBoundingClientRect();
+        mx = Math.floor((evt.clientX - canvasRect.left)/blockWidth);
+        my = Math.floor((evt.clientY - canvasRect.top)/blockHeight);
+
+        cellGrid[mx][my].toggle();
+    }
+
+    function playPause() {
+        play = !play;
+        document.getElementById("playpausebutton").innerHTML = play ? "PAUSE" : "PLAY";
+    }
+
+    function stopGame() {
+        play = false;
+        document.getElementById("playpausebutton").innerHTML = "PLAY";
+    }
+
+    function resetBoard() {
+        stopGame();
+        document.getElementById("messagelog").innerHTML = "";
+
+        for (var i = 0; i < cellGrid.length; i++) {
+            for (var j = 0; j < cellGrid[0].length; j++) {
+                cellGrid[i][j].update(false);
+            }
+        }
+    }
+
+    function playGame() {
+        initializeGrid();
+        canvas.addEventListener("mousedown", mouseDraw);
+
+        automaton = setInterval(function () {updateBoard(); }, waitTime);
+    }
+
+    playGame();
   }
 
   function getQuestion(questionNumber) {
