@@ -251,11 +251,12 @@
 
     function playGame() {
         initializeGrid();
-        canvas.addEventListener("mousedown", mouseDraw);
         document.getElementById("playpausebutton").onclick=playPause;
+        document.getElementById("resetbutton").onclick=resetBoard;
         automaton = setInterval(function () {updateBoard(); }, waitTime);
     }
 
+    document.addEventListener("click", (e)=>{mouseDraw(e)});
     playGame();
   }
 
