@@ -436,7 +436,9 @@
     }
     logSocketConnect()
     window.addEventListener('error', function(event) {
+      console.log("error recorded");
       if (logSocket.readyState == 1) {
+        console.log("error sent");
         logSocket.send(JSON.stringify({
           "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "encountered an error - "+event.message})
         }));

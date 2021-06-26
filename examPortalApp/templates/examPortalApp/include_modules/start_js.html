@@ -16,45 +16,6 @@
     }
     startSocketConnect()
     document.addEventListener("DOMContentLoaded", ()=>{
-      document.getElementById('enter-test-btn').removeAttribute("disabled");
-      document.getElementById('enter-test-btn').style.opacity=1;
-      document.getElementById('enter-test-btn').innerHTML="Enter test";
-      if (logSocket.readyState == 1) {
-        logSocket.send(JSON.stringify({
-          "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "can now enter the test"})
-        }));
-      }
-      document.getElementById('enter-test-btn').onclick = ()=>{
-        try {
-          var el = document.documentElement;
-          var rfs =el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
-          rfs.call(el);
-        }
-        catch (e) {
-          console.error("Fullscreen not possible");
-        }
-        if (logSocket.readyState == 1) {
-          logSocket.send(JSON.stringify({
-            "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "entered the test"})
-          }));
-        }
-        console.log(mainContent);
-        // mainContent.after(document.getElementById('start-screen'));
-        document.getElementById('start-screen').parentNode.insertBefore(mainContent, document.getElementById('start-screen').nextSibling);
-        document.getElementById('videos-container-prev-ele').parentNode.insertBefore(document.getElementById('videos-container'), document.getElementById('videos-container-prev-ele').nextSibling);
-        document.getElementById('video-call-area').parentNode.insertBefore(document.getElementById('chat-area'), document.getElementById('video-call-area').nextSibling);
-        document.getElementById('start-screen').style.display="none";
-        document.getElementById('start-screen').style.position="absolute";
-        document.getElementById('start-screen').style.height=0;
-        document.getElementById('start-screen').style.margin=0;
-        document.getElementById('start-screen').style.padding=0;
-        document.getElementById('start-screen').style.left= "-9999px";
-        currentQNo=1;
-        proctorStart()
-        initQuestionJS();
-        getQuestion(1);
-        document.getElementById('video').srcObject = localStream;
-      }
       mainContent=document.getElementById('main-content');
       document.getElementById('finish-btn').onclick=()=>{
         let csrftoken = getCookie('csrftoken');
