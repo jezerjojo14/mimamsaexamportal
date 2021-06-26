@@ -239,9 +239,9 @@
                 var b = 50;
 
                 ctx.fillStyle = "rgb(" + r + "," + r + "," + r + ")";
-                ctx.fillRect(x, HEIGHT - barHeight, barWidth + (barWidth)*(0.5-(i/bufferLength)), barHeight);
+                ctx.fillRect(x, HEIGHT - barHeight, barWidth + 2*(barWidth)*(0.5-(i/bufferLength)), barHeight);
 
-                x += barWidth + 1;
+                x += barWidth + 2*(barWidth)*(0.5-(i/bufferLength)) + 1;
               }
             }
 
