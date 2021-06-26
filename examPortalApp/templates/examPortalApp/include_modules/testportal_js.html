@@ -453,10 +453,30 @@
       }
     }
     setTimeout(function () {
-      logSocket.send(JSON.stringify({
-        "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "entered waiting room"})
-      }));
-    }, 2000)
+      if (logSocket.readyState == 1) {
+        logSocket.send(JSON.stringify({
+          "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "entered waiting room"})
+        }));
+      }
+      else {
+        setTimeout(function () {
+          if (logSocket.readyState == 1) {
+            logSocket.send(JSON.stringify({
+              "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "entered waiting room"})
+            }));
+          }
+          else {
+            setTimeout(function () {
+              if (logSocket.readyState == 1) {
+                logSocket.send(JSON.stringify({
+                  "log": JSON.stringify({"username":"{{user.username}}", "actionCommited": "entered waiting room"})
+                }));
+              }
+            }, 5000)
+          }
+        }, 5000)
+      }
+    }, 5000)
     document.getElementById('chat-log').innerHTML="";
     {% for log in chat_logs %}
     document.getElementById('chat-log').innerHTML+="<div><b>{% if log.0 == team.proctor_user.username %}Proctor{% else %}{{log.0}}{% endif %}:</b>"+" {{log.1}}</div>";
