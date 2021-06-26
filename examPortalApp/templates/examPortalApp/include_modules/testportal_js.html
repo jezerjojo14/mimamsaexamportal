@@ -355,10 +355,6 @@
   var logSocket
   var markQuestion
   document.addEventListener("DOMContentLoaded", () => {
-    var audioUsernameList = document.querySelectorAll('.audio-user-name');
-    for(var i = 0; i < audioUsernameList.length; i++) {
-      fitty(audioUsernameList[i]);
-    }
     function markQuestionConnect() {
       markQuestion = new WebSocket(
         ws_scheme+'://'
