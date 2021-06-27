@@ -224,8 +224,11 @@
         var canvasRect = canvas.getBoundingClientRect();
         mx = Math.floor((evt.clientX - canvasRect.left)/blockWidth);
         my = Math.floor((evt.clientY - canvasRect.top)/blockHeight);
-
-        cellGrid[mx][my].toggle();
+        try {
+          cellGrid[mx][my].toggle();
+        } catch (e) {
+          console.error(e);
+        }
     }
 
     function playPause() {
