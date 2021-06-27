@@ -1233,13 +1233,17 @@
     document.addEventListener('contextmenu', function(e) {
       log={};
       log["username"] = username;
-      var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
-      var a = hms.split(':'); // split it at the colons
+      try {
+        var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
+        var a = hms.split(':'); // split it at the colons
 
-      // minutes are worth 60 seconds. Hours are worth 60 minutes.
-      var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
-      var testTime=total_time-(seconds)+20*60;
-      log["time"]=testTime;
+        // minutes are worth 60 seconds. Hours are worth 60 minutes.
+        var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+        var testTime=total_time-(seconds)+20*60;
+        log["time"]=testTime;
+      } catch (e) {
+        log["time"]=-1;
+      }
       log["actionCommited"]="right clicked";
       log["windowOuterHeight"]=window.outerHeight;
       log["windowInnerHeight"]=window.innerHeight;
@@ -1251,13 +1255,17 @@
     function onFullScreenChange() {
       if (document.fullscreenElement==null && document.mozFullScreenElement==null && document.webkitFullscreenElement==null) {
         log["username"] = username;
-        var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
-        var a = hms.split(':'); // split it at the colons
+        try {
+          var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
+          var a = hms.split(':'); // split it at the colons
 
-        // minutes are worth 60 seconds. Hours are worth 60 minutes.
-        var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
-        var testTime=total_time-(seconds)+20*60;
-        log["time"]=testTime;
+          // minutes are worth 60 seconds. Hours are worth 60 minutes.
+          var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+          var testTime=total_time-(seconds)+20*60;
+          log["time"]=testTime;
+        } catch (e) {
+          log["time"]=-1;
+        }
         log["actionCommited"]="exited fullscreen";
         log["windowOuterHeight"]=window.outerHeight;
         log["windowInnerHeight"]=window.innerHeight;
@@ -1340,13 +1348,17 @@
       // change flag value
       isVisible = false;
       log["username"] = username;
-      var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
-      var a = hms.split(':'); // split it at the colons
+      try {
+        var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
+        var a = hms.split(':'); // split it at the colons
 
-      // minutes are worth 60 seconds. Hours are worth 60 minutes.
-      var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
-      var testTime=total_time-(seconds)+20*60;
-      log["time"]=testTime;
+        // minutes are worth 60 seconds. Hours are worth 60 minutes.
+        var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+        var testTime=total_time-(seconds)+20*60;
+        log["time"]=testTime;
+      } catch (e) {
+        log["time"]=-1;
+      }
       log["actionCommited"]="left the portal window";
       log["windowOuterHeight"]=window.outerHeight;
       log["windowInnerHeight"]=window.innerHeight;
@@ -1395,13 +1407,17 @@
       if ((window.outerHeight - window.innerHeight) > 100) {
         if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement) {
           log["username"] = username;
-          var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
-          var a = hms.split(':'); // split it at the colons
+          try {
+            var hms = document.querySelector('.time').innerHTML.split(' ')[0];   // your input string
+            var a = hms.split(':'); // split it at the colons
 
-          // minutes are worth 60 seconds. Hours are worth 60 minutes.
-          var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
-          var testTime=total_time-(seconds)+20*60;
-          log["time"]=testTime;
+            // minutes are worth 60 seconds. Hours are worth 60 minutes.
+            var seconds = (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+            var testTime=total_time-(seconds)+20*60;
+            log["time"]=testTime;
+          } catch (e) {
+            log["time"]=-1;
+          }
           log["actionCommited"]="may have opened Inspect Element";
           log["windowOuterHeight"]=window.outerHeight;
           log["windowInnerHeight"]=window.innerHeight;
