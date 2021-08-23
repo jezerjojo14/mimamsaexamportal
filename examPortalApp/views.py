@@ -179,62 +179,6 @@ def toggle_graded_confirm(request):
 #     return HttpResponse("Done")
 
 
-# def db_test(request):
-#     answers=Answer.objects.all()
-#     attempted_s_ans=Answer.objects.filter(question_instance__question_type='s').annotate(text_len=Length('answer_content'), answerfiles__count=Count('answerfiles')).exclude(text_len=0, answerfiles__count=0).distinct()
-#     attempted_m_ans=Answer.objects.filter(question_instance__question_type='m').annotate(text_len=Length('answer_content')).exclude(text_len__lte=2).distinct()
-#     attempted_t_ans=Answer.objects.filter(question_instance__question_type='t').annotate(text_len=Length('answer_content')).exclude(text_len__lte=8).distinct()
-#     stronk_team_count=Team.objects.filter(answer__in=attempted_s_ans).filter(answer__in=attempted_m_ans).filter(answer__in=attempted_t_ans).distinct().count()
-#     medium_team_count_1=Team.objects.filter(answer__in=attempted_s_ans).filter(answer__in=attempted_m_ans).distinct().count()
-#     medium_team_count_2=Team.objects.filter(answer__in=attempted_s_ans).filter(answer__in=attempted_t_ans).distinct().count()
-#     medium_team_count_3=Team.objects.filter(answer__in=attempted_t_ans).filter(answer__in=attempted_m_ans).distinct().count()
-#     weak_team_count_1=Team.objects.filter(answer__in=attempted_s_ans).distinct().count()
-#     weak_team_count_2=Team.objects.filter(answer__in=attempted_m_ans).distinct().count()
-#     weak_team_count_3=Team.objects.filter(answer__in=attempted_t_ans).distinct().count()
-#
-#     weak_team_1=Team.objects.filter(answer__in=attempted_s_ans).distinct()
-#     weak_team_2=Team.objects.filter(answer__in=attempted_m_ans).distinct()
-#     weak_team_3=Team.objects.filter(answer__in=attempted_t_ans).distinct()
-#
-#     teams=weak_team_1.union(weak_team_2, weak_team_3).values_list('team_id', flat=True)
-#
-#     visited_m_ans=Answer.objects.filter(question_instance__question_type='m').annotate(text_len=Length('answer_content')).filter(text_len__gte=2).distinct()
-#     visited_t_ans=Answer.objects.filter(question_instance__question_type='t').annotate(text_len=Length('answer_content')).filter(text_len__gte=8).distinct()
-#
-#     team_visit_m=Team.objects.filter(answer__in=visited_m_ans).distinct()
-#     team_visit_t=Team.objects.filter(answer__in=visited_t_ans).distinct()
-#
-#     print(team_visit_m.count())
-#     print(team_visit_t.count())
-#
-#     teams=teams.union(team_visit_m, team_visit_t)
-#     print(teams.count())
-#     try:
-#         weak_team_1.get(team_id="BOI69420")
-#         print("s")
-#         weak_team_2.get(team_id="BOI69420")
-#         print("m")
-#         weak_team_3.get(team_id="BOI69420")
-#         print("t")
-#     except:
-#         pass
-#     # team=Team.objects.all()
-#     print(stronk_team_count)
-#     print(medium_team_count_1)
-#     print(medium_team_count_2)
-#     print(medium_team_count_3)
-#     print(weak_team_count_1)
-#     print(weak_team_count_2)
-#     print(weak_team_count_3)
-#     print("Count: "+str(stronk_team_count-medium_team_count_1-medium_team_count_2-medium_team_count_3+weak_team_count_1+weak_team_count_2+weak_team_count_3))
-#     return HttpResponse(str(list(teams)))
-
-def db_test(request):
-    t=Team.objects.get(sequence="10276")
-    a=Answer.objects.get(team_instance=t, question_instance__question_number=7)
-    # a=Answer.objects.filter(team_instance=t, question_instance__question_subject="Biology").aggregate(total_marks=Sum('marks'))['total_marks']
-    print(len(Answer.objects.filter(team_instance=t, question_instance__question_subject="Biology")))
-    return HttpResponse(str(a.answer_content)+"\n"+str(AnswerFiles.objects.filter(answer_instance=a).count()))
 
 def csrf_failure(request, reason=""):
     return render(request, "500.html")
