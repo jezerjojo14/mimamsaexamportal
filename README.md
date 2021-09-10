@@ -3,11 +3,28 @@
 <img src="https://user-images.githubusercontent.com/63692326/132917588-577f19c6-3cf4-4959-a097-367d3bb67680.jpg" width="700">
 
 This is the exam portal first used by Mimamsa to conduct its online rounds in 2021. It's a Django app that allows for teams of participants to attempt a proctored exam.
+Participants of a team can talk to each other and chat amongst themselves and the proctor assigned to the team can hear and see all the converstaion. The proctor will also be receiving video streams of all the participants of the team and can communicate with the team through chat. Proctors are also notified whenever anyone in their team tries to right click, escape fullscreen mode, or open inspect element. Proctors also see errors are logged onto participants' browser consoles so that they'll be better equipped to deal with technical difficulties.
+
+**Participants' view:**
+
+<img src="https://user-images.githubusercontent.com/63692326/132922735-b87603ff-9d72-4094-9432-93b37bf308f9.JPG" width="500">
+<img src="https://user-images.githubusercontent.com/63692326/132922762-d932c77d-edab-47ec-a0e5-e4b2916a5575.JPG" width="500">
+<img src="https://user-images.githubusercontent.com/63692326/132922522-c8fb7c7d-b3aa-4002-b21e-576aa783fce5.JPG" width="500">
+<img src="https://user-images.githubusercontent.com/63692326/132922305-829a047e-1431-4a64-885a-2ed96a6b032f.JPG" width="500">
+
+**Proctor's view:**
+
+<img src="https://user-images.githubusercontent.com/63692326/132921865-dd4a5dae-0988-473f-a642-1abc5b1a6822.jpg" width="500">
+
+
+Participants can upload answers in different formats depending on the type of question asked. In case two participants are viewing the same question, one can view their teammate's latest answers by using a sync button. Participants can also mark questions as answered or mark them for review, and these changes show for all members of the team in real time.
+
+
 
 ## Setup
 
 Make sure to install all dependencies in requirements.txt using pip, apply migrations, and create a superuser named 'admin'.
-You'll need to run this command on docker to make django-channels work:
+You'll need to have a redis server running on docker to make django-channels work. Relevant cmd command:
 ```
 docker run -p 6379:6379 -d redis:5
 ```
