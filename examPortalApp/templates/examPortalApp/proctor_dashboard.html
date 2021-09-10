@@ -1,10 +1,8 @@
 {% extends 'examPortalApp/body.html' %}
 {% load static %}
 {% block script %}
+{% include  'examPortalApp/include_modules/http2https.html' %}
 <script type="text/javascript">
-  if (location.protocol !== 'https:') {
-    location.replace(`https:${location.href.substring(location.protocol.length)}`);
-  }
   window.addEventListener('error', function(event) {
     alert(event.message);
   });
@@ -218,11 +216,13 @@
      * RTCPeerConnection configuration
      */
     const configuration = {
-      iceServers: [{
-        urls: 'turn:13.233.105.7:3478',
-        username: 'mimamsa',
-        credential: 'mimamsa',
-      }, {
+      iceServers: [
+      // {
+        // urls: 'turn:13.233.105.7:3478',
+        // username: 'mimamsa',
+        // credential: 'mimamsa',
+      // },
+      {
         urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun3.l.google.com:19302"]
       }]
     };

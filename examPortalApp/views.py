@@ -51,16 +51,16 @@ TOTAL_TEST_TIME = 3600*3
 config = TransferConfig(multipart_threshold=0.1*GB)
 
 def correction_subject(request):
-    if request.user.username=='admin':
+    if request.user.is_superuser:
         return render(request, "examPortalApp/correction_subject.html")
 
 def correction_question(request, subject):
-    if request.user.username=='admin':
+    if request.user.is_superuser:
         questions=list(Question.objects.filter(question_subject=subject).annotate(num_marked_teams=Count(Case(When(answer__marks__gt=-1, then=1), output_field=IntegerField())), num_teams=Count('answer')).order_by('question_number').values_list('question_number', 'num_marked_teams', 'num_teams'))
         return render(request, "examPortalApp/correction_question.html", {"questions": questions, "subject": subject})
 
 def correction_team(request, question, page=1):
-    if request.user.username=='admin':
+    if request.user.is_superuser:
         q=Question.objects.get(question_number=question)
         answers=Answer.objects.annotate(main_ordering=Case(When(marks=-1, then=0), default=1, output_field=IntegerField())).filter(question_instance=q).exclude(team_instance__team_id="BOI69420").order_by('graded', 'main_ordering', 'team_instance__sequence').distinct()
         # corrected_answers=Answer.objects.filter(marks__gt=-1).order_by('team_instance__sequence')
@@ -76,7 +76,7 @@ def correction_team(request, question, page=1):
         return render(request, "examPortalApp/correction_team.html", {"pagecount": int(answers.count()/50)+int(answers.count()%50!=0), "question": q, "question_body": question_body, "options": options, "correct_answers": correct_answers, "page": page, "answers": Paginator(answers, 50).page(page), "a_count": answers.count()})
 
 def correction(request, question, sequence):
-    if request.user.username=='admin':
+    if request.user.is_superuser:
         if request.method=='GET':
             answer=Question.objects.get(question_number=question).answer_set.get(team_instance=Team.objects.get(sequence=sequence))
             answerfiles=answer.answerfiles_set
@@ -184,7 +184,7 @@ def csrf_failure(request, reason=""):
     return render(request, "500.html")
 
 def password_list(request):
-    if request.user.username=="admin":
+    if request.user.is_superuser:
         users=User.objects.filter(passwordSet=False)
         d={}
         for user in users:
@@ -192,7 +192,7 @@ def password_list(request):
         return JsonResponse(d)
 
 def mail_change(request):
-    if request.user.username=="admin":
+    if request.user.is_superuser:
         if request.method == "POST":
             sequence = (request.POST["sequence"]).lower()
             order_index = int(request.POST["order_index"])
@@ -213,6 +213,7 @@ def mail_change(request):
 
 
 def login_view(request):
+    print("check 1")
     if request.method == "POST":
 
         # Attempt to sign user in
@@ -285,7 +286,7 @@ def update_accounts(request):
                             team.save()
                 return JsonResponse(generated_passwords)
             print("Accounts updated")
-    if request.user.username=="admin":
+    if request.user.is_superuser:
         if request.method=="POST":
             #Authenticate user trying to update the accounts and generate passwords
             thread1 = GeneratePass()
@@ -299,7 +300,7 @@ def update_accounts(request):
 def unset_passwords(request):
     password_list={}
     for user in User.objects.all():
-        if not user.passwordSet and user.username!="admin":
+        if not user.passwordSet and not user.is_superuser:
             password_list[user.email]=user.generated_pass
     return JsonResponse(password_list)
 
@@ -316,7 +317,7 @@ def change_password(request):
                 user.set_password(new_password)
                 user.passwordSet=True
                 user.save()
-            elif user.username=="admin" and user.check_password(old_password): #backdoor for admin to change the password of someone else. admin has to enter his/her own password in place of old password
+            elif user.is_superuser and user.check_password(old_password): #backdoor for admin to change the password of someone else. admin has to enter his/her own password in place of old password
                 try:
                     reset_user=User.objects.get(username=email)
                 except:
@@ -374,7 +375,8 @@ def undo_end_test(request):
 
 def dashboard(request):
     if request.user.is_authenticated:
-        if request.user.passwordSet or request.user.username=="admin":
+        team=None
+        if request.user.passwordSet or request.user.is_superuser:
             if request.user.user_type=="proctor":
                 team=request.user.proctored_teams.first()
             if request.user.user_type=="participant":
@@ -1125,7 +1127,7 @@ def clear_t_options(request):
 
 @login_required(login_url='/')
 def question_making_page(request, page=1):
-    if request.user.username=="admin":
+    if request.user.is_superuser:
         q=Paginator(Question.objects.all().order_by("question_number"), 10)
         QCount=Question.objects.all().count()
         if page not in q.page_range:
@@ -1138,7 +1140,7 @@ def question_making_page(request, page=1):
 
 @login_required(login_url='/')
 def post_question(request):
-    if request.user.username=="admin":
+    if request.user.is_superuser:
         if request.POST["qtype"]=='s':
             q=Question(question_content=((request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")).strip(), question_number=(Question.objects.all().count()+1), question_subject=request.POST["subject"], question_type='s', question_answers='')
             q.save()
@@ -1178,7 +1180,7 @@ def post_question(request):
 
 @login_required(login_url='/')
 def delete_question(request):
-    if request.user.username=="admin":
+    if request.user.is_superuser:
         post_data = json.loads(request.body.decode("utf-8"))
         q=Question.objects.get(id=post_data["id"])
         total=Question.objects.all().count()
@@ -1193,7 +1195,7 @@ def delete_question(request):
 @login_required(login_url='/')
 def edit_question(request):
     subjects=["Physics", "Biology", "Math", "Chemistry"]
-    if request.user.username=="admin":
+    if request.user.is_superuser:
         q=Question.objects.get(id=int(request.POST["id"]))
         q.question_content=(request.POST["content"]).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>")
         if request.POST["subject"] in subjects:

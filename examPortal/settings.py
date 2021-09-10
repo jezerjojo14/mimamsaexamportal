@@ -23,8 +23,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'r0yc*776ty^e9*02oos(f44rccz%+3@zx5fv-s6uw%b05tn5wo'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-# DEBUG = True
+# DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['mimamsaexamportal.com', 'www.mimamsaexamportal.com', 'new-env.ap-south-1.elasticbeanstalk.com', '127.0.0.1', "localhost", 'env1.ap-south-1.elasticbeanstalk.com', 'examportal-dev2.ap-south-1.elasticbeanstalk.com', '172.31.12.13', 'examportal.eba-ngubpvi9.ap-south-1.elasticbeanstalk.com', 'examportal-dev.ap-south-1.elasticbeanstalk.com']
 
@@ -117,8 +117,8 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('mimamsa-django-channels.mam6sm.ng.0001.aps1.cache.amazonaws.com', 6379)],
-            # "hosts": [('127.0.0.1', 6379)],
+            # "hosts": [('mimamsa-django-channels.mam6sm.ng.0001.aps1.cache.amazonaws.com', 6379)],
+            "hosts": [('127.0.0.1', 6379)],
         },
     },
 }
@@ -127,23 +127,25 @@ CHANNEL_LAYERS = {
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'mimamsa',
-        'USER': 'postgres',
-        'PASSWORD': 'mimamsaAWS14',
-        'HOST': 'database-2.cxa9mi9i4k9z.ap-south-1.rds.amazonaws.com',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'mimamsa',
+#         'USER': 'postgres',
+#         'PASSWORD': 'mimamsaAWS14',
+#         'HOST': 'database-2.cxa9mi9i4k9z.ap-south-1.rds.amazonaws.com',
+#         'PORT': '5432',
+#     }
+# }
 
 
 AUTH_USER_MODEL = "examPortalApp.User"

@@ -1,10 +1,6 @@
 {% extends 'examPortalApp/body.html' %}
 {% block script %}
-<script type="text/javascript">
-  if (location.protocol !== 'https:') {
-    location.replace(`https:${location.href.substring(location.protocol.length)}`);
-  }
-</script>
+{% include  'examPortalApp/include_modules/http2https.html' %}
 {% endblock %}
 {% block sidepane %}
 {% if user.user_type == 'participant' %}
@@ -61,7 +57,7 @@
           {% else %}
             <a href="{% url 'proctor_view' %}">Proctor dashboard</a>
             <br>
-          {% endif %} 
+          {% endif %}
         {% endif %}
         <a href="{% url 'instructions' %}">Exam portal instructions</a>
         <br>

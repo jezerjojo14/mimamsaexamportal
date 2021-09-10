@@ -2,10 +2,8 @@
 {% load static %}
 
 {% block script %}
+{% include  'examPortalApp/include_modules/http2https.html' %}
 <script type="text/javascript">
-  if (location.protocol !== 'https:') {
-    location.replace(`https:${location.href.substring(location.protocol.length)}`);
-  }
   function closePopup(ele) {
     ele.closest('.popup').style.display="none";
   }

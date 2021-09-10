@@ -4,13 +4,13 @@ from django.db import models
 #User instances are created when registration sheets are inputted;
 #They're updated when (1) sessions are created and removed, and (2) when passwords are changed
 class User(AbstractUser):
-    phone_number = models.CharField(max_length=25)
+    phone_number = models.CharField(max_length=25, blank=True)
     #generated_pass is the initial server generated password that can be seen by us (unlike the default password field) and is initially also stored in hashed form in the default password field
-    generated_pass = models.CharField(max_length=100)
+    generated_pass = models.CharField(max_length=100, blank=True)
     #Once the user updates their actual password from the server generated one, password_set takes the value "True". At this point no one knows their password except them
     passwordSet = models.BooleanField(default=False)
     #Session key of each user is stored. If a user tries to login again in another device (start another session), they get logged out from the former device (original session is deleted)
-    session_key = models.CharField(max_length=100, null=True)
+    session_key = models.CharField(max_length=100, blank=True)
     # user types: participant, proctor, admin
     user_type = models.CharField(max_length=30, default='participant')
     active_question = models.IntegerField(default=0)
