@@ -1,9 +1,9 @@
 # S3 API
 
-import boto3
-from botocore.exceptions import ClientError
-import botocore
-from boto3.s3.transfer import TransferConfig
+# import boto3
+# from botocore.exceptions import ClientError
+# import botocore
+# from boto3.s3.transfer import TransferConfig
 
 
 
@@ -43,7 +43,7 @@ from django.db.models import Count, Sum, Case, When, IntegerField
 from django.contrib import messages
 
 GB = 1024 ** 3
-config = TransferConfig(multipart_threshold=0.1*GB)
+# config = TransferConfig(multipart_threshold=0.1*GB)
 
 
 
@@ -98,17 +98,17 @@ def correction(request, question, sequence):
                 correct_answers=ast.literal_eval(q.question_answers)
 
             for af in answerfiles.iterator():
-                s3 = boto3.client("s3")
-                response = s3.list_objects_v2(
-                        Bucket='mimamsauploadedanswers',
-                        Prefix =subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg',
-                        MaxKeys=100 )
+                # s3 = boto3.client("s3")
+                # response = s3.list_objects_v2(
+                        # Bucket='mimamsauploadedanswers',
+                        # Prefix =subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg',
+                        # MaxKeys=100 )
 
                 if "Contents" in response:
                     fh = io.BytesIO()
 
                     # Initialise a downloader object to download the file
-                    s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg', fh)
+                    # s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg', fh)
                     fh.seek(0)
 
                     prefix = 'data:image/jpeg;base64,'
@@ -677,11 +677,11 @@ def get_answer(request, page_no, qnumber):
         a=Answer.objects.get(team_instance=team, question_instance=q)
         af=AnswerFiles.objects.get(answer_instance=a, page_no=page_no)
 
-        s3 = boto3.client("s3")
-        response = s3.list_objects_v2(
-                Bucket='mimamsauploadedanswers',
-                Prefix =subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg',
-                MaxKeys=100 )
+        # s3 = boto3.client("s3")
+        # response = s3.list_objects_v2(
+                # Bucket='mimamsauploadedanswers',
+                # Prefix =subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg',
+                # MaxKeys=100 )
 
         image=""
 
@@ -689,7 +689,7 @@ def get_answer(request, page_no, qnumber):
             fh = io.BytesIO()
 
             # Initialise a downloader object to download the file
-            s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg', fh)
+            # s3.download_fileobj('mimamsauploadedanswers', subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+af.answer_filename+'.jpeg', fh)
             fh.seek(0)
 
             prefix = 'data:image/jpeg;base64,'
@@ -718,11 +718,11 @@ def del_answer(request, page_no, qnumber):
 
         subject=q.question_subject
 
-        s3 = boto3.client("s3")
-        response = s3.list_objects_v2(
-                Bucket='mimamsauploadedanswers',
-                Prefix =subject+'/Q'+str(q.id)+'/'+team.team_id,
-                MaxKeys=100 )
+        # s3 = boto3.client("s3")
+        # response = s3.list_objects_v2(
+                # Bucket='mimamsauploadedanswers',
+                # Prefix =subject+'/Q'+str(q.id)+'/'+team.team_id,
+                # MaxKeys=100 )
 
 
         if "Contents" in response and page_no<len(response["Contents"]):
@@ -730,7 +730,7 @@ def del_answer(request, page_no, qnumber):
             filename=af.answer_filename
             noofpages = AnswerFiles.objects.filter(answer_instance = a).count()
 
-            s3.delete_object(Bucket='mimamsauploadedanswers', Key=subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+filename+'.jpeg')
+            # s3.delete_object(Bucket='mimamsauploadedanswers', Key=subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+filename+'.jpeg')
             af.delete()
 
             #noofpages=5
@@ -935,9 +935,9 @@ def upload_text_answer(request):
             Answer.objects.filter(question_instance=q, team_instance=team).first().delete()
         a=Answer.objects.get_or_create(question_instance=q, team_instance=team)[0]
 
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket('mimamsauploadedanswers')
-        bucket.objects.filter(Prefix=subject+'/Q'+str(q.id)+'/'+team.team_id).delete()
+        # s3 = boto3.resource('s3')
+        # bucket = s3.Bucket('mimamsauploadedanswers')
+        # bucket.objects.filter(Prefix=subject+'/Q'+str(q.id)+'/'+team.team_id).delete()
 
         AnswerFiles.objects.filter(answer_instance = a).delete()
 
@@ -1003,28 +1003,28 @@ def upload_answer(request):
         rgb_im.save(b, "JPEG", optimize=True, quality=70)
         b.seek(0)
 
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket('mimamsauploadedanswers')
+        # s3 = boto3.resource('s3')
+        # bucket = s3.Bucket('mimamsauploadedanswers')
         suff=0
         fn=os.path.basename(answerfile.name)
         key = fn[0:fn.find(".")]+str(suff)
 
         exists=True
 
-        while exists:
-            try:
-                s3.Object('mimamsauploadedanswers', subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+key+".jpeg").load()
-            except botocore.exceptions.ClientError as e:
-                if e.response['Error']['Code'] == "404":
+        # while exists:
+            # try:
+                # s3.Object('mimamsauploadedanswers', subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+key+".jpeg").load()
+            # except botocore.exceptions.ClientError as e:
+                # if e.response['Error']['Code'] == "404":
                     # The object does not exist.
-                    exists=False
-                else:
+                    # exists=False
+                # else:
                     # Something else has gone wrong.
-                    raise
-            else:
+                    # raise
+            # else:
                 # The object does exist.
-                suff+=1
-                key = fn[0:fn.find(".")]+str(suff)
+                # suff+=1
+                # key = fn[0:fn.find(".")]+str(suff)
 
 
         while Answer.objects.filter(question_instance=q, team_instance=team).count()>1:
@@ -1032,7 +1032,7 @@ def upload_answer(request):
         ansinst = Answer.objects.get_or_create(team_instance = team, question_instance = q)
         ansinst[0].save()
 
-        bucket.upload_fileobj(b, subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+key+'.jpeg', Config=config)
+        # bucket.upload_fileobj(b, subject+'/Q'+str(q.id)+'/'+team.team_id+'/'+key+'.jpeg', Config=config)
 
         noofpages = AnswerFiles.objects.filter(answer_instance = (ansinst[0])).count()
         af = AnswerFiles.objects.create(answer_instance=ansinst[0], answer_filename=key, page_no = noofpages)
